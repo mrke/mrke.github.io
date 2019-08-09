@@ -8,7 +8,7 @@ permalink: /getting_started/
 <h1> Installation </h1>
 To view the code please visit the NicheMapR <a href="http://www.github.com/mrke/NicheMapR">GitHub account</a>
 
-To install NicheMapR you need the 'devtools' package as well as a Fortran compiler.
+To install NicheMapR you will need the 'devtools' package as well as a Fortran compiler.
 
 Install devtools by typing:
 
