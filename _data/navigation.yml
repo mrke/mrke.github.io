@@ -1,0 +1,13 @@
+main:
+  - title: "Getting Started"
+    url: /getting_started/
+  - title: "Models"
+    url: /models/
+  - title: "Help"
+    url: /help/
+  - title: "News"
+    url: /news/
+  - title: "Related Projects"
+    url: /related/
+  #- title: "External Link Test"
+  #  url: https://google.com
