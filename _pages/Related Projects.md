@@ -23,6 +23,10 @@ Related projects include
 
 <a href="http://www.debtheory.org/wiki/">DEB wiki</a>
 
+<a href="https://github.com/rafaqz/DynamicEnergyBudgets.jl">Rafael Schouten's DEB models in Julia</a>
+
+<a href="https://github.com/rafaqz/DEBScripts">Rafael Schouten's DEB plant/microclimate model in Julia</a>
+
 <h2>Other Mechanistic Niche Modelling projects</h2>
 
 <a href="https://trenchproject.github.io/">The Trench Project</a>
