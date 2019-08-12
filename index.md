@@ -5,8 +5,8 @@ permalink: /
 author_profile: true
 header:
   overlay_color: "#EAEAEA"
-  overlay_image: /assets/images/Global_Average_Temperature_Map.png
-  caption: "Photo credit: [**Wikipedia**](https://upload.wikimedia.org/wikipedia/commons/9/92/Annual_Average_Temperature_Map.png)"
+  overlay_image: /assets/images/near_papunya.jpg
+  caption: "Photo credit: **Michael Kearney**"
   actions:
     - label: "Jump To GitHub Code"
       url: "http://github.com/mrke/NicheMapR"
@@ -15,8 +15,22 @@ header:
 
 <hr color="black" align="center" size="5">
 
-<h1>Background & History</h1>
-Coming soon.
+<h1>Overview</h1>
+
+NicheMapR is a suite of programs for the R programming environment that compute fundamental physical and constraints on living things. It aims at asking the general question: _Can an organism can complete its life cycle in a particular place and time, without overheating, desiccating or starving_?
+
+In other words, starting with the **functional traits** of an organism, the programs can be used to determine the environmental sequence experienced by an organism in a particular habitat and assess whether this sequence is inside, or outside, of its niche.
+
+To achieve this it integrates: 
+* calculations of the external processes of heat and water exchange using the principles of **biophysical ecology**
+* calculations of internal processes of growth, development and reproduction, i.e. metabolism, using the principles of **metabolic theory** (Dynamic Energy Budget theory)
+* calculations of the **microclimates** to which the organism is exposed using principles of micrometerology, soil physics and hydrology.
+
+<a href="https://www.youtube.com/watch?v=ud_s7056GXo">Michael Kearney introduces NicheMapR</a>
+
+  {% for post in site.background %}
+    {% include archive-single.html %}
+  {% endfor %}
 
 <h2> Applications </h2>
 Coming soon.

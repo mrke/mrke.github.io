@@ -1,6 +1,8 @@
 main:
   - title: "Getting Started"
     url: /getting_started/
+  - title: "People"
+    url: /people/
   - title: "Models"
     url: /models/
   - title: "Help"

@@ -5,10 +5,12 @@
 # For technical reasons, this file is *NOT* reloaded automatically when you use
 # `jekyll serve`. If you change this file, please restart the server process.
 
-plugins:
-  - jekyll-remote-theme
+#plugins:
+#  - jekyll-remote-theme
+#
+#remote_theme: mmistakes/minimal-mistakes
 
-remote_theme: mmistakes/minimal-mistakes
+theme                    : "minimal-mistakes-jekyll"
 minimal_mistakes_skin    : "default" # "air", "aqua", "contrast", "dark", "dirt", "neon", "mint", "plum", "sunrise"
 
 # Site Settings
@@ -292,8 +294,8 @@ defaults:
       author_profile: true
       header:
         overlay_color: "#2f3036"
-        overlay_image: /assets/images/Global_Average_Temperature_Map.png
-        caption: "Photo credit: [**Wikipedia**](https://upload.wikimedia.org/wikipedia/commons/9/92/Annual_Average_Temperature_Map.png)"
+        overlay_image: /assets/images/near_papunya.jpg
+        caption: "Photo credit: **Michael Kearney**"
       #  actions:
       #    - label: "Testing This Feature"
       #      url: "http://github.com"
