@@ -10,7 +10,7 @@ permalink: /people/
 
 <a href="https://integrativebiology.wisc.edu/staff/porter-warren/">Warren P. Porter</a>
 
-<a href="https://www.researchgate.net/scientific-contributions/2030087696_Paul_D_Mathewson">Paul D. Mathewson Porter</a>
+<a href="https://www.researchgate.net/scientific-contributions/2030087696_Paul_D_Mathewson">Paul D. Mathewson</a>
 
 <a href="https://njbriscoeresearch.wordpress.com/">Natalie J. Briscoe</a>
 
