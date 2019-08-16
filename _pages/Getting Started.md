@@ -76,8 +76,8 @@ Simulate microclimate for 2018 in Madison, Wisconsin using the gridMet database 
 ~~~ R
 library(NicheMapR)
 loc <- c(-89.40, 43.07)
-dstart <- "01/01/2018"
-dfinish <- "31/12/2018"
+dstart <- "01/01/2017"
+dfinish <- "31/12/2017"
 micro <- micro_usa(loc = loc, dstart = dstart, dfinish = dfinish)
 metout <- as.data.frame(micro$metout)
 soil <- as.data.frame(micro$soil)
@@ -87,7 +87,23 @@ plot(soilmoist$WC5cm ~ micro$dates, type = 'l')
 plot(metout$SNOWDEP ~ micro$dates, type = 'l')
 ~~~
 
-Compute a heat budget for the default ectotherm (Eastern Water Skink, _Eulamprus quoyii_) in Sydney, Australia for 2015 using the micro_aust function and plot the consequences for its body temperature and seasonal activity window:
+Simulate microclimate for 2017 in Madison, Wisconsin using the NCEP database (this works for any location in the world) and plot hourly 5 cm soil temperature and soil moisture as well as snow depth:
+
+~~~ R
+library(NicheMapR)
+loc <- c(-89.40, 43.07)
+dstart <- "01/01/2017"
+dfinish <- "31/12/2017"
+micro <- micro_ncep(loc = loc, dstart = dstart, dfinish = dfinish)
+metout <- as.data.frame(micro$metout)
+soil <- as.data.frame(micro$soil)
+soilmoist <- as.data.frame(micro$soilmoist)
+plot(soil$D5cm ~ micro$dates, type = 'l')
+plot(soilmoist$WC5cm ~ micro$dates, type = 'l')
+plot(metout$SNOWDEP ~ micro$dates, type = 'l')
+~~~
+
+Compute a heat budget for the default ectotherm (Eastern Water Skink, _Eulamprus quoyii_) in Sydney, Australia for 2015 using the micro_aust function (uses the AWAP daily climate data set for Australia) and plot the consequences for its body temperature and seasonal activity window:
 
 ~~~ R
 library(NicheMapR)
