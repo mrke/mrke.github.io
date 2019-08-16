@@ -71,7 +71,7 @@ soil <- as.data.frame(micro$soil)
 plot(soil$D5cm ~ micro$dates, type = 'l')
 ~~~
 
-Simulate microclimate for 2018 in Madison, Wisconsin using the gridMet database for the USA and plot hourly 5 cm soil temperature and soil moisture as well as snow depth:
+Simulate microclimate for 2017 in Madison, Wisconsin using the gridMet database for the USA and plot hourly 5 cm soil temperature and soil moisture as well as snow depth:
 
 ~~~ R
 library(NicheMapR)
