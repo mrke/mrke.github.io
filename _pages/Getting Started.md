@@ -166,13 +166,13 @@ metout <- as.data.frame(micro$metout) # aboveground microclimate
 ecto <- ectotherm(DEB = 1) # run ectotherm model for default parameters (Eastern Water Skink) with DEB model turned on
 
 # retrieve output
-debout <- as.data.frame(ecto$debout) # Dynamic Energy Budget model turned on
+debout <- as.data.frame(ecto$debout) # Dynamic Energy Budget model output table
 
 # plot wet mass
 plot(debout$WETMASS ~ micro$dates, type = 'l')
-E.Hb <- 866.6 # maturity threshold at birth for Eastern Water Skink
-abline(v = micro$dates[which(debout$E_H > E.Hb)[1]], lty = 2, col = 'grey')
-text(micro$dates[1], max(debout$WETMASS), labels = "embryo", cex = 0.85)
+E.Hb <- 866.6 # maturity threshold at birth (J) for Eastern Water Skink, needed for next line
+abline(v = micro$dates[which(debout$E_H > E.Hb)[1]], lty = 2, col = 'grey') # show when it was born
+text(micro$dates[1], max(debout$WETMASS), labels = "embryo", cex = 0.85) # note embryo stage
 ~~~
 
 <h2> Source code </h2>
