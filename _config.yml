@@ -104,10 +104,8 @@ author:
   bio              : "Modelling the thermodynamic constraints on life"
   #location         : "Melbourne, Australia"
   links:
-    #- label: "NicheMapR Repo"
-    #  icon: "fab fa-fw fa-link"
-    #  url: "https://github.com/mrke/NicheMapR"
-    - label: "Twitter" #TODO find out how to display tweets
+
+    - label: "Twitter" 
       icon: "fab fa-fw fa-twitter-square"
       url: "https://twitter.com/nichemapr?lang=en"
     - label: "GitHub"
@@ -271,6 +269,9 @@ collections:
   portfolio:
     output: true
     permalink: /:collection/:path/
+  models:
+    output: true
+    permalink: /:collection/:path/
 
 
 # Defaults
@@ -323,3 +324,15 @@ defaults:
       layout: single
       author_profile: false
       share: true
+  # _models
+  - scope:
+      path: "_models"
+      type: models
+    values:
+      layout: single
+      author_profile : true
+      excerpt: ""
+      header:
+       overlay_color: "#2f3036"
+       overlay_image: /assets/images/near_papunya.jpg
+       caption: "Photo credit: **Michael Kearney**"
