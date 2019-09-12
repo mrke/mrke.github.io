@@ -1,7 +1,6 @@
 ---
 title          : "Ectotherm Models"
-layout         : single
-permalink      : /models/ectotherm/
+except: Coming Soon
 ---
 <h1>Ectotherm Models</h1>
 <p>

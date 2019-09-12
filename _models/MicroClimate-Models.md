@@ -1,7 +1,6 @@
 ---
 title          : "MicroClimate Models"
-layout         : single
-permalink      : /models/microclimate/
+excerpt: Coming Soon
 
 ---
 <h1>MicroClimate Models</h1>
