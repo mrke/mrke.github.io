@@ -17,7 +17,7 @@ header:
 
 <h1>Overview</h1>
 
-NicheMapR is a suite of programs for the R programming environment that compute fundamental physical and constraints on living things. It aims at asking the general question: _Can an organism can complete its life cycle in a particular place and time, without overheating, desiccating or starving_?
+NicheMapR is a suite of programs for the R programming environment that compute fundamental physical and constraints on living things. It aims at asking the general question: _Can an organism complete its life cycle in a particular place and time, without overheating, desiccating or starving_?
 
 In other words, starting with the **functional traits** of an organism, the programs can be used to determine the environmental sequence experienced by an organism in a particular habitat and assess whether this sequence is inside, or outside, of its niche.
 

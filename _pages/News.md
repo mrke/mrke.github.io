@@ -1,7 +1,14 @@
 ---
 title: "News"
-layout: single
+layout: archive
 permalink: /news/
 ---
 
-Coming soon.
+More News coming soon!
+
+{% for post in site.posts %}
+  {% include archive-single.html %}
+{% endfor %}
+
+<hr>
+Page still In-Progress, thank you for your patience!

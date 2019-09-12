@@ -2,15 +2,15 @@ var store = [{
         "title": "Ectotherm Models",
         "excerpt":"Ectotherm Models   Coming Soon    ","categories": [],
         "tags": [],
-        "url": "http://localhost:4000/models/ectotherm/",
+        "url": "http://localhost:4000/models/Ectotherms-Models/",
         "teaser":null},{
         "title": "MicroClimate Models",
         "excerpt":"MicroClimate Models    Coming Soon   ","categories": [],
         "tags": [],
-        "url": "http://localhost:4000/models/microclimate/",
+        "url": "http://localhost:4000/models/MicroClimate-Models/",
         "teaser":null},{
-        "title": "Welcome to Jekyll!",
-        "excerpt":"You’ll find this post in your _posts directory. Go ahead and edit it and re-build the site to see your changes. You can rebuild the site in many different ways, but the most common way is to run jekyll serve, which launches a web server and auto-regenerates your site when...","categories": ["jekyll","update"],
-        "tags": [],
-        "url": "http://localhost:4000/jekyll/update/welcome-to-jekyll/",
-        "teaser":null},]
+        "title": "Hello World",
+        "excerpt":"This is a filler post.   This will be deleted eventually.  ","categories": [],
+        "tags": ["testing"],
+        "url": "http://localhost:4000/Hello-World/",
+        "teaser":null}]

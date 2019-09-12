@@ -1,16 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 <url>
-<loc>http://localhost:4000/models/ectotherm/</loc>
-<lastmod>2019-08-19T19:11:45+10:00</lastmod>
+<loc>http://localhost:4000/models/Ectotherms-Models/</loc>
+<lastmod>2019-09-12T15:30:04+10:00</lastmod>
 </url>
 <url>
-<loc>http://localhost:4000/models/microclimate/</loc>
-<lastmod>2019-08-19T19:11:45+10:00</lastmod>
+<loc>http://localhost:4000/models/MicroClimate-Models/</loc>
+<lastmod>2019-09-12T15:30:04+10:00</lastmod>
 </url>
 <url>
-<loc>http://localhost:4000/jekyll/update/welcome-to-jekyll/</loc>
-<lastmod>2019-05-13T17:53:57+10:00</lastmod>
+<loc>http://localhost:4000/Hello-World/</loc>
+<lastmod>2019-09-12T00:00:00+10:00</lastmod>
 </url>
 <url>
 <loc>http://localhost:4000/404/</loc>
@@ -34,10 +34,16 @@
 <loc>http://localhost:4000/related/</loc>
 </url>
 <url>
+<loc>http://localhost:4000/_pages/archive-taxonomy/</loc>
+</url>
+<url>
 <loc>http://localhost:4000/</loc>
 </url>
 <url>
 <loc>http://localhost:4000/</loc>
+</url>
+<url>
+<loc>http://localhost:4000/tags/</loc>
 </url>
 <url>
 <loc>http://localhost:4000/NicheMapR/inst/doc/deb-model-tutorial.html</loc>
@@ -86,13 +92,5 @@
 <url>
 <loc>http://localhost:4000/NicheMapR/inst/doc/transient_equation_derivations.html</loc>
 <lastmod>2019-08-19T14:44:59+10:00</lastmod>
-</url>
-<url>
-<loc>http://localhost:4000/_pages/dummy.html</loc>
-<lastmod>2019-08-16T14:01:49+10:00</lastmod>
-</url>
-<url>
-<loc>http://localhost:4000/_pages/related.html</loc>
-<lastmod>2019-08-16T14:01:49+10:00</lastmod>
 </url>
 </urlset>
