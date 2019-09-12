@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Minimal Mistakes Jekyll Theme 4.16.3 by Michael Rose
+  Minimal Mistakes Jekyll Theme 4.16.5 by Michael Rose
   Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
   Free for personal and commercial use under the MIT license
   https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
@@ -111,6 +111,14 @@
   </head>
 
   <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
 
     <!--[if lt IE 9]>
 <div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
@@ -125,7 +133,10 @@
         
           <a class="site-logo" href="/"><img src="/assets/images/ThermoNiche.jpg" alt=""></a>
         
-        <a class="site-title" href="/">Home</a>
+        <a class="site-title" href="/">
+          Home
+          
+        </a>
         <ul class="visible-links"><li class="masthead__menu-item">
               <a href="/getting_started/" >Getting Started</a>
             </li><li class="masthead__menu-item">
@@ -315,6 +326,27 @@
         <h1> Community </h1>
 <p>To discuss ideas and problems with the NicheMapR community, join the NicheMapR <a href="https://groups.google.com/forum/#!forum/nichemapr">Google Group</a></p>
 
+<h2>Tutorial Files</h2>
+<p>These can also be found in the NicheMapR/inst/doc folder.</p>
+
+<p><a href="/NicheMapR/inst/doc/deb-model-tutorial" class="btn btn--primary">Deb Model Tutorial</a></p>
+
+<p><a href="/NicheMapR/inst/doc/ectotherm-model-tutorial" class="btn btn--warning">Ectotherm Model Tutorial</a></p>
+
+<p><a href="/NicheMapR/inst/doc/endotherm-components-tutorial" class="btn btn--danger">Endotherm Components Tutorial</a>
+<a href="/NicheMapR/inst/doc/endotherm-model-tutorial" class="btn btn--danger">Endotherm Model Tutorial</a></p>
+
+<p><a href="/NicheMapR/inst/doc/microclimate_inputs" class="btn btn--info">Microclimate Inputs</a>
+<a href="/NicheMapR/inst/doc/microclimate-hourly-input-example" class="btn btn--info">Microclimate Hourly Input Example</a>
+<a href="/NicheMapR/inst/doc/microclimate-IO" class="btn btn--info">Microclimate IO</a>
+<a href="/NicheMapR/inst/doc/microclimate-model-theory-equations" class="btn btn--info">Microclimate Model Theory Equations</a>
+<a href="/NicheMapR/inst/microclimate-model-tutorial" class="btn btn--info">Microclimate Model Tutorial</a>
+<a href="/NicheMapR/inst/doc/microclimate-monthly-input-example" class="btn btn--info">Microclimate Monthly Input Example</a></p>
+
+<p><a href="/NicheMapR/inst/doc/properties-of-air" class="btn btn--success">Properties Of Air</a>
+<a href="/NicheMapR/inst/doc/transient_equation_derivations" class="btn btn--success">Transient Equation Derivations</a></p>
+
+
         
       </section>
 
@@ -342,7 +374,7 @@
 
     
 
-    <div class="page__footer">
+    <div id="footer" class="page__footer">
       <footer>
         <!-- start custom footer snippets -->
 
@@ -376,7 +408,7 @@
 
     
   <script src="/assets/js/main.min.js"></script>
-  <script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js" integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ" crossorigin="anonymous"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
 
 
 

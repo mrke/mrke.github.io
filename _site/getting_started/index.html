@@ -1,6 +1,6 @@
 <!doctype html>
 <!--
-  Minimal Mistakes Jekyll Theme 4.16.3 by Michael Rose
+  Minimal Mistakes Jekyll Theme 4.16.5 by Michael Rose
   Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
   Free for personal and commercial use under the MIT license
   https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
@@ -111,6 +111,14 @@
   </head>
 
   <body class="layout--single">
+    <nav class="skip-links">
+  <h2 class="screen-reader-text">Skip links</h2>
+  <ul>
+    <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
+    <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
+    <li><a href="#footer" class="screen-reader-shortcut">Skip to footer</a></li>
+  </ul>
+</nav>
 
     <!--[if lt IE 9]>
 <div class="notice--danger align-center" style="margin: 0;">You are using an <strong>outdated</strong> browser. Please <a href="https://browsehappy.com/">upgrade your browser</a> to improve your experience.</div>
@@ -125,7 +133,10 @@
         
           <a class="site-logo" href="/"><img src="/assets/images/ThermoNiche.jpg" alt=""></a>
         
-        <a class="site-title" href="/">Home</a>
+        <a class="site-title" href="/">
+          Home
+          
+        </a>
         <ul class="visible-links"><li class="masthead__menu-item">
               <a href="/getting_started/" >Getting Started</a>
             </li><li class="masthead__menu-item">
@@ -371,7 +382,7 @@
 </span><span class="n">loc</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">c</span><span class="p">(</span><span class="m">-89.40</span><span class="p">,</span><span class="w"> </span><span class="m">43.07</span><span class="p">)</span><span class="w">
 </span><span class="n">micro</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">micro_global</span><span class="p">(</span><span class="n">loc</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="n">loc</span><span class="p">)</span><span class="w">
 </span><span class="n">soil</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">as.data.frame</span><span class="p">(</span><span class="n">micro</span><span class="o">$</span><span class="n">soil</span><span class="p">)</span><span class="w">
-</span><span class="n">plot</span><span class="p">(</span><span class="n">soil</span><span class="o">$</span><span class="n">D</span><span class="m">5</span><span class="n">cm</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">micro</span><span class="o">$</span><span class="n">dates</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'l'</span><span class="p">)</span><span class="w">
+</span><span class="n">plot</span><span class="p">(</span><span class="n">soil</span><span class="o">$</span><span class="n">D5cm</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">micro</span><span class="o">$</span><span class="n">dates</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'l'</span><span class="p">)</span><span class="w">
 </span></code></pre></div></div>
 
 <p>Simulate microclimate for 2017 in Madison, Wisconsin using the gridMet database for the USA and plot hourly 5 cm soil temperature and soil moisture as well as snow depth:</p>
@@ -384,7 +395,7 @@
 </span><span class="n">metout</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">as.data.frame</span><span class="p">(</span><span class="n">micro</span><span class="o">$</span><span class="n">metout</span><span class="p">)</span><span class="w">
 </span><span class="n">soil</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">as.data.frame</span><span class="p">(</span><span class="n">micro</span><span class="o">$</span><span class="n">soil</span><span class="p">)</span><span class="w">
 </span><span class="n">soilmoist</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">as.data.frame</span><span class="p">(</span><span class="n">micro</span><span class="o">$</span><span class="n">soilmoist</span><span class="p">)</span><span class="w">
-</span><span class="n">plot</span><span class="p">(</span><span class="n">soil</span><span class="o">$</span><span class="n">D</span><span class="m">5</span><span class="n">cm</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">micro</span><span class="o">$</span><span class="n">dates</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'l'</span><span class="p">)</span><span class="w">
+</span><span class="n">plot</span><span class="p">(</span><span class="n">soil</span><span class="o">$</span><span class="n">D5cm</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">micro</span><span class="o">$</span><span class="n">dates</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'l'</span><span class="p">)</span><span class="w">
 </span><span class="n">plot</span><span class="p">(</span><span class="n">soilmoist</span><span class="o">$</span><span class="n">WC5cm</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">micro</span><span class="o">$</span><span class="n">dates</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'l'</span><span class="p">)</span><span class="w">
 </span><span class="n">plot</span><span class="p">(</span><span class="n">metout</span><span class="o">$</span><span class="n">SNOWDEP</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">micro</span><span class="o">$</span><span class="n">dates</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'l'</span><span class="p">)</span><span class="w">
 </span></code></pre></div></div>
@@ -399,7 +410,7 @@
 </span><span class="n">metout</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">as.data.frame</span><span class="p">(</span><span class="n">micro</span><span class="o">$</span><span class="n">metout</span><span class="p">)</span><span class="w">
 </span><span class="n">soil</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">as.data.frame</span><span class="p">(</span><span class="n">micro</span><span class="o">$</span><span class="n">soil</span><span class="p">)</span><span class="w">
 </span><span class="n">soilmoist</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">as.data.frame</span><span class="p">(</span><span class="n">micro</span><span class="o">$</span><span class="n">soilmoist</span><span class="p">)</span><span class="w">
-</span><span class="n">plot</span><span class="p">(</span><span class="n">soil</span><span class="o">$</span><span class="n">D</span><span class="m">5</span><span class="n">cm</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">micro</span><span class="o">$</span><span class="n">dates</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'l'</span><span class="p">)</span><span class="w">
+</span><span class="n">plot</span><span class="p">(</span><span class="n">soil</span><span class="o">$</span><span class="n">D5cm</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">micro</span><span class="o">$</span><span class="n">dates</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'l'</span><span class="p">)</span><span class="w">
 </span><span class="n">plot</span><span class="p">(</span><span class="n">soilmoist</span><span class="o">$</span><span class="n">WC5cm</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">micro</span><span class="o">$</span><span class="n">dates</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'l'</span><span class="p">)</span><span class="w">
 </span><span class="n">plot</span><span class="p">(</span><span class="n">metout</span><span class="o">$</span><span class="n">SNOWDEP</span><span class="w"> </span><span class="o">~</span><span class="w"> </span><span class="n">micro</span><span class="o">$</span><span class="n">dates</span><span class="p">,</span><span class="w"> </span><span class="n">type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s1">'l'</span><span class="p">)</span><span class="w">
 </span></code></pre></div></div>
@@ -506,7 +517,7 @@
 
     
 
-    <div class="page__footer">
+    <div id="footer" class="page__footer">
       <footer>
         <!-- start custom footer snippets -->
 
@@ -540,7 +551,7 @@
 
     
   <script src="/assets/js/main.min.js"></script>
-  <script defer src="https://use.fontawesome.com/releases/v5.8.1/js/all.js" integrity="sha384-g5uSoOSBd7KkhAMlnQILrecXvzst9TdC09/VM+pjDTCM+1il8RHz5fKANTFFb+gQ" crossorigin="anonymous"></script>
+  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
 
 
 
