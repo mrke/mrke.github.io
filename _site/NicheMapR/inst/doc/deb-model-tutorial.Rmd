@@ -1,3 +1,15 @@
+---
+title: "Introduction to Dynamic Energy Budget models in NicheMapR"
+author: "Michael Kearney"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{DEB Model Tutorial}
+  %\VignetteEncoding{UTF-8}
+  %\VignetteEngine{knitr::rmarkdown}
+editor_options:
+  chunk_output_type: console
+---
 <style>
 p.caption {
   font-size: 1.15em;

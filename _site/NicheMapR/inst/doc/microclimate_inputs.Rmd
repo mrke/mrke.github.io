@@ -1,3 +1,14 @@
+---
+title: 'Microclimate Model Input Data'
+author: Michael R. Kearney
+date: '`r Sys.Date()`'
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Microclimate Model Input Data}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(
  eval = TRUE
