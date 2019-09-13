@@ -21,7 +21,7 @@ These can also be found in the NicheMapR/inst/doc folder.
 <a href="/NicheMapR/inst/doc/microclimate-hourly-input-example" class="btn btn--info">Microclimate Hourly Input Example</a>
 <a href="/NicheMapR/inst/doc/microclimate-IO" class="btn btn--info">Microclimate IO</a>
 <a href="/NicheMapR/inst/doc/microclimate-model-theory-equations" class="btn btn--info">Microclimate Model Theory Equations</a>
-<a href="/NicheMapR/inst/microclimate-model-tutorial" class="btn btn--info">Microclimate Model Tutorial</a>
+<a href="/NicheMapR/inst/doc/microclimate-model-tutorial" class="btn btn--info">Microclimate Model Tutorial</a>
 <a href="/NicheMapR/inst/doc/microclimate-monthly-input-example" class="btn btn--info">Microclimate Monthly Input Example</a>
 
 <a href="/NicheMapR/inst/doc/properties-of-air" class="btn btn--success">Properties Of Air</a>
