@@ -32,6 +32,11 @@ To achieve this it integrates:
     {% include archive-single.html %}
   {% endfor %}
 
+{% for background in site.background %}
+  <h1><a href="{{background.permalink}}">{{models.background}}</a></h1>
+<hr>
+{% endfor %}
+
 <h2> Applications </h2>
 Coming soon.
 
