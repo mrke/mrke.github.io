@@ -262,6 +262,8 @@ compress_html:
 collections:
   models:
     output: true
+    permalink: /:collection/:title
+
     
 
 
