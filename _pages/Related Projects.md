@@ -25,7 +25,7 @@ Related projects include
 
 <a href="https://github.com/rafaqz/DynamicEnergyBudgets.jl">Rafael Schouten's DEB models in Julia</a>
 
-<a href="https://github.com/rafaqz/DEBScripts">Rafael Schouten's DEB plant/microclimate model in Julia</a>
+<a href="https://github.com/rafaqz/DEBScripts">Rafael Schouten's integrated DEB plant/microclimae model in Julia</a>
 
 <h2>Other Mechanistic Niche Modelling projects</h2>
 
