@@ -36,7 +36,7 @@ permalink: /models/
 
 <h2> Background and History </h2>
 
-{% for model in site.background %}
+{% for background in site.background %}
   <h1>
     <a href="{{ background.url }}">
       {{background.title}}
