@@ -1,10 +1,14 @@
 ---
-title: Background and history
-excerpt: A short overview of the origin of the NicheMapR models.
+title          : "Background and history"
+excerpt: A short overview of the origin of the NicheMapR models
 tags:
   - NicheMapR
   - biophysical ecology
 ---
+<h1>Background and history</h1>
+
+
+<p>
 
 The NicheMapR package is an R implementation of a biophysical modelling software originally developed by Warren Porter and colleagues in the 1970s. Biophysical modelling is the application of physical principles of heat, mass and momentum transfer to organisms. 
 
