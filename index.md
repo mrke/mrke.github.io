@@ -28,9 +28,21 @@ To achieve this it integrates:
 
 <a href="https://www.youtube.com/watch?v=ud_s7056GXo">Michael Kearney introduces NicheMapR</a>
 
-{% for background in site.background %}
-  <h1><a href="{{background.permalink}}">{{background.title}}</a></h1>
-<hr>
+---
+title: "Models"
+layout: single
+permalink: /models/
+---
+
+<h2> Background and History </h2>
+
+{% for model in site.background %}
+  <h1>
+    <a href="{{ background.url }}">
+      {{background.title}}
+    </a>
+  </h1>
+  <hr>
 {% endfor %}
 
 <h2> Applications </h2>
