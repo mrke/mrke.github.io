@@ -28,12 +28,8 @@ To achieve this it integrates:
 
 <a href="https://www.youtube.com/watch?v=ud_s7056GXo">Michael Kearney introduces NicheMapR</a>
 
-  {% for post in site.background %}
-    {% include archive-single.html %}
-  {% endfor %}
-
 {% for background in site.background %}
-  <h1><a href="{{background.permalink}}">{{models.background}}</a></h1>
+  <h1><a href="{{background.permalink}}">{{background.title}}</a></h1>
 <hr>
 {% endfor %}
 
