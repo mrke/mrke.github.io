@@ -30,15 +30,15 @@ To achieve this it integrates:
 
 <h2> Background and History </h2>
 
-NicheMapR started as a project on why desert iguanas change colour. Learn more here.
+NicheMapR started as a project on why desert iguanas change colour. Learn more <a href="://mrke.github.io/background/"> here</a>
 
 <h2> Applications </h2>
 
-To find examples from the literature that have applied NicheMapR, click here.
+To find examples from the literature that have applied NicheMapR, click <a href="://mrke.github.io/examples/"> here</a>.
 
 <h2> Tests </h2>
 
-The algorithms underlying NicheMapR have been subjected to a range of tests as described in the papers here.
+The algorithms underlying NicheMapR have been subjected to a range of tests as described in the papers <a href="://mrke.github.io/tests/"> here</a>.
 
 Snow model test: ![gras](/assets/images/snodastest.gif)
 
