@@ -8,4 +8,3 @@ permalink: /tests/
 
 
 <p>
-Snow model test: ![gras](../assets/images/snodastest.gif)

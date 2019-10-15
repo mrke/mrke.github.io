@@ -30,7 +30,7 @@ To achieve this it integrates:
 
 <h2> Background and History </h2>
 
-NicheMapR started as a project on why desert iguanas change colour. Learn more <a href="https://mrke.github.io/background/"> here</a>
+NicheMapR started as a project on why desert iguanas change colour. Learn more <a href="https://mrke.github.io/background/"> here</a>.
 
 <h2> Applications </h2>
 

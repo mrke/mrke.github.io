@@ -4,7 +4,7 @@ excerpt: A short history of the development of NicheMapR
 layout: single
 permalink: /background/
 ---
-<h1>Dynamic Energy Budget Models</h1>
+<h1>Background and History</h1>
 
 <p>
 The NicheMapR package is an R implementation of a biophysical modelling software originally developed by Warren Porter and colleagues in the 1970s. Biophysical modelling is the application of physical principles of heat, mass and momentum transfer to organisms. 
