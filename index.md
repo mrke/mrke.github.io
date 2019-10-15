@@ -28,20 +28,13 @@ To achieve this it integrates:
 
 <a href="https://www.youtube.com/watch?v=ud_s7056GXo">Michael Kearney introduces NicheMapR</a>
 
-<h2> Background and History </h2>
-
-{% for background in site.background %}
+{% for model in site.home %}
   <h1>
-    <a href="{{ background.url }}">
-      {{background.title}}
+    <a href="{{ home.url }}">
+      {{home.title}}
     </a>
   </h1>
   <hr>
 {% endfor %}
 
-<h2> Applications </h2>
-Coming soon.
-
-<h3> Tests </h3>
-Snow model test: ![gras](/assets/images/snodastest.gif)
 
