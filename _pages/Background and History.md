@@ -1,7 +1,8 @@
 ---
 title          : "Background and History"
 excerpt: A short history of the development of NicheMapR
-
+layout: single
+permalink: /background/
 ---
 <h1>Dynamic Energy Budget Models</h1>
 
