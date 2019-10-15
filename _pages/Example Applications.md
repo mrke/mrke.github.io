@@ -59,7 +59,7 @@ Rubalcaba, J. G., Gouveia, S. F., & Olalla-Tárraga, M. A. (2019). Upscaling Mic
 <p>
 Smith Kathleen R., Cadena Viviana, Endler John A., Porter Warren P., Kearney Michael R., & Stuart-Fox Devi. (2016). Colour change on different body regions provides thermal and signalling advantages in bearded dragon lizards. Proceedings of the Royal Society B: Biological Sciences, 283(1832), 20160626. <a href="https://10.1098/rspb.2016.0626">10.1098/rspb.2016.0626</a>
 <p>
-Stenhouse, V., Carter, A. L., Chapple, D. G., Hare, K. M., Hartley, S., & Nelson, N. J. (2018). Modelled incubation conditions indicate wider potential distributions based on thermal requirements for an oviparous lizard. Journal of Biogeography, 45(8), 1872–1883. <a href="10.1111/jbi.13363">https://10.1111/jbi.13363</a>
+Stenhouse, V., Carter, A. L., Chapple, D. G., Hare, K. M., Hartley, S., & Nelson, N. J. (2018). Modelled incubation conditions indicate wider potential distributions based on thermal requirements for an oviparous lizard. Journal of Biogeography, 45(8), 1872–1883. <a href="https://10.1111/jbi.13363">10.1111/jbi.13363</a>
 <p>
 Strangas, M. L., Navas, C. A., Rodrigues, M. T., & Carnaval, A. C. (2019). Thermophysiology, microclimates, and species distributions of lizards in the mountains of the Brazilian Atlantic Forest. Ecography, 42(2), 354–364. <a href="https://10.1111/ecog.03330">10.1111/ecog.03330</a>
 <p>
