@@ -12,8 +12,9 @@ permalink: /people/
 
 <a href="https://www.researchgate.net/scientific-contributions/2030087696_Paul_D_Mathewson">Paul D. Mathewson</a>, Endotherm model developmer, general programmer
 
-<a href="https://njbriscoeresearch.wordpress.com/">Natalie J. Briscoe</a>, Endotherm model developer
+<a href="https://njbriscoeresearch.wordpress.com/">Natalie J. Briscoe</a>, Endotherm model development
 
+<a href="https://github.com/rafaqz">Rafael Schouten</a>, Plant model development
 
 <h1> Web design </h1>
 
