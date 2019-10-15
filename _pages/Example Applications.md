@@ -7,7 +7,7 @@ permalink: /examples/
 <h1>Example Applications</h1>
 
 <p>
-Carter, A., Kearney, M., Mitchell, N., Hartley, S., Porter, W., & Nelson, N. (2015). Modelling the soil microclimate: does the spatial or temporal resolution of input parameters matter? Frontiers of Biogeography, 7(4), 138–154. <a href="/https://doi.org/10.21425/F5FBG27849"/a>
+Carter, A., Kearney, M., Mitchell, N., Hartley, S., Porter, W., & Nelson, N. (2015). Modelling the soil microclimate: does the spatial or temporal resolution of input parameters matter? Frontiers of Biogeography, 7(4), 138–154. <a href="/https://doi.org/10.21425/F5FBG27849">/https://doi.org/10.21425/F5FBG27849</a>
 <p>
 Carter Anna L., Kearney Michael R., Hartley Stephen, Porter W. P., & Nelson Nicola J. (2018). Geostatistical interpolation can reliably extend coverage of a very high-resolution model of temperature-dependent sex determination. Journal of Biogeography, 45(3), 652–663. https://10.1111/jbi.13152
 <p>
