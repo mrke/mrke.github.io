@@ -28,13 +28,17 @@ To achieve this it integrates:
 
 <a href="https://www.youtube.com/watch?v=ud_s7056GXo">Michael Kearney introduces NicheMapR</a>
 
-{% for model in site.home %}
-  <h1>
-    <a href="{{ home.url }}">
-      {{home.title}}
-    </a>
-  </h1>
-  <hr>
-{% endfor %}
+<h2> Background and History </h2>
 
+NicheMapR started as a project on why desert iguanas change colour. Learn more here.
+
+<h2> Applications </h2>
+
+To find examples from the literature that have applied NicheMapR, click here.
+
+<h2> Tests </h2>
+
+The algorithms underlying NicheMapR have been subjected to a range of tests as described in the papers here.
+
+Snow model test: ![gras](/assets/images/snodastest.gif)
 
