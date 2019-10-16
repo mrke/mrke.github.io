@@ -7,7 +7,8 @@ permalink: /background/
 <h1>Background and History</h1>
 <p>
 <h2>Beginnings</h2>
-The NicheMapR package is an R implementation of a biophysical modelling software originally developed by Warren Porter and colleagues in the 1970s. Biophysical modelling is the application of physical principles of heat, mass and momentum transfer to organisms (Porter and Gates 1969; Gates 1980). 
+<p>
+The NicheMapR package is an R implementation of a biophysical modelling software suite originally developed by Warren Porter and colleagues in the 1970s. Biophysical modelling is the application of physical principles of heat, mass and momentum transfer to organisms (Porter and Gates 1969; Gates 1980). 
 <p>
 Porter became interested in this approach to understand a simple question about a lizard, the <a href="https://en.wikipedia.org/wiki/Desert_iguana">desert iguana</a>  - what is the thermal advantage to it being able to change colour from dark to light? To answer this question, Porter collaborated with mechanical engineers to develop Fortran programs for computing the lizard's heat budget (Porter et al. 1973). They also developed a microclimate model of the desert environment to estimate the environmental conditions required by the heat budget (Mitchell et al. 1975) that incoporated a sophisticated solar radiation algorithm (McCullough and Porter 1971). 
 <p>
@@ -27,7 +28,7 @@ The mass budget aspects of Niche Mapper were initially of a static, empirical na
 <p>
 <h2>Transition to R</h2>
 <p>
-The Niche Mapper programs were developed in the Fortran language, in part because it was the dominant numerical modelling language at the time the programs were first being developed. However, since around the year 2000 the R programming environment began to emerge as the dominant working language in ecology. Kearney developed R interfaces to the Niche Mapper Fortran code and developed it into the 'NicheMapR' package. The microclimate model was officially released first (Kearney and Porter 2017), including new capacity to simulate soil moisture (Kearney and Maino 2018) and snow (Kearney in prep.) and a beta version of the ectotherm model. The ectotherm model was officially released subsequently in NicheMapR v2.0.0 (Kearney and Porter 2019) with a beta version of the endotherm model.
+The Niche Mapper programs were developed in the Fortran language, in part because it was the dominant numerical modelling language at the time the programs were first being developed. However, since around the year 2000 the R programming environment began to emerge as the dominant working language in ecology. Kearney created R interfaces to the Niche Mapper Fortran code and developed it into the 'NicheMapR' package. The microclimate model was officially released first (Kearney and Porter 2017), including new capacity to simulate soil moisture (Kearney and Maino 2018) and snow (Kearney in prep.) and a beta version of the ectotherm model. The ectotherm model was officially released subsequently in NicheMapR v2.0.0 (Kearney and Porter 2019), along with a beta version of the endotherm model.
 <p>
 <h2>References</h2>
 <p>
