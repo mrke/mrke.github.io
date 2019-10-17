@@ -3,8 +3,39 @@ title          : "Endotherm Models"
 excerpt: Computing the heat balances of birds, mammals and other endotherms
 
 ---
-
-```fortran
+<h1>Endotherm Models</h1>
+<p>
+Computing heat budgets for endotherms involves using the same principles as for ectotherms, but instead of solving for core temperature one typically solves for the metabolic rate or water loss rate, depending on whether the animal is in a hot or cold environment. 
+<p>
+There are two broad modelling algorithms for computing heat budgets for endotherms in NicheMapR, one simple but limited in scope, and one more complex but more generally applicable. 
+<p>
+The simple model is the function <a href="https://github.com/mrke/NicheMapR/blob/master/R/ellipsoid.R">ellipsoid</a>. This is an analytical model, i.e. can be solved directly without numerical methods, and is described in detail in Porter and Kearney (2009). As the name suggests, it is a model of an ellipsoid-shaped endotherm conceived as having an outer fur layer and an inner flesh layer. Given an air temperature and wind speed, the target core body temperature, as well as the particular shape and size of the ellipsoid, the fur depth and conductivity, and the flesh thermal conductivity, it will compute the required metabolic heat production. It is only designed to work for an environment where there is no solar radiation and the temperatures of the surrounding surfaces are the same as the air temperature ('black-body' conditions, as approximated in a room, a cave or deep shade). It has a crude method for determining required evaporative water loss in situations where the predicted metabolic rate is below the specified basal level.
+<p>
+The more complex model is a pared down, deconstructed version of the general endotherm model developed by Porter and colleagues over many years (see Mathewson and Porter 2013, including their <a href="https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0072863.s007&type=supplementary">supplementary derivation</a>).
+<p>
+The version in NicheMapR includes a set of sub-functions written in FORTRAN and directly callable from R, as described in detail in the <a href="/NicheMapR/inst/doc/endotherm-components-tutorial">Endotherm Components Tutorial</a>. These functions can be used to estimate the heat balance of a single-part animal (e.g. a bird modelled as an ellipsoid) or could be used to build up a multi-part animal (e.g. a bat modelled as an ellipsoid torso plus two plate-shaped wings). It is currently a beta version and is yet to be fully documented and described by a software note. Some of the code for this model is not yet open source.
+<p>
+In combination, these functions allow the calculation of heat and water budgets by numerically solving for the skin temperature and the outer temperature of the insulation (fur or feathers) in the process of finding the required metabolic heat generation for a particular core temperature. It is explicit about the effects of air temperature, wind speed, solar and infrared radiation and humidity, and thus can be used for complex outdoor environments. It is also explicit about the dorsal and ventral properties of the organism as well as the environment the dorsal and ventral side is exposed to (e.g. solar radiation hitting the top of the animal more intensely than the bottom). The model takes more detailed input on the insulation properties than the ellipsoid function and can be solved for different geometries, specifically a plate, a cylinder, a sphere or an ellipsoid.
+<p>
+The overall strategy of solving the problem is to solve, for a given state of the animal (e.g. core temperature, posture, skin wetness) and environment, the heat exchange for an object of entirely dorsal properties experiencing the dorsal environment, and the same for the ventral case. Then a weighted mean metabolic rate is computed from the dorsal and ventral estimate. Finally, the respiratory heat loss is computed for the whole system to obtain a final estimate of the heat generation. If this value is less than the specified lowest allowable metabolic rate (e.g. basal for a resting animal, higher for an active animal), then a sequence of potential thermoregulatory responses is attempted to find a viable (physically possible) solution.
+<p>
+The exact nature of the configuration of these subroutines will depend on the details of how the species in question thermoregulates. In particular, it will depend on how the organism changes posture and pelage (e.g. piloerection), allows core temperature to rise, alters flesh conductivity, pants or sweats, and in what order. The function <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR_devel.R">endoR_devel</a> provides a typical example of a configuration, which under heat stress will first uncurl, then allow flesh conductivity to rise, then allow core temperature to rise, then pant and then sweat.
+<p>
+The <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR_devel.R">endoR_devel</a> function runs slowly due to the constant exchange between R and FORTRAN. The <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR.R">endoR</a> function, in contrast, is a wrapper to an equivalent algorithm entirely in FORTRAN and is around two orders of magnitude faster. The FORTRAN code for this algorithm (function SOLVENDO) is provided below and can be modified accordingly, after a working version has been developed in the (quicker and easier) R coding environment on the basis of the <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR_devel.R">endoR_devel</a> function.
+<p>
+The <a href="/NicheMapR/inst/doc/endotherm-model-tutorial">Endotherm Model Tutorial</a> provides examples of using the <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR.R">endoR</a> function. 
+<p>
+<h1>References</h1>
+<p>
+Mathewson, P. D., & Porter, W. P. (2013). Simulating Polar Bear Energetics during a Seasonal Fast Using a Mechanistic Model. PLoS One, 8(9), e72863. doi:10.1371/journal.pone.0072863
+<p>
+Porter, W. P., & Kearney, M. (2009). Size, shape, and the thermal niche of endotherms. Proceedings of the National Academy of Sciences, 106(Supplement 2), 19666–19672. doi:10.1073/pnas.0907321106
+</p>
+<h1>SOLVENDO.f function</h1>
+~~~ FORTRAN
+      subroutine SOLVENDO(INPUT,TREG,MORPH,ENBAL,MASBAL)
+     
+      implicit none
       DOUBLE PRECISION EMISAN, SHAPE, FATOBJ,FSKREF,FGDREF,NESTYP,PCTDIF
       DOUBLE PRECISION ABSSB,FLTYPE,ELEV,BP,NITESHAD,SHADE,QSOLR
       DOUBLE PRECISION RoNEST,Z,VEL,TS,TFA,FABUSH,FURTHRMK,RH,TCONDSB
@@ -574,32 +605,4 @@ excerpt: Computing the heat balances of birds, mammals and other endotherms
 
       RETURN
       END
-```
-
-<h1>Endotherm Models</h1>
-<p>
-Computing heat budgets for endotherms involves using the same principles as for ectotherms, but instead of solving for core temperature one typically solves for the metabolic rate or water loss rate, depending on whether the animal is in a hot or cold environment. 
-<p>
-There are two broad modelling algorithms for computing heat budgets for endotherms in NicheMapR, one simple but limited in scope, and one more complex but more generally applicable. 
-<p>
-The simple model is the function <a href="https://github.com/mrke/NicheMapR/blob/master/R/ellipsoid.R">ellipsoid</a>. This is an analytical model, i.e. can be solved directly without numerical methods, and is described in detail in Porter and Kearney (2009). As the name suggests, it is a model of an ellipsoid-shaped endotherm conceived as having an outer fur layer and an inner flesh layer. Given an air temperature and wind speed, the target core body temperature, as well as the particular shape and size of the ellipsoid, the fur depth and conductivity, and the flesh thermal conductivity, it will compute the required metabolic heat production. It is only designed to work for an environment where there is no solar radiation and the temperatures of the surrounding surfaces are the same as the air temperature ('black-body' conditions, as approximated in a room, a cave or deep shade). It has a crude method for determining required evaporative water loss in situations where the predicted metabolic rate is below the specified basal level.
-<p>
-The more complex model is a pared down, deconstructed version of the general endotherm model developed by Porter and colleagues over many years (see Mathewson and Porter 2013, including their <a href="https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0072863.s007&type=supplementary">supplementary derivation</a>).
-<p>
-The version in NicheMapR includes a set of sub-functions written in FORTRAN and directly callable from R, as described in detail in the <a href="/NicheMapR/inst/doc/endotherm-components-tutorial">Endotherm Components Tutorial</a>. These functions can be used to estimate the heat balance of a single-part animal (e.g. a bird modelled as an ellipsoid) or could be used to build up a multi-part animal (e.g. a bat modelled as an ellipsoid torso plus two plate-shaped wings). It is currently a beta version and is yet to be fully documented and described by a software note. Some of the code for this model is not yet open source.
-<p>
-In combination, these functions allow the calculation of heat and water budgets by numerically solving for the skin temperature and the outer temperature of the insulation (fur or feathers) in the process of finding the required metabolic heat generation for a particular core temperature. It is explicit about the effects of air temperature, wind speed, solar and infrared radiation and humidity, and thus can be used for complex outdoor environments. It is also explicit about the dorsal and ventral properties of the organism as well as the environment the dorsal and ventral side is exposed to (e.g. solar radiation hitting the top of the animal more intensely than the bottom). The model takes more detailed input on the insulation properties than the ellipsoid function and can be solved for different geometries, specifically a plate, a cylinder, a sphere or an ellipsoid.
-<p>
-The overall strategy of solving the problem is to solve, for a given state of the animal (e.g. core temperature, posture, skin wetness) and environment, the heat exchange for an object of entirely dorsal properties experiencing the dorsal environment, and the same for the ventral case. Then a weighted mean metabolic rate is computed from the dorsal and ventral estimate. Finally, the respiratory heat loss is computed for the whole system to obtain a final estimate of the heat generation. If this value is less than the specified lowest allowable metabolic rate (e.g. basal for a resting animal, higher for an active animal), then a sequence of potential thermoregulatory responses is attempted to find a viable (physically possible) solution.
-<p>
-The exact nature of the configuration of these subroutines will depend on the details of how the species in question thermoregulates. In particular, it will depend on how the organism changes posture and pelage (e.g. piloerection), allows core temperature to rise, alters flesh conductivity, pants or sweats, and in what order. The function <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR_devel.R">endoR_devel</a> provides a typical example of a configuration, which under heat stress will first uncurl, then allow flesh conductivity to rise, then allow core temperature to rise, then pant and then sweat.
-<p>
-The <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR_devel.R">endoR_devel</a> function runs slowly due to the constant exchange between R and FORTRAN. The <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR.R">endoR</a> function, in contrast, is a wrapper to an equivalent algorithm entirely in FORTRAN and is around two orders of magnitude faster. The FORTRAN code for this algorithm (function SOLVENDO) is provided below and can be modified accordingly, after a working version has been developed in the (quicker and easier) R coding environment on the basis of the <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR_devel.R">endoR_devel</a> function.
-<p>
-The <a href="/NicheMapR/inst/doc/endotherm-model-tutorial">Endotherm Model Tutorial</a> provides examples of using the <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR.R">endoR</a> function. 
-<p>
-<h1>References</h1>
-<p>
-Mathewson, P. D., & Porter, W. P. (2013). Simulating Polar Bear Energetics during a Seasonal Fast Using a Mechanistic Model. PLoS One, 8(9), e72863. doi:10.1371/journal.pone.0072863
-<p>
-Porter, W. P., & Kearney, M. (2009). Size, shape, and the thermal niche of endotherms. Proceedings of the National Academy of Sciences, 106(Supplement 2), 19666–19672. doi:10.1073/pnas.0907321106
+~~~
