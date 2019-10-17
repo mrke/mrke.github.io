@@ -9,7 +9,7 @@ Microclimates represent the physical environments experienced by organisms. They
 <p>
 The NicheMapR package has a range of functions useful in the computations of microclimates. These include functions for computing the physical properties of dry and humid air (functions <a href="https://github.com/mrke/NicheMapR/blob/master/R/DRYAIR.R">DRYAIR</a>, <a href="https://github.com/mrke/NicheMapR/blob/master/R/WETAIR.R">WETAIR</a>). Some empirical and theoretical details about the properties of air are also to be found in the  <a href="https://mrke.github.io/NicheMapR/inst/doc/properties-of-air">properties of air vignette</a>.
 <p>
-The microclimate model of the NicheMapR package (Kearney and Porter 2017) comprises an R wrapper script that communicates with the FORTRAN code (function <a href="https://github.com/mrke/NicheMapR/blob/master/R/microrun.R">microrun</a>) and a set of environmental database-specific functions that collate and transform the required input data for submission to the microrun function. Specifically, functions are:
+The microclimate model of the NicheMapR package (Kearney and Porter 2017) comprises an R wrapper script that communicates with the <a href="https://github.com/mrke/NicheMapR/tree/master/src">FORTRAN code</a> (function <a href="https://github.com/mrke/NicheMapR/blob/master/R/microrun.R">microrun</a>) and a set of environmental database-specific functions that collate and transform the required input data for submission to the microrun function. Specifically, functions are:
 <p>
 <a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_global.R">micro_global</a> which connects to the global monthly database of climate conditions developed by New et al. (2002), on a ~10x10 km grid averaged over 1960 to 1990;
 <p>
@@ -23,7 +23,7 @@ The microclimate model of the NicheMapR package (Kearney and Porter 2017) compri
 <p>
 <a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_nz.R">micro_nz</a> connects to the 5 km daily <a href="https://www.niwa.co.nz/climate/our-services/virtual-climate-stations">Virtual Climate Station Network</a> (VCSN) for New Zealand (requires log in).
 <p>
-All of these functions can connect via the web to the SoiGrids (Hengle 2017) global soil properties database by setting the argument 'soilgrids' to a value of 1.
+All of these functions can connect via the web to the SoilGrids (Hengle 2017) global soil properties database by setting the argument 'soilgrids' to a value of 1.
 <p>
 In addition, there are example vignettes for setting up your own functions for forcing the microclimate model, including a summary of all <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-IO">inputs and outputs</a>, an explanation of all the <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate_inputs">input parameters</a>, and example setups for <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-monthly-input-example">monthly</a> or <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-hourly-input-example">hourly</a> input data. There is also a vignette on the underlying <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-model-theory-equations">theory and equations</a> as well as a general <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-model-tutorial">tutorial</a>.
 <h1>References</h1>

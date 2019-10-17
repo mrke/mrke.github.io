@@ -3,6 +3,11 @@ title          : "Endotherm Models"
 excerpt: Computing the heat balances of birds, mammals and other endotherms
 
 ---
+
+~~~ R
+install.packages('devtools')
+~~~
+
 <h1>Endotherm Models</h1>
 <p>
 Computing heat budgets for endotherms involves using the same principles as for ectotherms, but instead of solving for core temperature one typically solves for the metabolic rate or water loss rate, depending on whether the animal is in a hot or cold environment. 
@@ -32,17 +37,9 @@ Mathewson, P. D., & Porter, W. P. (2013). Simulating Polar Bear Energetics durin
 Porter, W. P., & Kearney, M. (2009). Size, shape, and the thermal niche of endotherms. Proceedings of the National Academy of Sciences, 106(Supplement 2), 19666–19672. doi:10.1073/pnas.0907321106
 <p>
 
-~~~ R
-install.packages('devtools')
-~~~
+
 
 ~~~ FORTRAN
-      subroutine SOLVENDO(INPUT,TREG,MORPH,ENBAL,MASBAL)
-     
-      implicit none
-~~~
-
-~~~
       DOUBLE PRECISION EMISAN, SHAPE, FATOBJ,FSKREF,FGDREF,NESTYP,PCTDIF
       DOUBLE PRECISION ABSSB,FLTYPE,ELEV,BP,NITESHAD,SHADE,QSOLR
       DOUBLE PRECISION RoNEST,Z,VEL,TS,TFA,FABUSH,FURTHRMK,RH,TCONDSB
