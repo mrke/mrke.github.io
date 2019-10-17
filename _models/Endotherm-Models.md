@@ -5,7 +5,7 @@ excerpt: Computing the heat balances of birds, mammals and other endotherms
 ---
 <h1>Endotherm Models</h1>
 <p>
-Solving heat budgets for endotherms uses the same principles as for ectotherms, but instead of solving for core temperature one typically solves for the metabolic rate or water loss rate, depending on whether the animal is in a hot or cold environment. 
+Computing heat budgets for endotherms involves using the same principles as for ectotherms, but instead of solving for core temperature one typically solves for the metabolic rate or water loss rate, depending on whether the animal is in a hot or cold environment. 
 <p>
 There are two broad modelling algorithms for computing heat budgets for endotherms in NicheMapR, one simple but limited in scope, and one more complex but more generally applicable. 
 <p>
@@ -21,7 +21,9 @@ The overall strategy of solving the problem is to solve, for a given state of th
 <p>
 The exact nature of the configuration of these subroutines will depend on the details of how the species in question thermoregulates. In particular, it will depend on how the organism changes posture and pelage (e.g. piloerection), allows core temperature to rise, alters flesh conductivity, pants or sweats, and in what order. The function <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR_devel.R">endoR_devel</a> provides a typical example of a configuration, which under heat stress will first uncurl, then allow flesh conductivity to rise, then allow core temperature to rise, then pant and then sweat.
 <p>
-The <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR_devel.R">endoR_devel</a> function runs slowly due to the constant exchange between R and FORTRAN. The <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR.R">endoR</a> function, in contrast, is a wrapper to an equivalent algorithm entirely in FORTRAN and is around two orders of magnitude faster. The FORTRAN code is provided below and can be modified accordingly, after a working version has been developed in the (quicker and easier) R coding environment on the basis of the <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR_devel.R">endoR_devel</a> function.
+The <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR_devel.R">endoR_devel</a> function runs slowly due to the constant exchange between R and FORTRAN. The <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR.R">endoR</a> function, in contrast, is a wrapper to an equivalent algorithm entirely in FORTRAN and is around two orders of magnitude faster. The FORTRAN code for this algorithm (function SOLVENDO) is provided below and can be modified accordingly, after a working version has been developed in the (quicker and easier) R coding environment on the basis of the <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR_devel.R">endoR_devel</a> function.
+<p>
+The <a href="/NicheMapR/inst/doc/endotherm-model-tutorial" class="btn btn--danger">Endotherm Model Tutorial</a> provides examples of using the <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR.R">endoR</a> function. 
 <p>
 <h1>References</h1>
 <p>

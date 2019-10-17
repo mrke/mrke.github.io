@@ -18,6 +18,7 @@ Also, the soil moisture algorithm incorporates a soil-plant-atmosphere-continuum
 <li>SP = 10, stability parameter for stomatal closure equation, -</li>
 <li>LAI = 0.1, leaf area index, used to partition traspiration/evaporation from potential evapotranspiration (PET)</li>
 </ul>
+<p>
 The microclimate model also produces estimates of plant transpiration rate and the leaf and (depth-specific) root water potential from the from the soil moisture calculations (output tables 'plant' and 'shadplant').
 <p>
 The function <a href="https://github.com/mrke/NicheMapR/blob/master/R/plantgro.R">plantgro</a> takes soil water potential and soil temperature input and computes a crude growing degree day model of potential plant growth and an estimate of plant water content, given threshold values of soil water potential at which the wilting point and permanent wilting point occurs, the depth range of the roots and a threshold root temperature for growth.
