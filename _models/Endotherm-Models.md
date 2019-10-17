@@ -23,7 +23,7 @@ The exact nature of the configuration of these subroutines will depend on the de
 <p>
 The <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR_devel.R">endoR_devel</a> function runs slowly due to the constant exchange between R and FORTRAN. The <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR.R">endoR</a> function, in contrast, is a wrapper to an equivalent algorithm entirely in FORTRAN and is around two orders of magnitude faster. The FORTRAN code for this algorithm (function SOLVENDO) is provided below and can be modified accordingly, after a working version has been developed in the (quicker and easier) R coding environment on the basis of the <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR_devel.R">endoR_devel</a> function.
 <p>
-The <a href="/NicheMapR/inst/doc/endotherm-model-tutorial" class="btn btn--danger">Endotherm Model Tutorial</a> provides examples of using the <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR.R">endoR</a> function. 
+The <a href="/NicheMapR/inst/doc/endotherm-model-tutorial">Endotherm Model Tutorial</a> provides examples of using the <a href="https://github.com/mrke/NicheMapR/blob/master/R/endoR.R">endoR</a> function. 
 <p>
 <h1>References</h1>
 <p>
