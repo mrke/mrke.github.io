@@ -11,21 +11,21 @@ The NicheMapR package has a range of functions useful in the computations of mic
 <p>
 The microclimate model of the NicheMapR package (Kearney and Porter 2017) comprises an R wrapper script that communicates with the FORTRAN code (function <a href="https://github.com/mrke/NicheMapR/blob/master/R/microrun.R">microrun</a>) and a set of environmental database-specific functions that collate and transform the required input data for submission to the microrun function. Specifically, functions are:
 <p>
-<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_global.R">micro_global</a> which connects to the global monthly database of climate conditions developed by New et al. (2002), on a x km grid averaged over 1960 to 1990;
+<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_global.R">micro_global</a> which connects to the global monthly database of climate conditions developed by New et al. (2002), on a ~10x10 km grid averaged over 1960 to 1990;
 <p>
-<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_ncep.R">micro_ncep</a> which uses the microclima package as well as the RNCEP (Kemp et al. 2012) and elevatr (Hollister et al. 2017) packges to connect to the 6-hourly 2.5 degree gridded historical NCEP data (global scope, from 1957 onwards; Kalnay et al. 1996) and downscale them to hourly and account for local terrain effects including elevation-induced lapse rates, coastal influences and cold-air drainage (Kearney et al. 2019).
+<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_ncep.R">micro_ncep</a> which uses the microclima package as well as the RNCEP (Kemp et al. 2012) and elevatr (Hollister et al. 2017) packges to connect to the 6-hourly 2.5x2.5 degree gridded historical NCEP data (global scope, from 1957 onwards; Kalnay et al. 1996) and downscale them to hourly and account for local terrain effects (~30x30 m) including elevation-induced lapse rates, coastal influences and cold-air drainage (Kearney et al. 2019).
 <p>
-<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_aust.R">micro_aust</a> connects to the Australian Water Availability Project (AWAP; Jones et al. 2009) 5km gridded daily weather grids.
+<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_aust.R">micro_aust</a> connects to the Australian Water Availability Project (AWAP; Jones et al. 2009) 5x5 km gridded daily weather grids.
 <p>
-<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_usa.R">micro_usa</a> connects to the gridMET (Abatzoglou 2013) 5 km daily weather grids for the USA.
+<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_usa.R">micro_usa</a> connects to the gridMET (Abatzoglou 2013) 5x5 km daily weather grids for the USA.
 <p>
-<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_uk.R">micro_uk</a> connects to the CHESS (Robinson et al. 2017) 1km daily weather grids for the UK  (requires log in). 
+<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_uk.R">micro_uk</a> connects to the CHESS (Robinson et al. 2017) 1x1 km daily weather grids for the UK  (requires log in). 
 <p>
 <a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_nz.R">micro_nz</a> connects to the 5 km daily <a href="https://www.niwa.co.nz/climate/our-services/virtual-climate-stations">Virtual Climate Station Network</a> (VCSN) for New Zealand (requires log in).
 <p>
 All of these functions can connect via the web to the SoiGrids (Hengle 2017) global soil properties database by setting the argument 'soilgrids' to a value of 1.
 <p>
-In addition, there are example vignettes for setting up your own functions for forcing the microclimate model, including a summary of all <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-IO">inputs and outputs</a>, an explanation of all the <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate_inputs">input parameters, and example setups for <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-monthly-input-example">monthly</a> or <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-hourly-input-example">hourly</a> input data. There is also a vignette on the underlying <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-model-theory-equations">theory and equations</a> as well as a general <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-monthly-input-example">tutorial</a>.
+In addition, there are example vignettes for setting up your own functions for forcing the microclimate model, including a summary of all <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-IO">inputs and outputs</a>, an explanation of all the <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate_inputs">input parameters</a>, and example setups for <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-monthly-input-example">monthly</a> or <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-hourly-input-example">hourly</a> input data. There is also a vignette on the underlying <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-model-theory-equations">theory and equations</a> as well as a general <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-model-tutorial">tutorial</a>.
 <h1>References</h1>
 Abatzoglou, J. T. (2013). Development of gridded surface meteorological data for ecological applications and modelling. International Journal of Climatology, 33(1), 121–131. doi:10.1002/joc.3413
 <p>
