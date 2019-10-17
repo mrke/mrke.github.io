@@ -4,7 +4,7 @@ excerpt: Computing the heat balances of birds, mammals and other endotherms
 
 ---
 
-~~~ FORTRAN
+```fortran
       DOUBLE PRECISION EMISAN, SHAPE, FATOBJ,FSKREF,FGDREF,NESTYP,PCTDIF
       DOUBLE PRECISION ABSSB,FLTYPE,ELEV,BP,NITESHAD,SHADE,QSOLR
       DOUBLE PRECISION RoNEST,Z,VEL,TS,TFA,FABUSH,FURTHRMK,RH,TCONDSB
@@ -574,7 +574,7 @@ excerpt: Computing the heat balances of birds, mammals and other endotherms
 
       RETURN
       END
-~~~
+```
 
 <h1>Endotherm Models</h1>
 <p>
