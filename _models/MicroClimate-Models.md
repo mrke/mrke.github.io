@@ -17,7 +17,7 @@ The microclimate model of the NicheMapR package (Kearney and Porter 2017) compri
 <p>
 <a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_aust.R">micro_aust</a> connects to the Australian Water Availability Project (AWAP; Jones et al. 2009) 5km gridded daily weather grids.
 <p>
-<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_usa.R">micro_usa</a> connects to the gridMET (Abatzoglou 2013) 5 km daily weather grids for the USA
+<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_usa.R">micro_usa</a> connects to the gridMET (Abatzoglou 2013) 5 km daily weather grids for the USA.
 <p>
 <a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_uk.R">micro_uk</a> connects to the CHESS (Robinson et al. 2017) 1km daily weather grids for the UK  (requires log in). 
 <p>
@@ -25,6 +25,7 @@ The microclimate model of the NicheMapR package (Kearney and Porter 2017) compri
 <p>
 All of these functions can connect via the web to the SoiGrids (Hengle 2017) global soil properties database by setting the argument 'soilgrids' to a value of 1.
 <p>
+In addition, there are example vignettes for setting up your own functions for forcing the microclimate model, including a summary of all <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-IO">inputs and outputs</a>, an explanation of all the <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate_inputs">input parameters, and example setups for <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-monthly-input-example">monthly</a> or <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-hourly-input-example">hourly</a> input data. There is also a vignette on the underlying <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-model-theory-equations">theory and equations</a> as well as a general <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-monthly-input-example">tutorial</a>.
 <h1>References</h1>
 Abatzoglou, J. T. (2013). Development of gridded surface meteorological data for ecological applications and modelling. International Journal of Climatology, 33(1), 121–131. doi:10.1002/joc.3413
 <p>
