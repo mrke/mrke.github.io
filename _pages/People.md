@@ -10,7 +10,7 @@ permalink: /people/
 
 <a href="https://integrativebiology.wisc.edu/staff/porter-warren/">Warren P. Porter</a>, Primary developer of microclimate, ectotherm and endotherm models
 
-<a href="https://www.researchgate.net/scientific-contributions/2030087696_Paul_D_Mathewson">Paul D. Mathewson</a>, Endotherm model developmer, general programmer
+<a href="https://www.researchgate.net/scientific-contributions/2030087696_Paul_D_Mathewson">Paul D. Mathewson</a>, Endotherm model developer, general programmer
 
 <a href="https://njbriscoeresearch.wordpress.com/">Natalie J. Briscoe</a>, Endotherm model development
 

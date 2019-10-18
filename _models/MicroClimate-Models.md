@@ -13,7 +13,7 @@ The microclimate model of the NicheMapR package (Kearney and Porter 2017) compri
 <p>
 <a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_global.R">micro_global</a> which connects to the global monthly database of climate conditions developed by New et al. (2002), on a ~10x10 km grid averaged over 1960 to 1990;
 <p>
-<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_ncep.R">micro_ncep</a> which uses the microclima package as well as the RNCEP (Kemp et al. 2012) and elevatr (Hollister et al. 2017) packges to connect to the 6-hourly 2.5x2.5 degree gridded historical NCEP data (global scope, from 1957 onwards; Kalnay et al. 1996) and downscale them to hourly and account for local terrain effects (~30x30 m) including elevation-induced lapse rates, coastal influences and cold-air drainage (Kearney et al. 2019).
+<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_ncep.R">micro_ncep</a> which uses the microclima package as well as the RNCEP (Kemp et al. 2012) and elevatr (Hollister et al. 2017) packages to connect to the 6-hourly 2.5x2.5 degree gridded historical NCEP data (global scope, from 1957 onward; Kalnay et al. 1996) and downscale them to hourly and account for local terrain effects (~30x30 m) including elevation-induced lapse rates, coastal influences and cold-air drainage (Kearney et al. 2019).
 <p>
 <a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_aust.R">micro_aust</a> connects to the Australian Water Availability Project (AWAP; Jones et al. 2009) 5x5 km gridded daily weather grids.
 <p>
