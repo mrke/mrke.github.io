@@ -30,4 +30,4 @@ There are four functions for computing transient heat budgets in NicheMapR:
 
 <h1>References</h1>
 <p>
-Kearney, M. R., & Porter, W. P. (2019). NicheMapR - an R package for biophysical modelling: the ectotherm and Dynamic Energy Budget models. Ecography. doi:10.1111/ecog.04680
+Kearney, M. R., & Porter, W. P. (2019). NicheMapR - an R package for biophysical modelling: the ectotherm and Dynamic Energy Budget models. Ecography, 42, 1–12. doi:10.1111/ecog.04680
