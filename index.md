@@ -43,5 +43,5 @@ The algorithms underlying NicheMapR have been subjected to a range of tests as d
 Snow model test from Kearney, M. R. (2019). microclimUS: hourly estimates of historical microclimates for the United States of America with example applications. Ecology, 0(ja), e02829. doi:10.1002/ecy.2829
 : ![gras](/assets/images/snodastest.gif)
 <p>
-Sample comparison of SNODAS and microclimUS predictions of snow depth in 2010, showing (top left) SNODAS prediction, (top right) microclimUS prediction, (bottom left) prediction overlap (i.e. only showing SNODAS points coinciding with microclimUS points, the size of points represents relative depth of snow for each data set) and (bottom right) correlation.
+Sample comparison of SNODAS and NicheMapR predictions of snow depth in 2010, showing (top left) SNODAS prediction, (top right) microclimUS prediction, (bottom left) prediction overlap (i.e. only showing SNODAS points coinciding with microclimUS points, the size of points represents relative depth of snow for each data set) and (bottom right) correlation.
 
