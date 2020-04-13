@@ -6,6 +6,8 @@ permalink: /tests/
 ---
 <h1>NicheMapR Tests</h1>
 <p>
+Kearney M. R. How will snow alter exposure of organisms to cold stress under climate warming? Global Ecology and Biogeography n/a. [online]. <a href= "http://onlinelibrary.wiley.com/doi/abs/10.1111/geb.13100">10.1111/geb.13100</a>
+<p>
 Kearney, M. R. (2019). microclimUS: hourly estimates of historical microclimates for the United States of America with example applications. Ecology, 0(ja), e02829. <a href="https://10.1002/ecy.2829">10.1002/ecy.2829</a>
 <p>
 Kearney, M. R., Isaac, A. P., & Porter, W. P. (2014). microclim: Global estimates of hourly microclimate based on long-term monthly climate averages. Scientific Data, 1, 140006. <a href="https://10.1038/sdata.2014.6">10.1038/sdata.2014.6</a>

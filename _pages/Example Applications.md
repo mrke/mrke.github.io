@@ -17,6 +17,8 @@ Enriquez‐Urzelai, U., Kearney, M. R., Nicieza, A. G., & Tingley, R. (2019). In
 <p>
 Fitzpatrick, M. J., Zuckerberg, B., Pauli, J. N., Kearney, M. R., Thompson, K. L., Werner, L. C., & Porter, W. P. (2019). Modeling the distribution of niche space and risk for a freeze-tolerant ectotherm, Lithobates sylvaticus. Ecosphere, 10(7), e02788. <a href="https://10.1002/ecs2.2788">10.1002/ecs2.2788</a>
 <p>
+Kearney M. R. How will snow alter exposure of organisms to cold stress under climate warming? Global Ecology and Biogeography n/a. [online]. <a href= "http://onlinelibrary.wiley.com/doi/abs/10.1111/geb.13100">10.1111/geb.13100</a>
+<p>
 Kearney, M. R. (2019a). MicroclimOz – A microclimate data set for Australia, with example applications. Austral Ecology, 44(3), 534–544. <a href= "https://10.1111/aec.12689">10.1111/aec.12689</a>
 <p>
 Kearney, M. R. (2019b). microclimUS: hourly estimates of historical microclimates for the United States of America with example applications. Ecology, 0(ja), e02829. <a href="https://10.1002/ecy.2829">10.1002/ecy.2829</a>
