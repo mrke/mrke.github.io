@@ -38,6 +38,9 @@ To achieve this it integrates:
 
 <a href="https://www.youtube.com/watch?v=ud_s7056GXo">Michael Kearney introduces NicheMapR</a>
 
+R Shiny apps for the <a href="http://bioforecasts.science.unimelb.edu.au/soil/">microclimate</a> and <a href="http://bioforecasts.science.unimelb.edu.au/ectotherm/">ectotherm</a> models.
+
+
 <h2> Background and History </h2>
 
 NicheMapR started as a project on why desert iguanas change colour. Learn more <a href="https://mrke.github.io/background/"> here</a>.
