@@ -28,13 +28,15 @@ The mass budget aspects of Niche Mapper were initially of a static, empirical na
 <p>
 <h2>Transition to R</h2>
 <p>
-The Niche Mapper programs were developed in the Fortran language, in part because it was the dominant numerical modelling language at the time the programs were first being developed. However, since around the year 2000 the R programming environment began to emerge as the dominant working language in ecology. Kearney created R interfaces to the Niche Mapper Fortran code and developed it into the 'NicheMapR' package. The microclimate model was officially released first (Kearney and Porter 2017), including new capacity to simulate soil moisture (Kearney and Maino 2018) and snow (Kearney in prep.) and a beta version of the ectotherm model. The ectotherm model was officially released subsequently in NicheMapR v2.0.0 (Kearney and Porter 2019), along with a beta version of the endotherm model.
+The Niche Mapper programs were developed in the Fortran language, in part because it was the dominant numerical modelling language at the time the programs were first being developed. However, since around the year 2000 the R programming environment began to emerge as the dominant working language in ecology. Kearney created R interfaces to the Niche Mapper Fortran code and developed it into the 'NicheMapR' package. The microclimate model was officially released first (Kearney and Porter 2017), including new capacity to simulate soil moisture (Kearney and Maino 2018) and snow (Kearney 2020) and a beta version of the ectotherm model. The ectotherm model was officially released subsequently in NicheMapR v2.0.0 (Kearney and Porter 2019), along with a beta version of the endotherm model.
 <p>
 <h2>References</h2>
 <p>
 Gates, D. M. (1980). Biophysical Ecology. New York: Springer Verlag.
 <p>
 Kearney, M., & Porter, W. P. (2004). Mapping the fundamental niche: physiology, climate, and the distribution of a nocturnal lizard. Ecology, 85(11), 3119–3131.
+<p>
+Kearney, M. R. (2020). How will snow alter exposure of organisms to cold stress under climate warming?. Global Ecology and Biogeography. doi:10.1111/geb.13100
 <p>
 Kearney, M., Phillips, B. L., Tracy, C. R., Christian, K., Betts, G., & Porter, W. P. (2008). Modelling species distributions without using species distributions: the cane toad in Australia under current and future climates. Ecography, 31, 423–434.
 <p>
