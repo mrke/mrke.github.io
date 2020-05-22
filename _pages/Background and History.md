@@ -34,9 +34,9 @@ The Niche Mapper programs were developed in the Fortran language, in part becaus
 <p>
 Gates, D. M. (1980). Biophysical Ecology. New York: Springer Verlag.
 <p>
-Kearney, M., & Porter, W. P. (2004). Mapping the fundamental niche: physiology, climate, and the distribution of a nocturnal lizard. Ecology, 85(11), 3119–3131.
-<p>
 Kearney, M. R. (2020). How will snow alter exposure of organisms to cold stress under climate warming?. Global Ecology and Biogeography. doi:10.1111/geb.13100
+<p>
+Kearney, M., & Porter, W. P. (2004). Mapping the fundamental niche: physiology, climate, and the distribution of a nocturnal lizard. Ecology, 85(11), 3119–3131.
 <p>
 Kearney, M., Phillips, B. L., Tracy, C. R., Christian, K., Betts, G., & Porter, W. P. (2008). Modelling species distributions without using species distributions: the cane toad in Australia under current and future climates. Ecography, 31, 423–434.
 <p>
