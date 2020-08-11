@@ -7,7 +7,7 @@ permalink: /related/
 Related projects include
 
 <h2>Microclimates</h2>
-<a href="https://data.nceas.ucsb.edu/view/doi:10.5063/F1B56H16">microclimOZ Australian database</a> 
+<a href="https://knb.ecoinformatics.org/view/doi:10.5063/F1833Q7X">microclimOZ Australian database</a> 
 
 <a href="https://knb.ecoinformatics.org/view/doi:10.5063/F1B56H16">microclimUS USA database</a>
 
