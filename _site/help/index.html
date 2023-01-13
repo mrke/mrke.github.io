@@ -1,7 +1,7 @@
 <!doctype html>
 <!--
-  Minimal Mistakes Jekyll Theme 4.16.5 by Michael Rose
-  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
   Free for personal and commercial use under the MIT license
   https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
 -->
@@ -13,6 +13,9 @@
 <meta name="description" content="The NicheMapR informational homepage">
 
 
+  <meta name="author" content="NicheMapR">
+  
+
 
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_US">
@@ -20,6 +23,8 @@
 <meta property="og:title" content="Help">
 <meta property="og:url" content="http://localhost:4000/help/">
 
+
+  <meta property="og:description" content="The NicheMapR informational homepage">
 
 
 
@@ -51,18 +56,17 @@
 
 
 
-
-
-
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
       "@type": "Person",
       "name": "NichMapR Homepage",
-      "url": "http://localhost:4000",
+      "url": "http://localhost:4000/",
       "sameAs": ["https://twitter.com/nichemapr?lang=en"]
-    }
-  </script>
+    
+  }
+</script>
 
 
 
@@ -73,7 +77,9 @@
 <!-- end _includes/seo.html -->
 
 
-<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="NicheMapR Feed">
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="NicheMapR Feed">
+
 
 <!-- https://t.co/dKP3o1e -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -84,21 +90,8 @@
 
 <!-- For all browsers -->
 <link rel="stylesheet" href="/assets/css/main.css">
-
-<!--[if IE ]>
-  <style>
-    /* old IE unsupported flexbox fixes */
-    .greedy-nav .site-title {
-      padding-right: 3em;
-    }
-    .greedy-nav button {
-      position: absolute;
-      top: 0;
-      right: 0;
-      height: 100%;
-    }
-  </style>
-<![endif]-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
 
 
 
@@ -112,7 +105,6 @@
 
   <body class="layout--single">
     <nav class="skip-links">
-  <h2 class="screen-reader-text">Skip links</h2>
   <ul>
     <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
     <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
@@ -131,24 +123,24 @@
     <div class="masthead__menu">
       <nav id="site-nav" class="greedy-nav">
         
-          <a class="site-logo" href="/"><img src="/assets/images/ThermoNiche.jpg" alt=""></a>
+          <a class="site-logo" href="/"><img src="/assets/images/ThermoNiche.jpg" alt="Home"></a>
         
         <a class="site-title" href="/">
           Home
           
         </a>
         <ul class="visible-links"><li class="masthead__menu-item">
-              <a href="/getting_started/" >Getting Started</a>
+              <a href="/getting_started/">Getting Started</a>
             </li><li class="masthead__menu-item">
-              <a href="/people/" >People</a>
+              <a href="/people/">People</a>
             </li><li class="masthead__menu-item">
-              <a href="/models/" >Models</a>
+              <a href="/models/">Models</a>
             </li><li class="masthead__menu-item">
-              <a href="/help/" >Help</a>
+              <a href="/help/">Help</a>
             </li><li class="masthead__menu-item">
-              <a href="/news/" >News</a>
+              <a href="/news/">News</a>
             </li><li class="masthead__menu-item">
-              <a href="/related/" >Related Projects</a>
+              <a href="/related/">Related Projects</a>
             </li></ul>
         
         <button class="greedy-nav__toggle hidden" type="button">
@@ -172,10 +164,6 @@
 
 
 
-
-
-
-
 <div class="page__hero--overlay"
   style="background-color: #2f3036; background-image: url('/assets/images/near_papunya.jpg');"
 >
@@ -189,6 +177,8 @@
       </h1>
       
       
+
+
       
       
     </div>
@@ -214,8 +204,6 @@
   
     <div class="author__avatar">
       
-
-      
         <img src="/assets/images/ThermoNiche.jpg" alt="NicheMapR" itemprop="image">
       
     </div>
@@ -226,9 +214,10 @@
       <h3 class="author__name" itemprop="name">NicheMapR</h3>
     
     
-      <p class="author__bio" itemprop="description">
-        Modelling the thermodynamic constraints on life
-      </p>
+      <div class="author__bio" itemprop="description">
+        <p>Modelling the thermodynamic constraints on life</p>
+
+      </div>
     
   </div>
 
@@ -240,11 +229,11 @@
       
         
           
-            <li><a href="https://twitter.com/nichemapr?lang=en" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+            <li><a href="https://twitter.com/nichemapr?lang=en" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
           
         
           
-            <li><a href="https://github.com/mrke/NicheMapR" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+            <li><a href="https://github.com/mrke/NicheMapR" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
           
         
       
@@ -312,6 +301,7 @@
   </div>
 
 
+
   <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
     <meta itemprop="headline" content="Help">
     
@@ -329,19 +319,19 @@
 <h2>Tutorial Files</h2>
 <p>These can also be found in the NicheMapR/inst/doc folder.</p>
 
-<p><a href="/NicheMapR/inst/doc/deb-model-tutorial" class="btn btn--primary">Deb Model Tutorial</a></p>
+<p><a href="/NicheMapR/inst/doc/microclimate-model-tutorial" class="btn btn--info">Microclimate Model Tutorial</a>
+<a href="/NicheMapR/inst/doc/microclimate-model-theory-equations" class="btn btn--info">Microclimate Model Theory Equations</a>
+<a href="/NicheMapR/inst/doc/microclimate_inputs" class="btn btn--info">Microclimate Inputs</a>
+<a href="/NicheMapR/inst/doc/microclimate-IO" class="btn btn--info">Microclimate IO</a>
+<a href="/NicheMapR/inst/doc/microclimate-monthly-input-example" class="btn btn--info">Microclimate Monthly Input Example</a>
+<a href="/NicheMapR/inst/doc/microclimate-hourly-input-example" class="btn btn--info">Microclimate Hourly Input Example</a></p>
 
 <p><a href="/NicheMapR/inst/doc/ectotherm-model-tutorial" class="btn btn--warning">Ectotherm Model Tutorial</a></p>
 
+<p><a href="/NicheMapR/inst/doc/deb-model-tutorial" class="btn btn--primary">Deb Model Tutorial</a></p>
+
 <p><a href="/NicheMapR/inst/doc/endotherm-components-tutorial" class="btn btn--danger">Endotherm Components Tutorial</a>
 <a href="/NicheMapR/inst/doc/endotherm-model-tutorial" class="btn btn--danger">Endotherm Model Tutorial</a></p>
-
-<p><a href="/NicheMapR/inst/doc/microclimate_inputs" class="btn btn--info">Microclimate Inputs</a>
-<a href="/NicheMapR/inst/doc/microclimate-hourly-input-example" class="btn btn--info">Microclimate Hourly Input Example</a>
-<a href="/NicheMapR/inst/doc/microclimate-IO" class="btn btn--info">Microclimate IO</a>
-<a href="/NicheMapR/inst/doc/microclimate-model-theory-equations" class="btn btn--info">Microclimate Model Theory Equations</a>
-<a href="/NicheMapR/inst/microclimate-model-tutorial" class="btn btn--info">Microclimate Model Tutorial</a>
-<a href="/NicheMapR/inst/doc/microclimate-monthly-input-example" class="btn btn--info">Microclimate Monthly Input Example</a></p>
 
 <p><a href="/NicheMapR/inst/doc/properties-of-air" class="btn btn--success">Properties Of Air</a>
 <a href="/NicheMapR/inst/doc/transient_equation_derivations" class="btn btn--success">Transient Equation Derivations</a></p>
@@ -356,6 +346,8 @@
 
 
         
+
+
       </footer>
 
       
@@ -397,18 +389,19 @@
       
     
 
-    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
   </ul>
 </div>
 
-<div class="page__footer-copyright">&copy; 2019 NichMapR Homepage. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">&copy; 2023 NichMapR Homepage. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>
 
     
   <script src="/assets/js/main.min.js"></script>
-  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
 
 
 

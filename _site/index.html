@@ -1,7 +1,7 @@
 <!doctype html>
 <!--
-  Minimal Mistakes Jekyll Theme 4.16.5 by Michael Rose
-  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
   Free for personal and commercial use under the MIT license
   https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
 -->
@@ -13,6 +13,9 @@
 <meta name="description" content="The NicheMapR informational homepage">
 
 
+  <meta name="author" content="NicheMapR">
+  
+
 
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_US">
@@ -20,6 +23,8 @@
 <meta property="og:title" content="Welcome to NicheMapR">
 <meta property="og:url" content="http://localhost:4000/">
 
+
+  <meta property="og:description" content="The NicheMapR informational homepage">
 
 
 
@@ -51,18 +56,17 @@
 
 
 
-
-
-
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
       "@type": "Person",
       "name": "NichMapR Homepage",
-      "url": "http://localhost:4000",
+      "url": "http://localhost:4000/",
       "sameAs": ["https://twitter.com/nichemapr?lang=en"]
-    }
-  </script>
+    
+  }
+</script>
 
 
 
@@ -73,7 +77,9 @@
 <!-- end _includes/seo.html -->
 
 
-<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="NicheMapR Feed">
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="NicheMapR Feed">
+
 
 <!-- https://t.co/dKP3o1e -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -84,21 +90,8 @@
 
 <!-- For all browsers -->
 <link rel="stylesheet" href="/assets/css/main.css">
-
-<!--[if IE ]>
-  <style>
-    /* old IE unsupported flexbox fixes */
-    .greedy-nav .site-title {
-      padding-right: 3em;
-    }
-    .greedy-nav button {
-      position: absolute;
-      top: 0;
-      right: 0;
-      height: 100%;
-    }
-  </style>
-<![endif]-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
 
 
 
@@ -112,7 +105,6 @@
 
   <body class="layout--single">
     <nav class="skip-links">
-  <h2 class="screen-reader-text">Skip links</h2>
   <ul>
     <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
     <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
@@ -131,24 +123,24 @@
     <div class="masthead__menu">
       <nav id="site-nav" class="greedy-nav">
         
-          <a class="site-logo" href="/"><img src="/assets/images/ThermoNiche.jpg" alt=""></a>
+          <a class="site-logo" href="/"><img src="/assets/images/ThermoNiche.jpg" alt="Home"></a>
         
         <a class="site-title" href="/">
           Home
           
         </a>
         <ul class="visible-links"><li class="masthead__menu-item">
-              <a href="/getting_started/" >Getting Started</a>
+              <a href="/getting_started/">Getting Started</a>
             </li><li class="masthead__menu-item">
-              <a href="/people/" >People</a>
+              <a href="/people/">People</a>
             </li><li class="masthead__menu-item">
-              <a href="/models/" >Models</a>
+              <a href="/models/">Models</a>
             </li><li class="masthead__menu-item">
-              <a href="/help/" >Help</a>
+              <a href="/help/">Help</a>
             </li><li class="masthead__menu-item">
-              <a href="/news/" >News</a>
+              <a href="/news/">News</a>
             </li><li class="masthead__menu-item">
-              <a href="/related/" >Related Projects</a>
+              <a href="/related/">Related Projects</a>
             </li></ul>
         
         <button class="greedy-nav__toggle hidden" type="button">
@@ -172,10 +164,6 @@
 
 
 
-
-
-
-
 <div class="page__hero--overlay"
   style="background-color: #EAEAEA; background-image: url('/assets/images/near_papunya.jpg');"
 >
@@ -189,11 +177,12 @@
       </h1>
       
       
+
+
       
       
         <p>
         
-          
           <a href="http://github.com/mrke/NicheMapR" class="btn btn--light-outline btn--large">Jump To GitHub Code</a>
         
       
@@ -220,8 +209,6 @@
   
     <div class="author__avatar">
       
-
-      
         <img src="/assets/images/ThermoNiche.jpg" alt="NicheMapR" itemprop="image">
       
     </div>
@@ -232,9 +219,10 @@
       <h3 class="author__name" itemprop="name">NicheMapR</h3>
     
     
-      <p class="author__bio" itemprop="description">
-        Modelling the thermodynamic constraints on life
-      </p>
+      <div class="author__bio" itemprop="description">
+        <p>Modelling the thermodynamic constraints on life</p>
+
+      </div>
     
   </div>
 
@@ -246,11 +234,11 @@
       
         
           
-            <li><a href="https://twitter.com/nichemapr?lang=en" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i> Twitter</a></li>
+            <li><a href="https://twitter.com/nichemapr?lang=en" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-twitter-square" aria-hidden="true"></i><span class="label">Twitter</span></a></li>
           
         
           
-            <li><a href="https://github.com/mrke/NicheMapR" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i> GitHub</a></li>
+            <li><a href="https://github.com/mrke/NicheMapR" rel="nofollow noopener noreferrer"><i class="fab fa-fw fa-github" aria-hidden="true"></i><span class="label">GitHub</span></a></li>
           
         
       
@@ -318,6 +306,7 @@
   </div>
 
 
+
   <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
     <meta itemprop="headline" content="Welcome to NicheMapR">
     
@@ -329,13 +318,24 @@
 
       <section class="page__content" itemprop="text">
         
-        <p><b>NicheMapR:</b> Software suite for microclimate and mechanistic niche modelling in the R programming environment.</p>
+        <!-- Global site tag (gtag.js) - Google Analytics -->
+<script async="" src="https://www.googletagmanager.com/gtag/js?id=UA-151353837-1"></script>
+
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'UA-151353837-1');
+</script>
+
+<p><b>NicheMapR:</b> Software suite for microclimate and mechanistic niche modelling in the R programming environment.</p>
 
 <hr color="black" align="center" size="5" />
 
 <h1>Overview</h1>
 
-<p>NicheMapR is a suite of programs for the R programming environment that compute fundamental physical and constraints on living things. It aims at asking the general question: <em>Can an organism complete its life cycle in a particular place and time, without overheating, desiccating or starving</em>?</p>
+<p>NicheMapR is a suite of programs for the R environment that compute fundamental physical and chemical constraints on living things. It aims at asking the general question: <em>Can an organism complete its life cycle in a particular place and time, without overheating, desiccating or starving</em>?</p>
 
 <p>In other words, starting with the <strong>functional traits</strong> of an organism, the programs can be used to determine the environmental sequence experienced by an organism in a particular habitat and assess whether this sequence is inside, or outside, of its niche.</p>
 
@@ -348,12 +348,28 @@
 
 <p><a href="https://www.youtube.com/watch?v=ud_s7056GXo">Michael Kearney introduces NicheMapR</a></p>
 
+<p>R Shiny apps for the <a href="http://bioforecasts.science.unimelb.edu.au/soil/">microclimate</a> and <a href="http://bioforecasts.science.unimelb.edu.au/ectotherm/">ectotherm</a> models.</p>
+
+<h2> Background and History </h2>
+
+<p>NicheMapR started as a project on why desert iguanas change colour. Learn more <a href="https://mrke.github.io/background/"> here</a>.</p>
+
 <h2> Applications </h2>
-<p>Coming soon.</p>
 
-<h3> Tests </h3>
-<p>Snow model test: <img src="/assets/images/snodastest.gif" alt="gras" /></p>
+<p>To see examples from the literature that have applied NicheMapR, click <a href="https://mrke.github.io/examples/"> here</a>.</p>
 
+<h2> Tests </h2>
+
+<p>The algorithms underlying NicheMapR have been subjected to a range of tests as described in the papers <a href="https://mrke.github.io/tests/"> here</a>.</p>
+
+<dl>
+  <dt>Snow model test from Kearney, M. R. (2019). microclimUS: hourly estimates of historical microclimates for the United States of America with example applications. Ecology, 0(ja), e02829. doi:10.1002/ecy.2829</dt>
+  <dd><img src="/assets/images/snodastest.gif" alt="gras" /></dd>
+</dl>
+<p>
+Sample comparison of SNODAS and NicheMapR predictions of snow depth in 2010, showing (top left) SNODAS prediction, (top right) microclimUS prediction, (bottom left) prediction overlap (i.e. only showing SNODAS points coinciding with microclimUS points, the size of points represents relative depth of snow for each data set) and (bottom right) correlation.
+
+</p>
 
         
       </section>
@@ -364,6 +380,8 @@
 
 
         
+
+
       </footer>
 
       
@@ -405,18 +423,19 @@
       
     
 
-    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
   </ul>
 </div>
 
-<div class="page__footer-copyright">&copy; 2019 NichMapR Homepage. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">&copy; 2023 NichMapR Homepage. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>
 
     
   <script src="/assets/js/main.min.js"></script>
-  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
 
 
 

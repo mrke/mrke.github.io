@@ -1,7 +1,7 @@
 <!doctype html>
 <!--
-  Minimal Mistakes Jekyll Theme 4.16.5 by Michael Rose
-  Copyright 2013-2019 Michael Rose - mademistakes.com | @mmistakes
+  Minimal Mistakes Jekyll Theme 4.24.0 by Michael Rose
+  Copyright 2013-2020 Michael Rose - mademistakes.com | @mmistakes
   Free for personal and commercial use under the MIT license
   https://github.com/mmistakes/minimal-mistakes/blob/master/LICENSE
 -->
@@ -13,6 +13,9 @@
 <meta name="description" content="The NicheMapR informational homepage">
 
 
+  <meta name="author" content="NicheMapR">
+  
+
 
 <meta property="og:type" content="website">
 <meta property="og:locale" content="en_US">
@@ -20,6 +23,8 @@
 <meta property="og:title" content="NicheMapR">
 <meta property="og:url" content="http://localhost:4000/_pages/archive-taxonomy/">
 
+
+  <meta property="og:description" content="The NicheMapR informational homepage">
 
 
 
@@ -51,18 +56,17 @@
 
 
 
-
-
-
-  <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
+<script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    
       "@type": "Person",
       "name": "NichMapR Homepage",
-      "url": "http://localhost:4000",
+      "url": "http://localhost:4000/",
       "sameAs": ["https://twitter.com/nichemapr?lang=en"]
-    }
-  </script>
+    
+  }
+</script>
 
 
 
@@ -73,7 +77,9 @@
 <!-- end _includes/seo.html -->
 
 
-<link href="/feed.xml" type="application/atom+xml" rel="alternate" title="NicheMapR Feed">
+
+  <link href="/feed.xml" type="application/atom+xml" rel="alternate" title="NicheMapR Feed">
+
 
 <!-- https://t.co/dKP3o1e -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -84,21 +90,8 @@
 
 <!-- For all browsers -->
 <link rel="stylesheet" href="/assets/css/main.css">
-
-<!--[if IE ]>
-  <style>
-    /* old IE unsupported flexbox fixes */
-    .greedy-nav .site-title {
-      padding-right: 3em;
-    }
-    .greedy-nav button {
-      position: absolute;
-      top: 0;
-      right: 0;
-      height: 100%;
-    }
-  </style>
-<![endif]-->
+<link rel="preload" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@5/css/all.min.css"></noscript>
 
 
 
@@ -112,7 +105,6 @@
 
   <body class="layout--default">
     <nav class="skip-links">
-  <h2 class="screen-reader-text">Skip links</h2>
   <ul>
     <li><a href="#site-nav" class="screen-reader-shortcut">Skip to primary navigation</a></li>
     <li><a href="#main" class="screen-reader-shortcut">Skip to content</a></li>
@@ -131,24 +123,24 @@
     <div class="masthead__menu">
       <nav id="site-nav" class="greedy-nav">
         
-          <a class="site-logo" href="/"><img src="/assets/images/ThermoNiche.jpg" alt=""></a>
+          <a class="site-logo" href="/"><img src="/assets/images/ThermoNiche.jpg" alt="Home"></a>
         
         <a class="site-title" href="/">
           Home
           
         </a>
         <ul class="visible-links"><li class="masthead__menu-item">
-              <a href="/getting_started/" >Getting Started</a>
+              <a href="/getting_started/">Getting Started</a>
             </li><li class="masthead__menu-item">
-              <a href="/people/" >People</a>
+              <a href="/people/">People</a>
             </li><li class="masthead__menu-item">
-              <a href="/models/" >Models</a>
+              <a href="/models/">Models</a>
             </li><li class="masthead__menu-item">
-              <a href="/help/" >Help</a>
+              <a href="/help/">Help</a>
             </li><li class="masthead__menu-item">
-              <a href="/news/" >News</a>
+              <a href="/news/">News</a>
             </li><li class="masthead__menu-item">
-              <a href="/related/" >Related Projects</a>
+              <a href="/related/">Related Projects</a>
             </li></ul>
         
         <button class="greedy-nav__toggle hidden" type="button">
@@ -165,6 +157,7 @@
     <div class="initial-content">
       <div id="main" role="main">
   
+
 
   <div class="archive">
     <h1 class="page__title"></h1>
@@ -198,18 +191,19 @@
       
     
 
-    <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
+      <li><a href="/feed.xml"><i class="fas fa-fw fa-rss-square" aria-hidden="true"></i> Feed</a></li>
+    
   </ul>
 </div>
 
-<div class="page__footer-copyright">&copy; 2019 NichMapR Homepage. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
+<div class="page__footer-copyright">&copy; 2023 NichMapR Homepage. Powered by <a href="https://jekyllrb.com" rel="nofollow">Jekyll</a> &amp; <a href="https://mademistakes.com/work/minimal-mistakes-jekyll-theme/" rel="nofollow">Minimal Mistakes</a>.</div>
 
       </footer>
     </div>
 
     
   <script src="/assets/js/main.min.js"></script>
-  <script src="https://kit.fontawesome.com/4eee35f757.js"></script>
 
 
 
