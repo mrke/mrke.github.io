@@ -4,12 +4,30 @@
 \alias{rundeb}
 \title{rundeb}
 \usage{
-rundeb(allstat = allstat, species = "Daphnia.magna", Euler = 0,
-  start.stage = 0, stages = 6, S_instar = rep(1.618, stages),
-  ndays = 50, div = 24, Tbs = rep(20, ndays * div), Xs = rep(100,
-  ndays * div), E_sm = 350, fdry = 0.3, clutchsize = 5,
-  kap.mult = 1, z.mult = 1, v.mult = 1, p.M.mult = 1,
-  E.0.mult = 1, plot = 1, mass.unit = "g", length.unit = "cm")
+rundeb(
+  allstat = allstat,
+  species = "Daphnia.magna",
+  Euler = 0,
+  start.stage = 0,
+  stages = 6,
+  S_instar = rep(1.618, stages),
+  ndays = 50,
+  div = 24,
+  Tbs = rep(20, ndays * div),
+  Xs = rep(100, ndays * div),
+  E_sm = 350,
+  fdry = 0.3,
+  clutchsize = 5,
+  kap.mult = 1,
+  z.mult = 1,
+  v.mult = 1,
+  p.M.mult = 1,
+  E.0.mult = 1,
+  plot = 1,
+  mass.unit = "g",
+  length.unit = "cm",
+  ageing = 1
+)
 }
 \arguments{
 \item{allstat}{= allstat, the allstat data set}
@@ -53,12 +71,14 @@ rundeb(allstat = allstat, species = "Daphnia.magna", Euler = 0,
 \item{mass.unit}{= 'g', mass unit for the plots, 'mg', 'g' or 'kg'}
 
 \item{length.unit}{= 'cm', length unit for the plots, 'mm', 'cm' or 'm'}
+
+\item{ageing}{= 1, impose ageing? 0=immortal, 1=aging according to parameter h.a}
 }
 \description{
 Function to simulate the development, growth and reproduction trajectory of
 an organism using DEB theory, drawing parameters from the 'AmP' parameter
 database at https://github.com/add-my-pet/AmPtool. It requires the
-'allstat.mat' file to have been converted to 'allstat.Rda' via the R.matlab
+'allStat.mat' file to have been converted to 'allStat.Rda' via the R.matlab
 package (i.e. allStat <- readMat('allStat.mat' then
 save(allStat, file = 'allstat.Rda'))).
 }
