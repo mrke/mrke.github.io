@@ -46,7 +46,8 @@ c     Predicting the effect of temperature on soil thermal conductivity. Soil Sc
       INTEGER JULNUM,DOY,Numtyps
       INTEGER NON,evenrain,runmoist,runsnow,trouble
       INTEGER I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I11,I12,I91,I92,I93
-     & ,I94,I95,I96,ij,I97,I98,I99,I100,I101    
+     &,I94,I95,I96,ij,I97,I98,I99,I100,I101,I102,I103,I104,I105,I106
+     &,I107    
       INTEGER IPINT,NOSCAT,IUV,IALT,IDAYST,IDA,IEP,ISTART,IEND2
       DIMENSION DENDAY(30),SPDAY(30),TKDAY(30)
       dimension soilprop(10,5),TSOI(30),moistt(10)
@@ -60,7 +61,7 @@ c     Predicting the effect of temperature on soil thermal conductivity. Soil Sc
       COMMON/SOILND/NON
       COMMON/DAYJUL/JULNUM,DOY
       COMMON/WMAIN/I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I11,I12,I91,I92,I93
-     & ,I94,I95,I96,I97,I98,I99,I100,I101
+     & ,I94,I95,I96,I97,I98,I99,I100,I101,I102,I103,I104,I105,I106,I107
       common/soilmoist/condep,rainmult,maxpool
       common/soilmoist3/runmoist,evenrain,maxcount 
       common/soimoist2/rww,pc,rl,sp,r1,im
@@ -125,9 +126,9 @@ c    # standard sea level air pressure, Pa
 c    # deg K
        T_K=TSOI(i)+273.15
 c    # W/mC thermal conductivity of dry air (equation 9 in Campbell et al. 1994)
-       k_a=0.024+7.73e-5*TSOI(i)-2.6e-8*TSOI(i)**2
+       k_a=0.024+7.73D-5*TSOI(i)-2.6D-8*TSOI(i)**2
 c    # W/mC thermal conductivity of water (equation 8 in Campbell et al. 1994)
-       k_w=0.554+2.24e-3*TSOI(i)-9.87e-6*TSOI(i)**2
+       k_w=0.554+2.24D-3*TSOI(i)-9.87D-6*TSOI(i)**2
 c    # W/mC thermal conductivity of minerals (value of 2.5 suggested from Campbell and Norman 1998, Table 8.2)
 c      k_m= 2.5
 
@@ -137,7 +138,7 @@ c    # air pressure
 c    # relative humidity
        hr=1.0
 c    # vapour diffusivity in air (m2/s), standard value at 0 deg C and sea level pressure (Campbell et al. 1994)
-       D_v0=2.12e-5
+       D_v0=2.12D-5
 c    # molar density of air (mol/m3), standard value at 0 deg C and sea level pressure (Campbell et al. 1994)
        rho_hat0=44.65
 c    # temperature/pressure-corrected vapour diffusivity in air (m2/s) (p. 309 in Campbell et al. 1994)
@@ -193,15 +194,15 @@ c     # # volume fraction of gas
        if(phi_g.lt.0)then
         phi_g=0
        endif
-c     # eq 8.17 Campbell and Norman
+c     # eq 8.17 Campbell and Norman 1988
        f_w=1/(1+(theta/theta_0)**(-4.))
-c     # eq 8.17 Campbell and Norman, using temperature-specific q
+c     # eq 8.17 Campbell and Norman 1988, using temperature-specific q
        f_w=1/(1+(theta/theta_0)**(-1.*q))
-c    # eq 8.18 Campbell and Norman
+c    # eq 8.18 Campbell and Norman 1988
        k_g=k_a+lambda*deltax*hr*f_w*rho_hat*D_v/(p_a-e_a)
-c     # eq 8.19 Campbell and Norman
+c     # eq 8.19 Campbell and Norman 1988
        k_f=k_g+f_w*(k_w-k_g)
-c    # 0.1 for mineral soils, 0.33 for organic, p 125, Campbell and Norman
+c    # 0.1 for mineral soils, 0.33 for organic, p 125, Campbell and Norman 1988
        g_a=0.1
 c     # p 125, Campbell and Norman
        g_c=1-2*g_a
@@ -222,7 +223,7 @@ c     Convert specific heats from J/kg-K to cal/g-K for DSUB'S Microclimate calc
        Spheat(i)=Spheat(i)/4186.
 c     Convert densities from kg/m3 to g/cm3 for DSUB'S Microclimate calculations
 C     1 kg/m3 * 1000g/1 kg * 1 m3/1000000.
-       Density(i)=Density(i)/1.0E+3
+       Density(i)=Density(i)/1.0D+3
 2     continue
 
       if(runsnow.eq.1)then
@@ -235,8 +236,8 @@ C     1 kg/m3 * 1000g/1 kg * 1 m3/1000000.
          endif
        endif
        if(cursnow.ge.minsnow)then ! snow is present
-        call WETAIR(0,WB,100,DP,BP,E,ESAT,VD,RW,TVIR,TVINC,DENAIR,CP,
-     &  WTRPOT) ! get specific heat and mixing ratio of humid air at zero C
+        call WETAIR(0.D+0,WB,100.D+0,DP,BP,E,ESAT,VD,RW,TVIR,TVINC,
+     &  DENAIR,CP,WTRPOT) ! get specific heat and mixing ratio of humid air at zero C
         cpsnow = (2100*snowdens+(1.005+1.82*(RW/1.+RW))*1000* ! based on https://en.wiktionary.org/wiki/humid_heat
      &   (1-snowdens)) ! compute weighted specific heat accounting for ice vs airm SI units
         snowcond2 = (0.00395+0.00084*(snowdens*1000)-0.0000017756* ! snow thermal conductivity as a function of density (from Aggarwal, R. 2009. Defence Science Journal 59:126–130.)
@@ -256,17 +257,17 @@ C     1 kg/m3 * 1000g/1 kg * 1 m3/1000000.
          endif
          ! now only give layers with snow the density of snow, otherwise zero (which means they have no influence)
          if((snode(i).gt.0).or.
-     &    (((snode(i).lt.1e-8).and.(snode(min(8,i+1)).gt.0))))then
+     &    (((snode(i).lt.1D-8).and.(snode(min(8,i+1)).gt.0))))then
           Density(i)=snowdens
          else
-          Density(i)=0.
+          Density(i)=0.D0
          endif
 4       continue
        else
         do 5 i=1,8 ! no snow, give all snow nodes (top 8) the value of the soil layer for conductivity and specific heat and zero for density
          Thconduct(i)=Thconduct(9)
          Spheat(i)=Spheat(9)
-         Density(i)=0
+         Density(i)=0.D0
 5       continue
        endif
       endif

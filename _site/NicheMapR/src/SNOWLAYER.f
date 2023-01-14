@@ -32,6 +32,7 @@ C     Computes snow layer and thermal properties
       INTEGER I,JULNUM,DOY,Numtyps,ITEST,NON,SNON,methour
       INTEGER I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I11,I12,IOUT,maxsnode
       INTEGER I91,I92,I93,I94,I95,I96,I97,I98,I99,I100,I101
+      INTEGER I102,I103,I104,I105,I106,I107
       DIMENSION DENDAY(30),SPDAY(30),TKDAY(30),snode(10),densfun(4)
       DIMENSION snownode(10),Thconduct(30),Density(30),Spheat(30),TT(30)
 
@@ -41,7 +42,7 @@ C     Computes snow layer and thermal properties
       COMMON/SOILND/NON,SNON
       COMMON/DAYJUL/JULNUM,DOY
       COMMON/WMAIN/I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I11,I12,I91,I92,I93
-     & ,I94,I95,I96,I97,I98,I99,I100,I101
+     & ,I94,I95,I96,I97,I98,I99,I100,I101,I102,I103,I104,I105,I106,I107
       COMMON/SNOWPRED/snowtemp,snowdens,snowmelt,snownode,minsnow
      &,maxsnode1,snode,cursnow,daysincesnow,lastday,undercatch,rainmeltf
      &,densfun,snowcond,intercept,snowage,prevden,grasshade
@@ -51,24 +52,24 @@ C     Computes snow layer and thermal properties
 
       maxsnode=0
       if(cursnow.gt.300)then
-       maxsnode1=0.
+       maxsnode1=0.D0
       endif
 
       methour=int(SIOUT(1)/60)+1+24*(DOY-1)
 
       if(cursnow.lt.minsnow)then ! get rid of snow
        maxsnode=0
-       maxsnode1=0.
+       maxsnode1=0.D0
        do 34 i=1,8
-        snode(i)=0.
+        snode(i)=0.D0
 34     continue
-       snowhr(methour)=0.
+       snowhr(methour)=0.D0
         do 52 i=1,8 ! set temperature of snow nodes to that of soil node 1
          snode(i)=0.
          t(i)=t(1)
          tt(i)=tt(1)
 52      continue
-       cursnow=0.
+       cursnow=0.D0
        goto 900
       endif
 
@@ -91,7 +92,7 @@ c     now build up the snow nodes accordingly but start from the bottom
 c     check if snow depth is going down a node
        if(maxsnode.lt.maxsnode1)then
         do 5 i=1,8-maxsnode
-         snode(i)=0.
+         snode(i)=0.D0
          t(i)=t(1)
 5       continue
        endif
@@ -102,7 +103,7 @@ c     current snow depth in cm
 
       else
        do 4 i=1,8
-        snode(i)=0.
+        snode(i)=0.D0
         maxsnode=0
         cursnow=snowhr(methour)
         maxsnode1=real(maxsnode,8)
