@@ -29,13 +29,17 @@ ectorun(ecto)
 
 \item{shadhumid}{Hourly predictions of the soil humidity under the maximum specified shade}
 
+\item{tcond}{Hourly predictions of the soil thermal conductivity under the minimum specified shade}
+
+\item{shadtcond}{Hourly predictions of the soil humidity under the maximum specified shade}
+
 \item{DEP}{Depths used for the microclimate model}
 
 \item{rainfall}{Daily rainfall}
 
 \item{rainhr}{Hourly rainfall (overwrites rainfall if non-negative}
 
-\item{debmod}{Dynamic Energy Budget (DEB) model paramters}
+\item{debmod}{Dynamic Energy Budget (DEB) model parameters}
 
 \item{deblast}{Initial DEB state}
 
@@ -43,7 +47,7 @@ ectorun(ecto)
 
 \item{foodlevels}{Food levels (add units)}
 
-\item{wetlandTemps}{Tempature of water body}
+\item{wetlandTemps}{Temperature of water body}
 
 \item{wetlandDepths}{Depth of water body}
 
@@ -58,6 +62,8 @@ ectorun(ecto)
 \item{GLMfoods}{General Lake Model water food densities}
 
 \item{arrhenius}{Arrhenius thermal response}
+
+\item{arrhenius2}{Arrhenius thermal response for temperature size rule}
 
 \item{thermal_stages}{Stage-specific thermal physiology}
 

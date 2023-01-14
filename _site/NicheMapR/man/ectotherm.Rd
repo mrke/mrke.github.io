@@ -50,7 +50,7 @@ ectotherm(Ww_g, shape, alpha_max, alpha_min, T_F_min, T_F_max, T_B_min, T_RB_min
 
 \item{maxdepth}{= 10, Maximum depth (soil node #) to which animal can retreat if burrowing}
 
-\item{M_1}{= 0.013, Metabolic rate parameter 1 V_O2=M_1*M^M_2*10^(M_3*Tb), default parameters for lizards based on Eq. 2 from Andrews & Pough 1985. Physiol. Zool. 58:214-231}
+\item{M_1}{= 0.013, Metabolic rate parameter 1 V_O2=M_1*M^M_2*10^(M_3*Tb), in ml O2 / h, default parameters for lizards based on Eq. 2 from Andrews & Pough 1985. Physiol. Zool. 58:214-231}
 
 \item{M_2}{= 0.800, Metabolic rate parameter 2}
 
@@ -62,7 +62,7 @@ ectotherm(Ww_g, shape, alpha_max, alpha_min, T_F_min, T_F_max, T_B_min, T_RB_min
 
 \item{pct_mouth}{= 5, \% of surface area taken up by open mouth, for computing panting water loss}
 
-\item{pantmax}{= 5, maximum multiplier on breathing rate, for respiratory water loss via panting}
+\item{pantmax}{= 5, maximum multiplier on breathing rate, for respiratory water loss via panting (value of 1 prevents panting)}
 
 \item{F_O2}{= 20, \% oxygen extraction efficiency, for respiratory water loss}
 
@@ -82,7 +82,7 @@ compute metabolic rate. \cr\cr NOTE: The microclimate model, e.g. \code{\link{mi
 \strong{ Parameters controling how the model runs:}
 \itemize{
 \item{\code{nyears}{ = micro$nyears, Number of years the simulation runs for - must be consistent with dimensions of environmental input data}\cr}
-\item{\code{enberr}{ = 0.0002, Factor by which the mass is multiplied to obtain a tolerance level for the heat budget solution}\cr}
+\item{\code{enberr}{ = 0.01, Factor by which the mass is multiplied to obtain a tolerance level for the heat budget solution}\cr}
 \item{\code{live}{ = 1, Live (metabolism/behaviour) or dead animal?}\cr}
 \item{\code{transient}{ = 0, Run a transient (i.e. include heat storage) simulation (1=yes, 0=no)? No behaviour yet - assums full sun}\cr}
 \item{\code{delta_shade}{ = 3, Percent shade increment step, 0-100\%, allowing different thermoregulatory precision (smaller values increase run time)}\cr}
@@ -93,13 +93,20 @@ compute metabolic rate. \cr\cr NOTE: The microclimate model, e.g. \code{\link{mi
 \strong{ Environmental inputs:}
 
 \itemize{
-\item{\code{minshade}{ = 0, Minimum shade (\%) available to the animal}\cr}
-\item{\code{minshades}{ = rep(minshade,length(micro$MAXSHADES), Vector of daily minimum shade values (\%)}\cr}
-\item{\code{maxshades}{ = micro$MAXSHADES, Vector of daily maximum shade values (\%)}\cr}
+\item{\code{minshades}{ = micro$minshade, Vector of daily minimum shade values - can be different to value used in microclimate model (e.g. to simulate sunspot tracking on a forest floor) (\%)}\cr}
+\item{\code{maxshades}{ = micro$maxshade, Vector of daily maximum shade values - can be different to value used in microclimate model (e.g. to simulate use of fine-scale shade in a generally unshaded habitat) (\%)}\cr}
 \item{\code{fluid}{ = 0, Fluid type 0=air, 1=water }\cr}
-\item{\code{k_sub}{ = 2.79, Substrate thermal conductivity (W/mC)}\cr}
+\item{\code{O2gas}{ = 20.95, oxygen concentration of air, to account for non-atmospheric concentrations e.g. in burrows (\%)}\cr}
+\item{\code{N2gas}{ = 79.02, nitrogen concetration of air, to account for non-atmospheric concentrations e.g. in burrows (\%)}\cr}
+\item{\code{CO2gas}{ = 0.0412, carbon dioxide concentration of air, to account for non-atmospheric concentrations e.g. in burrows (\%)}\cr}
 \item{\code{alpha_sub}{ = 1 - micro$REFL, Vector of daily substrate reflectances (0-1)}\cr}
+\item{\code{epsilon_sub}{ = 1, Emissivity of substrate (0-1)}\cr}
+\item{\code{epsilon_sky}{ = 1, Emissivity of sky (0-1)}\cr}
+\item{\code{PDIF}{ = 0.1, Fraction of total solar radiation that is diffuse (0-1), will ultimately be made an optionally hourly vector}\cr}
 \item{\code{DEP}{ = micro$DEP, Depths available from the microclimate model simulation}\cr}
+\item{\code{KS}{ = micro$KS[seq(1, 19, 2)], Depth-specific saturated hydraulic conductivity (kg s/m3) from the microclimate model simulation, for modelling liquid exchange with substrate}\cr}
+\item{\code{b}{ = micro$BB[seq(1, 19, 2)], Depth-specific Campbell's b parameter (-) from the microclimate model simulation, for modelling liquid exchange with substrate}\cr}
+\item{\code{PE}{ = micro$PE[seq(1, 19, 2)], Depth-specific air-entry water potential (J / kg) from the microclimate model simulation, for modelling liquid exchange with substrate}\cr}
 \item{\code{metout}{ = micro$metout, Microclimate model output for above ground, minimum shade conditions}\cr}
 \item{\code{shadmet}{ = micro$shadmet, Microclimate model output for above ground, maximum shade conditions}\cr}
 \item{\code{soil}{ = micro$soil, Microclimate model output for soil temperature, minimum shade conditions}\cr}
@@ -110,8 +117,11 @@ compute metabolic rate. \cr\cr NOTE: The microclimate model, e.g. \code{\link{mi
 \item{\code{shadhumid}{ = micro$shadhumid, Microclimate model output for soil humidity, maximum shade conditions}\cr}
 \item{\code{soilpot}{ = micro$soilpot, Microclimate model output for soil water potential, minimum shade conditions}\cr}
 \item{\code{shadpot}{ = micro$shadpot, Microclimate model output for soil water potential, maximum shade conditions}\cr}
+\item{\code{tcond}{ = micro$tcond, Microclimate model output for soil thermal conductivity, minimum shade conditions}\cr}
+\item{\code{shadtcond}{ = micro$shadtcond, Microclimate model output for soil thermal conductivity, maximum shade conditions}\cr}
 \item{\code{rainfall}{ = micro$RAINFALL, Vector of daily rainfall (mm)}\cr}
 \item{\code{rainhr}{ = rep(-1,nrow(metout)), Vector of hourly rainfall (mm), overwrites rainfall if not negative}\cr}
+\item{\code{preshr}{ = rep(101325 * ((1 - (0.0065 * as.numeric(micro$elev) / 288)) ^ (1/0.190284)), nrow(metout)), Vector of hourly atmospheric pressure (Pa), defaulting to elevation-adjusted values}\cr}
 \item{\code{elev}{ = as.numeric(micro$elev), Elevation of simulation (m), obtained from microclimate model output by default}\cr}
 \item{\code{longitude}{ = micro$longlat[1], Longitude (decimal degrees), obtained from microclimate model output by default}\cr}
 \item{\code{latitude}{ = micro$longlat[2], Latitude (decimal degrees), obtained from microclimate model output by default}\cr}
@@ -125,18 +135,24 @@ compute metabolic rate. \cr\cr NOTE: The microclimate model, e.g. \code{\link{mi
 \item{\code{shape_c}{ = 0.6666666667, Proportionality factor (-) for going from volume to area, represents ratio of length:height for a plate, c axis:a axis for ellipsoid}\cr}
 \item{\code{fatosk}{ = 0.4, Configuration factor to sky (-) for infrared calculations}\cr}
 \item{\code{fatosb}{ = 0.4, Configuration factor to subsrate for infrared calculations}\cr}
-\item{\code{rinsul}{ = 0, Insulative fat layer thickness (m)}\cr}
-\item{\code{pct_cond}{ = 10, Percentage of surface contacting the substrate (\%)}\cr}
+\item{\code{rinsul}{ = 0, Insulative fat layer thickness (not yet functional) (m)}\cr}
+\item{\code{pct_cond}{ = 10, Percentage of animal surface contacting the substrate (\%)}\cr}
+\item{\code{pct_touch}{ = 0, Percentage of animal surface area contacting another animal of same temperature (\%)}\cr}
 \item{\code{c_body}{ = 3073, Specific heat of flesh J/(kg-K)}\cr}
 \item{\code{k_flesh}{ = 0.5, Thermal conductivity of flesh (W/mC, range: 0.412-2.8)}\cr}
 \item{\code{rho_body}{ = 1000, Density of flesh (kg/m3)}\cr}
 \item{\code{epsilon}{ = 0.95, Emissivity of animal (0-1)}\cr}
+\item{\code{eggshape_a}{ = 1, Proportionality factor (-) for going from volume to area, keep this 1 (redundant parameter that should be removed)}\cr}
+\item{\code{eggshape_b}{ = 0.6666666667, Proportionality factor (-) for going from volume to area, represents ratio of width:height for a plate, length:diameter for cylinder, b axis:a axis for ellipsoid }\cr}
+\item{\code{eggshape_c}{ = 0.6666666667, Proportionality factor (-) for going from volume to area, represents ratio of length:height for a plate, c axis:a axis for ellipsoid}\cr}
+\item{\code{eggmult }{ = 1 # multiply egg mass by clutch size for heat and water exchange calculations?}\cr}
+\item{\code{pct_cond_egg}{ = 50, Percentage of egg surface contacting the substrate (\%)}\cr}
 }
 \strong{ Behavioural parameters:}
 
 \itemize{
 \item{\code{postur}{ = 1, postural orientation to sun, 1 = perpendicular, 2 = parallel, 0 = half way between, relevant if live = 0}\cr}
-\item{\code{warmsig}{ = 0, Warming signal for emergence? 1=yes, 0=no (if in burrow deeper than node 2, 0.1 degree sensitivity)}\cr}
+\item{\code{warmsig}{ = 0, Warming signal for emergence? °C/h (if in burrow deeper than node 2, change in burrow temp must be exceed warmsig)}\cr}
 \item{\code{fossorial}{ = 0, Fossorial activity? 1=yes, 0=no (this option hasn't been properly implemented)}\cr}
 \item{\code{rainact}{ = 0, Activity is limited by rainfall? 1=yes, 0=no, threshold rainfall for activity set by \code{actrainthresh}}\cr}
 \item{\code{actrainthresh}{ = 0.1, Threshold (mm) of rain causing activity if \code{rainact}=1}\cr}
@@ -150,7 +166,7 @@ compute metabolic rate. \cr\cr NOTE: The microclimate model, e.g. \code{\link{mi
 \item{\code{CT_minthresh}{ = 12, Number of consecutive hours below CT_min that leads to death - simulation will terminate beyond this threshold if \code{CT_kill}=1}\cr}
 \item{\code{CT_kill}{ = 0, Animal dies when it hits critical thermal limits? 1=yes, 0=no}\cr}
 }
-\strong{ Water and food budget parameters (only relevant if \code{DEB}=1):}
+\strong{ Water and food budget parameters (first eight only relevant if \code{DEB}=1):}
 
 \itemize{
 \item{\code{pct_H_P}{ = 73, Water in faeces (product) (\%)}\cr}
@@ -161,6 +177,13 @@ compute metabolic rate. \cr\cr NOTE: The microclimate model, e.g. \code{\link{mi
 \item{\code{gutfill}{ = 75, Gut fill (\%) at which satiation occurs - if greater than 100\%, animal always tries to forage}\cr}
 \item{\code{raindrink}{ = 0, Rainfall level at which rehydration from drinking occurs - if 0 animal can always drink}\cr}
 \item{\code{foodlim}{ = 1, Is the animal food limited - if 0 animal can always find food (useful for making different life stages dependent on soil moisture-based food estimates}\cr}
+\item{\code{RQ}{ = 0.8, respiratory quotient (0-1), computed from first principles if DEB model running}\cr}
+\item{\code{K_skin}{ = 2.8e-09, - Hydraulic conductivity of skin (kg/(m s (J/kg)) - drives liquid water exchange with substrate}\cr}
+\item{\code{spec_hyd_body}{ = 0.000304, Specific hydration of body (m3 / (m3 (J/kg))) - drives liquid water exchange with substrate if K_skin > 0 }\cr}
+\item{\code{psi_body}{ = -707, Water potential of body (J/kg) - drives liquid water exchange with substrate if K_skin > 0 and will also affect skin humidity for water vapour exchange}\cr}
+\item{\code{K_egg}{ = 2.8e-09, Hydraulic conductivity of egg shell (kg/(m s (J/kg)) - drives liquid water exchange with substrate}\cr}
+\item{\code{spec_hyd_egg}{ = 0.000304, Specific hydration of egg (m3 / (m3 (J/kg))) - drives liquid water exchange with substrate if K_skin > 0 }\cr}
+\item{\code{psi_egg}{ = -707, Water potential of egg (J/kg) - drives liquid water exchange with substrate if K_skin > 0}\cr}
 }
 \strong{ Dynamic Energy Budget (DEB) model parameters:}
 \itemize{
@@ -173,7 +196,7 @@ compute metabolic rate. \cr\cr NOTE: The microclimate model, e.g. \code{\link{mi
 \itemize{
 \item{\code{z}{ = 2.825*z_mult, Zoom factor (cm)}\cr}
 \item{\code{del_M}{ =  0.2144, Shape coefficient (-)}\cr}
-\item{\code{F_m}{ = 12420, Surface area-specific maximum feeding rate J/cm2/h}\cr}
+\item{\code{p_Xm}{ = 12420, Surface area-specific maximum feeding rate J/cm2/h}\cr}
 \item{\code{kap_X}{ = 0.85, Digestive efficiency (0-1)}\cr}
 \item{\code{v}{ = 0.02795/24, Energy conductance (cm/h)}\cr}
 \item{\code{kap}{ = 0.8206, Fraction of mobilised reserve allocated to soma}\cr}
@@ -191,12 +214,18 @@ compute metabolic rate. \cr\cr NOTE: The microclimate model, e.g. \code{\link{mi
 }
 \strong{ Thermal DEB parameters:}
 \itemize{
+\item{\code{arrhen_mode}{ = 1, equation used for Arrhenius rate correction - 0 is original Sharpe-Schoolfield formulation, 1 is version used in DEB tempcorr function from AmPtool}\cr}
 \item{\code{T_REF}{ = 20 + 273.15, Reference temperature for rate correction (°C)}\cr}
 \item{\code{T_A}{ = 8817 Arhhenius temperature}\cr}
 \item{\code{T_AL}{ = 50000, Arrhenius temperature for decrease below lower boundary of tolerance range \code{T_L}}\cr}
 \item{\code{T_AH}{ = 90000, Arrhenius temperature for decrease above upper boundary of tolerance range \code{T_H}}\cr}
 \item{\code{T_L}{ = 6 + 273.15, Lower boundary (K) of temperature tolerance range for Arrhenius thermal response}\cr}
 \item{\code{T_H}{ = 33 + 273.15, Upper boundary (K) of temperature tolerance range for Arrhenius thermal response}\cr}
+\item{\code{T_A2}{ = 8817 Arhhenius temperature}\cr} for maturity maintenance (causes 'Temperature Size Rule' effect)
+\item{\code{T_AL2}{ = 50000, Arrhenius temperature for decrease below lower boundary of tolerance range \code{T_L}}\cr} for maturity maintenance (causes 'Temperature Size Rule' effect)
+\item{\code{T_AH2}{ = 90000, Arrhenius temperature for decrease above upper boundary of tolerance range \code{T_H}}\cr} for maturity maintenance (causes 'Temperature Size Rule' effect)
+\item{\code{T_2L}{ = 6 + 273.15, Lower boundary (K) of temperature tolerance range for Arrhenius thermal response}\cr} for maturity maintenance (causes 'Temperature Size Rule' effect)
+\item{\code{T_H2}{ = 33 + 273.15, Upper boundary (K) of temperature tolerance range for Arrhenius thermal response}\cr} for maturity maintenance (causes 'Temperature Size Rule' effect)
 }
 \strong{ Compound/derived DEB parameters:}
 \itemize{
@@ -215,21 +244,26 @@ compute metabolic rate. \cr\cr NOTE: The microclimate model, e.g. \code{\link{mi
 \item{\code{d_V}{ = 0.3, Dry mass fraction of structure (0-1)}\cr}
 \item{\code{d_E}{ = 0.3, Dry mass fraction of reserve (0-1)}\cr}
 \item{\code{d_Egg}{ = 0.3, Dry mass fraction of egg (0-1)}\cr}
+\item{\code{stoich_mode}{ = 0, adjust chemical indices to chemical potentials (0) or vice versa (1) or leave as is (2)}\cr}
 \item{\code{mu_X}{ = 525000, Molar Gibbs energy (chemical potential) of food (J/mol)}\cr}
 \item{\code{mu_E}{ = 585000, Molar Gibbs energy (chemical potential) of reserve (J/mol)}\cr}
 \item{\code{mu_V}{ = 500000, Molar Gibbs energy (chemical potential) of structure (J/mol)}\cr}
 \item{\code{mu_P}{ = 480000, Molar Gibbs energy (chemical potential) of faeces (J/mol)}\cr}
+\item{\code{mu_N}{ = 244e3/5, Molar Gibbs energy (chemical potential) of nitrogenous waste (J/mol), synthesis from NH3, Withers page 119}\cr}
 \item{\code{kap_X_P}{ = 0.1, Faecation efficiency of food to faeces (-)}\cr}
 \item{\code{n_X}{ = c(1, 1.8, 0.5, 0.15), chem. indices of C, O, H and N in food}\cr}
 \item{\code{n_E}{ = c(1, 1.8, 0.5, 0.15), chem. indices of C, O, H and N in reserve}\cr}
 \item{\code{n_V}{ = c(1, 1.8, 0.5, 0.15), chem. indices of C, O, H and N in structure}\cr}
 \item{\code{n_P}{ = c(1, 1.8, 0.5, 0.15), chem. indices of C, O, H and N in faeces}\cr}
 \item{\code{n_M_nitro}{ = c(1, 4/5, 3/5, 4/5), chem. indices of C, O, H and N in nitrogenous waste}\cr}
+\item{\code{h_N}{ = 384238, molar enthalpy of nitrogenous waste (combustion frame of reference) (J/mol), overridden if n_M_nitro specified as urea, uric acid or ammonia}\cr}
 }
 \strong{ Holometabolous insect DEB model parameters:}
 \itemize{
 \item{\code{stages}{ = 8, number of stages = number of instars plus 1 for egg + 1 for pupa + 1 for imago}\cr}
-\item{\code{y_EV_l}{ = 0.6, yield of imago reserve on larval structure (mol/mol)}\cr}
+\item{\code{kap_V}{ = 0.8, conversion efficient E -> V -> E (-)}\cr}
+\item{\code{k_Ee}{ = 0.06293 / 24, reproduction buffer turnover of imago (1/h)}\cr}
+\item{\code{k_EV}{ = 0.03111 / 24, spec decay rate of larval structure in pupa (1/h)}\cr}
 \item{\code{S_instar}{ = rep(2.049137, stages), stress at instar n: L_n^2/ L_n-1^2 (-)}\cr}
 \item{\code{s_j}{ = 0.9985855, Reprod buffer/structure ratio at pupation as fraction of max}\cr}
 \item{\code{L_b}{ = 0.0734, Structural length at birth (cm)}\cr}
@@ -296,11 +330,12 @@ compute metabolic rate. \cr\cr NOTE: The microclimate model, e.g. \code{\link{mi
 }
 \strong{ Life stage-specific parameter allocation:}
 \itemize{
-\item{\code{thermal_stages}{ = matrix(data = c(rep(CT_min,stages),rep(CT_max,stages),rep(T_F_min,stages),rep(T_F_max,stages),rep(T_B_min,stages),rep(T_pref,stages)), nrow = stages, ncol = 6), Stage specific thermal thresholds (CT_min,CT_max,T_F_min,T_F_max,T_B_min,T_pref)}\cr}
-\item{\code{behav_stages}{ = matrix(data = c(rep(diurn,stages),rep(nocturn,stages),rep(crepus,stages),rep(burrow,stages),rep(shdburrow,stages),rep(mindepth,stages),rep(maxdepth,stages),rep(shade_seek,stages),rep(climb,stages),rep(fossorial,stages),rep(rainact,stages),rep(actrainthresh,stages),rep(act_breed,stages),rep(flyer,stages),rep(aquabask,stages)), nrow = stages, ncol = 15), Stage specific behaviour diurn,nocturn,crepus,burrow,shdburrow,mindepth,maxdepth,shade_seek,climb,fossorial,rainact,actrainthresh,act_breed,flyer,aquabask)}\cr}
-\item{\code{water_stages}{ = matrix(data = c(rep(pct_wet,stages),rep(F_O2,stages),rep(pct_H_P,stages),rep(pct_H_N,stages),rep(pct_H_X,stages),rep(pct_H_R,stages),rep(raindrink,stages),rep(gutfill,stages)), nrow = stages, ncol = 8), Stage-specific water budget parameters (pct_wet,F_O2,pct_H_P,pct_H_N,pct_H_X,pct_H_R,raindrink,gutfill)}\cr}
-\item{\code{nutri_stages}{ = matrix(data = c(rep(foodlim,stages),rep(0,stages)), nrow = stages, ncol = 1), Stage-specific nutritional parameters (foodlim)}\cr}
-\item{\code{arrhenius}{ = matrix(data = matrix(data = c(rep(T_A,stages),rep(T_AL,stages),rep(T_AH,stages),rep(T_L,stages),rep(T_H,stages)), nrow = stages, ncol = 5), nrow = stages, ncol = 5), Stage-specific 5-parameter Arrhenius thermal response for DEB model (T_A,T_AL,T_AH,T_L,T_H)}\cr}
+\item{\code{thermal_stages}{ = matrix(data = c(rep(CT_min, stages), rep(CT_max, stages), rep(T_F_min, stages), rep(T_F_max, stages), rep(T_B_min, stages), rep(T_pref, stages)),  nrow = stages,  ncol = 6), Stage specific thermal thresholds (CT_min, CT_max, T_F_min, T_F_max, T_B_min, T_pref)}\cr}
+\item{\code{behav_stages}{ = matrix(data = c(rep(diurn, stages), rep(nocturn, stages), rep(crepus, stages), rep(burrow, stages), rep(shdburrow, stages), rep(mindepth, stages), rep(maxdepth, stages), rep(shade_seek, stages), rep(climb, stages), rep(fossorial, stages), rep(rainact, stages), rep(actrainthresh, stages), rep(act_breed, stages), rep(flyer, stages), rep(aquabask, stages)), nrow = stages, ncol = 15), Stage specific behaviour diurn, nocturn, crepus, burrow, shdburrow, mindepth, maxdepth, shade_seek, climb, fossorial, rainact, actrainthresh, act_breed, flyer, aquabask)}\cr}
+\item{\code{water_stages}{ = matrix(data = c(rep(pct_wet, stages), rep(F_O2, stages), rep(pct_H_P, stages), rep(pct_H_N, stages), rep(pct_H_X, stages), rep(pct_H_R, stages), rep(raindrink, stages), rep(gutfill, stages)),  nrow = stages,  ncol = 8), Stage-specific water budget parameters (pct_wet, F_O2, pct_H_P, pct_H_N, pct_H_X, pct_H_R, raindrink, gutfill)}\cr}
+\item{\code{nutri_stages}{ = matrix(data = c(rep(foodlim, stages), rep(0, stages)),  nrow = stages,  ncol = 1),  Stage-specific nutritional parameters (foodlim)}\cr}
+\item{\code{arrhenius}{ = matrix(data = matrix(data = c(rep(T_A, stages), rep(T_AL, stages), rep(T_AH, stages), rep(T_L, stages), rep(T_H, stages)),  nrow = stages,  ncol = 5),  nrow = stages,  ncol = 5), Stage-specific 5-parameter Arrhenius thermal response for DEB model (T_A, T_AL, T_AH, T_L, T_H)}\cr}
+\item{\code{arrhenius2}{ = matrix(data = matrix(data = c(rep(T_A2, stages), rep(T_AL2, stages), rep(T_AH2, stages), rep(T_L2, stages), rep(T_H2, stages)),  nrow = stages,  ncol = 5),  nrow = stages,  ncol = 5), Stage-specific 5-parameter Arrhenius thermal response for DEB model (T_A, T_AL, T_AH, T_L, T_H) for maturity maintenance (causes 'Temperature Size Rule' effect)}\cr}
 }
 \strong{ Butterfly model parameters (not yet tested):}
 \itemize{
@@ -386,6 +421,8 @@ masbal variables:
 \item 17 H2OEye_g - Ocular water loss (g/h)
 \item 18 H2OBal_g - Instantaneous water balance (g/h)
 \item 19 H2OCumBal_g - Cumulative water balance (g)
+\item 20 H2OLiq_g - Change in liquid water exchange with substrate (g)
+\item 21 PSI_kPa - Organism water potential (J/kg = kPa)
 }
 debout variables:
 \itemize{
@@ -397,7 +434,7 @@ debout variables:
 \item 6 V - Structural volume (cm3)
 \item 7 E - Reserve density (J/cm3)
 \item 8 E_H - Maturity state (J)
-\item 9 LENGTH - Physical length (mm) (what this represents depends on choice of length measure for DEB paramter fitting, e.g. snout-vent length, head length, etc.)
+\item 9 L_W - Physical length (mm) (what this represents depends on choice of length measure for DEB paramter fitting, e.g. snout-vent length, head length, etc.)
 \item 10 WETMASS - Wet mass total (reserve, structure, reproduction buffer, stomach contents) (g)
 \item 11 WETGONAD - Wet mass of gonad (batch and reproduction buffers) (g)
 \item 12 WETGUT - Wet mass of food in gut (g)
@@ -410,6 +447,14 @@ debout variables:
 \item 19 E_BABY - Reserve density of baby (J/cm3) (only if viviparous and pregnant)
 \item 20 H_S - Hazard rate (1/h)
 \item 21 P_SURV - Survival probability due to joint influence of ageing and mortality rates
+\item 22 P_A - assimilation flux, J/h
+\item 23 P_C - mobilisation flux, J/h
+\item 24 P_M - maintenance flux, J/h
+\item 25 P_G - growth flux, J/h
+\item 26 P_D - dissipation flux, J/h
+\item 27 P_J - maturity maintenance flux, J/h
+\item 28 P_R - reproduction/maturation flux, J/h
+\item 29 P_D - egg flux, J/h
 }
 yearout variables:
 \itemize{
@@ -515,7 +560,7 @@ ytick<-seq(-20, -10, by=2)
 axis(side=2, at=ytick, labels = FALSE)
 mtext(text = rev(seq(0, 100, 20)), side = 2, line = 1, at = seq(-20, -10, 2), las = 2)
 abline(h = -10, lty = 2, col = 'grey')
-mtext(text = c('body temperature (Â°C)', 'activity', 'shade (\%)', 'depth (cm)'), side = 2, line = 2.5, at = c(30, 9, 0, -15))
+mtext(text = c('body temperature (°C)', 'activity', 'shade (\%)', 'depth (cm)'), side = 2, line = 2.5, at = c(30, 9, 0, -15))
 text(-0.2, c(ecto$T_F_max + 1, ecto$T_F_min + 1), c('T_F_max', 'T_F_min'), col = c('red', 'blue'), cex = 0.75)
 
 # seasonal activity plot (dark blue = night, light blue = basking, orange = foraging)

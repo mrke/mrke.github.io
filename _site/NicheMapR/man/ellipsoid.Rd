@@ -4,14 +4,29 @@
 \alias{ellipsoid}
 \title{Ellipsoid endotherm model}
 \usage{
-ellipsoid(posture = 4.5, mass = 0.5, coreT = 37, furdepth = 5,
-  furcond = 0.04, O2eff = 0.2, stress = 0.6, airT = 20,
-  windspd = 1, rh = 50, Q10 = 3, basal = NA, basmult = 1)
+ellipsoid(
+  posture = 4.5,
+  mass = 0.5,
+  density = 1000,
+  coreT = 37,
+  furdepth = 5,
+  furcond = 0.04,
+  O2eff = 0.2,
+  stress = 0.6,
+  airT = 20,
+  windspd = 1,
+  rh = 50,
+  Q10 = 3,
+  basal = NA,
+  basmult = 1
+)
 }
 \arguments{
 \item{posture}{= 4.5, Shape, ratio of long to short axis of a prolate ellipsoid}
 
-\item{mass}{= 0.5, Body Mass (kg)}
+\item{mass}{= 0.5, Body mass (kg)}
+
+\item{density}{= 1000, Body density (kg/m3)}
 
 \item{coreT}{= 37, Core temperature (deg C)}
 
