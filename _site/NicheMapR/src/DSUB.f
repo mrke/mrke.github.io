@@ -23,7 +23,7 @@ c     along with this program. If not, see http://www.gnu.org/licenses/.
       double precision A,ALAT,ALONC,ALTT,AMOL,AMULT,ARAD,AZMUTH
       double precision B,BEGP,BP,C,CC,CLEAR,CLOD,CLOUD,CLR,CMH2O,CP,CRAD
      & ,CS,CZ,CZSL
-      double precision D,DAS,DENAIR,DENDAY,DEPP,DEP,DP,DTAU,DTDT
+      double precision D,D0,DAS,DENAIR,DENDAY,DEPP,DEP,DP,DTAU,DTDT
       double precision ERRP,E,END,ERR1,ESAT,F,F1,F2,FIN,GRDIN
       double precision H,HC,HD,HEMIS,HGTP,HTRN
       double precision MASS,MAXSHD,MON,OUT
@@ -40,7 +40,7 @@ c     along with this program. If not, see http://www.gnu.org/licenses/.
       double precision VD,VELR,VV,WB,WC,WTRPOT,X,XXX
       double precision ZENR,ZSLR,ZZ,Z01,Z02,ZH1,ZH2,HRAD,QRADHL,VIEWF,TT
       double precision sle,err,soilprop,moist,Thconduct,Density,Spheat
-     & ,snowage,grasshade
+     & ,snowage,grasshade,ZH
       double precision rainfall,minsnow,inrad,refrad,snowcond,intercept
      & ,prevden
       double precision condep,rainmult,surflux,ep,maxpool,tide
@@ -48,7 +48,7 @@ c     along with this program. If not, see http://www.gnu.org/licenses/.
      &undercatch,rainmeltf,snowalbedo,tt_past,densfun
       double precision rww,pc,rl,sp,r1,im
       double precision snowdens,snowmelt,snowtemp,cursnow,cummelted
-     & ,qfreze,xtrain,qphase,sumphase,sumphase2,NONP
+     & ,qfreze,xtrain,qphase,sumphase,sumphase2,NONP,MAXSURF
 
       INTEGER I,II,I1,I2,IALT,IDA,IDAYST,IEND,IEP,maxsnode2
       INTEGER IOUT,IPINT,IPRINT,ISTART,ITEST
@@ -65,6 +65,7 @@ c     along with this program. If not, see http://www.gnu.org/licenses/.
 
       COMMON/AIRRAY/ZZ(10),VV(10)
       COMMON/DMYCRO/Z01,Z02,ZH1,ZH2
+      COMMON/CMYCRO/ZH,D0
       COMMON/WDSUB/TSKY,ARAD,CRAD,CLOUD,CLR,SOLR
       COMMON/PAR/SIGP,RCSP,SOK,SAB,HGTP,RUFP,BEGP,MON,PRTP,ERRP,END,
      1 SLEP,DAS,NONP,SUN,PLT,FIN,STP
@@ -99,6 +100,7 @@ c    Variable soil properties data from Iomet1
       COMMON/temps/TT,TT_past,cummelted
       COMMON/WOSUB/DEPP
       COMMON/melt/QFREZE,xtrain,qphase,sumphase,sumphase2
+      COMMON/MAXTEMP/MAXSURF
 
 C     NOTATION
 C     Key Variables
@@ -115,14 +117,14 @@ C     Nodes(max node depth,subst type) are real numbers. The number to the left 
       j=1
       if(runsnow.eq.1)then
        if(cursnow.lt.minsnow)then
-        maxsnode1=0.
-        DEPP(9)=0.
+        maxsnode1=0.D0
+        DEPP(9)=0.D0
        endif
        do 555 i=1,8
-        if(snode(i).lt.1e-8)then
+        if(snode(i).lt.1D-8)then
          t(i)=t(1)
          tt(i)=tt(1)
-         if((snode(8).lt.1e-8).and.(cursnow.lt.1e-8))then
+         if((snode(8).lt.1D-8).and.(cursnow.lt.1D-8))then
           t(9)=t(1)
           tt(9)=tt(1)
          endif
@@ -139,8 +141,8 @@ C     Nodes(max node depth,subst type) are real numbers. The number to the left 
       PI=3.14159
 C     CHECK FOR UNSTABLE CONDITIONS OF GROUND SURFACE TEMPERATURE, T(1)
       do 101 i=1,N
-       IF(T(i).GE. 81)THEN
-        T(i) = 81.
+       IF(T(i).GE. MAXSURF)THEN
+        T(i) = MAXSURF
        ELSE
         IF(T(i).LT.-81)THEN
          T(i) = -81
@@ -155,7 +157,7 @@ C     HEIGHTS IN ZZ ARE FROM THE GROUND UP, SO ARE VELOCITIES, VV,
 C     BUT DO NOT INCLUDE THE SURFACE
 c    1 CONTINUE
       DO 2 I=1,10
-       VV(I)=0.
+       VV(I)=0.D0
        ZZ(I)=0
     2 CONTINUE
       NAIR=0
@@ -194,7 +196,11 @@ C     SURFACE ABSORPTIVITY FOR SUB. DSUB CALCULATIONS
 C     SURFACE REFLECTIVITY FOR SOLRAD CALCULATIONS
       REFL = REFLS(doy)
       SLE = SLES(doy)
-      moist=moists(1:10,doy)
+      if((SIOUT(1).eq.1440).and.(doy.gt.1))then
+       moist=moists(1:10,doy-1) ! initalise with last soil moisture estimate
+      else
+       moist=moists(1:10,doy)
+      endif
       if(runsnow.eq.1)then
        methour=(int(SIOUT(1)/60)+1)+24*(doy-1)
        if(methour.gt.1)then
@@ -252,16 +258,16 @@ C       mass*specific heat product (per unit area)
          RCSP=DENDAY(1)*SPDAY(1)
          WC(1)=RCSP*DEPP(2)/2.
          SOK=TKDAY(1)
-         if(DEPP(2).lt.1e-8)then
-          C(1)=0.
+         if(DEPP(2).lt.1D-8)then
+          C(1)=0.D0
          else
           C(1)=SOK/DEPP(2)
          endif
         else
-         if((depp(i+1).gt.1e-8).or.(i.eq.18))then
+         if((depp(i+1).gt.1D-8).or.(i.eq.18))then
 C         mass*specific heat product (per unit area)
           RCSP = DENDAY(I)*SPDAY(I)
-          if((depp(i).lt.1e-8).and.(maxsnode1.gt.0))then
+          if((depp(i).lt.1D-8).and.(maxsnode1.gt.0))then
            WC(I)=RCSP*DEPP(9-maxsnode2)
           else
            WC(I)=RCSP*(DEPP(I+1)-DEPP(I-1))/2.
@@ -271,7 +277,7 @@ C         mass*specific heat product (per unit area)
          else
 C         mass*specific heat product (per unit area)
 c         RCSP = DENDAY(I)*SPDAY(I)
-          WC(I)=0.
+          WC(I)=0.D0
           SOK =TKDAY(1)
           if(maxsnode2.eq.0)then
            C(I)=SOK/DEPP(10)
@@ -341,7 +347,7 @@ c      TSKY=((QRAD+QRADGR)/(SIGP))**(1./4.)-273
       else
 C      CLEAR SKY RADIANT TEMPERATURE
        if(IRmode.eq.0)then
-c       Campbell and Norman eq. 10.10 to get emissivity of sky
+c       Campbell and Norman 1998 eq. 10.10 to get emissivity of sky
         RH = TAB('REL',TIME)
         if(RH.gt.100.)then
          RH= 100.
@@ -360,7 +366,7 @@ C       EQUATIONS FROM SUBROUTINE DRYAIR    (TRACY ET AL,1972)
 c     Below is the Gates formula (7.1)
 c        ARAD=(1.22*0.00000005673*(TAIR+273.)**4-171)
        else
-c       Swinbank, Eq. 10.11 in Campbell and Norman
+c       Swinbank, Eq. 10.11 in Campbell and Norman 1998
         ARAD=(0.0000092*(TAIR+273.16)**2)*0.0000000567*(TAIR+273.16)**4
      &  *60./(4.185*10000.)
        endif
@@ -420,7 +426,7 @@ c      TSKY=((QRADSK + QRADVG)/(SIGP))**(1./4.)-273
 c     change for snow - check what node is to be used for conduction, will be node 10 if no snow
        j=1
        do 1103 i=2,18
-        if(density(i-1).lt.1e-8)then
+        if(density(i-1).lt.1D-8)then
          j=j+1
         endif
 1103   continue
@@ -453,12 +459,12 @@ c     to substrate based on water temp
 C     COMPUTE VELOCITY AND TEMPERATURE PROFILES
       IF((ZH1.LE.0.000).AND.(ZH2.LE.0.000))THEN
 C      NO SEGMENTED VELOCITY PROFILE (SINGLE LOG PROFILE)
-        CALL MICRO(HGTP,RUFP,TAIR,T(1),VELR,QCONV,AMOL,NAIR,ZZ,VV,T,
-     &  ZENR)
+        CALL MICRO(HGTP,RUFP,ZH,D0,TAIR,T(1),VELR,QCONV
+     &  ,AMOL,NAIR,ZZ,VV,T,ZENR)
        ELSE
 C      SEGMENTED VELOCITY PROFILE (VEGETATION OR OTHER OBJECTS MODIFYING VELOCITY PROFILE)
-        CALL MICROSEGMT(HGTP,RUFP,TAIR,T(1),VELR,QCONV,AMOL,NAIR,ZZ,
-     &  VV,T,ZENR)
+        CALL MICROSEGMT(HGTP,RUFP,TAIR,T(1),VELR,QCONV,AMOL,NAIR,
+     &  ZZ,VV,T,ZENR)
 c      QCOND=C(1)*(T(2)-T(1))
       ENDIF
 
@@ -468,24 +474,24 @@ C     THIS SURFACE NODE EQUATION IS A HEAT BALANCE ON THE SOIL SURFACE NODE:
 C     QIN = QOUT + QSTORED  REARRANGED TO GET THE RATE OF CHANGE OF TEMPERATURE TERM IN QSTORED, m*c*dT/dt
       if(tide.gt.0)then
         DTDT(1)=(QCOND+QCONV)/WC(1)
-        QEVAP=0.
+        QEVAP=0.D0
       else
-       IF(PTWET.lt.1e-8)THEN
-C       DRY SURFACE
-         if(runsnow.eq.1)then
-          DTDT(1)=(QSOLAR+QRAD+QCOND+QCONV+QFREZE)/WC(j)
-         else
-          DTDT(1)=(QSOLAR+QRAD+QCOND+QCONV)/WC(1)
-         endif
-         QEVAP=0.
-        ELSE
+C      IF(PTWET.lt.1e-8)THEN
+CC       DRY SURFACE
+C        if(runsnow.eq.1)then
+C         DTDT(1)=(QSOLAR+QRAD+QCOND+QCONV+QFREZE)/WC(j)
+C        else
+C         DTDT(1)=(QSOLAR+QRAD+QCOND+QCONV)/WC(1)
+C        endif
+C        QEVAP=0.D0
+C       ELSE
 C       SNOW or WET SURFACE
 C       GETTING THE RELATIVE HUMIDITY FOR THIS POINT IN TIME
          RH = TAB('REL',TIME)
          if(RH.gt.100.)then
           RH = 100.
          endif
-         WB = 0.
+         WB = 0.D0
          DP = 999.
 C        BP CALCULATED FROM ALTITUDE USING THE STANDARD ATMOSPHERE
 C        EQUATIONS FROM SUBROUTINE DRYAIR    (TRACY ET AL,1972)
@@ -515,7 +521,7 @@ C       CHECKING FOR DIVIDE BY ZERO
          else
           DTDT(1)=(QSOLAR+QRAD+QCOND+QCONV-QEVAP)/WC(1)
          endif
-       ENDIF ! end check for wet surface
+c       ENDIF ! end check for wet surface
       endif ! end check for tide
 C     SETTING UP THE DEEP SOIL TEMPERATURE, TDS, FOR SOIL TRANSIENTS.
 C     (N=MM+1); N = # OF SOIL NODES SET UP IN 'DEP' ARRAY IN INPUT DATA

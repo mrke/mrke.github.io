@@ -24,7 +24,7 @@ c     warning - this is all in SI units!
       double precision AIRVD,ALTT,BP,CP,DB,DENAIR,DP,E,EFFSUR,ESAT
       double precision HD,HTOVPR,MAXSHD,PSTD,PTWET,GWSURF
       double precision QEVAP,RH,RELHUM,RW,SABNEW,SHAYD,SURFVD
-      double precision TAIR,TSURF,TVIR 
+      double precision TAIR,TSURF,TVIR
       double precision TVINC,VD,WATER,WB,WTRPOT,rainfall
       integer sat
 
@@ -39,7 +39,7 @@ C     CHECK FOR TOO LOW A SURFACE TEMPERATURE
       ENDIF
 
 C     SETTING 3 PARAMETERS FOR WETAIR, SINCE RH IS KNOWN (SEE WETAIR LISTING)  
-      WB=0.
+      WB=0.D0
       DP=999.  
 C     BP CALCULATED FROM ALTITUDE USING THE STANDARD ATMOSPHERE
 C     EQUATIONS FROM SUBROUTINE DRYAIR    (TRACY ET AL,1972)
@@ -66,7 +66,6 @@ C     CONVERTING TO THE FRACTION OF A UNIT SURFACE AREA THAT IS WET
       endif
 C     AMOUNT OF WATER EVAPORATED FROM THE SURFACE (KG/S)
       WATER = EFFSUR * HD *(SURFVD - AIRVD)  
-
 C     FROM DRYAIR: LATENT HEAT OF VAPORIZATION 
 c      HTOVPR = 2.5012E+06 - 2.3787E+03 * TAIR
       if(TSURF.gt.0)then
@@ -74,7 +73,7 @@ c      HTOVPR = 2.5012E+06 - 2.3787E+03 * TAIR
       else
        HTOVPR=2834.1-0.29*TSURF-0.004*TSURF**2 
       endif
-      HTOVPR=HTOVPR*1000
+      HTOVPR=HTOVPR*1000.D0
 c     convert qevap to cal/min/cm2 for dsub 
       if(sat.eq.2)then
        QEVAP = WATER * HTOVPR ! keep in SI for water budget calcs  
@@ -82,10 +81,10 @@ c     convert qevap to cal/min/cm2 for dsub
        QEVAP = WATER * HTOVPR / 4.184 * 60. / 10000.  
       endif
 C     KG/S TO G/S 
-      GWSURF  = WATER * 1000. 
+      GWSURF  = WATER * 1000.D0
 c     don't lose water if heat is just going into melting snow
       if(TSURF.le.0)then
-       gwsurf=0.
+       gwsurf=0.D0
       endif
       
       RETURN
