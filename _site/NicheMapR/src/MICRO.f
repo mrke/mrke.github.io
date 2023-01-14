@@ -1,4 +1,4 @@
-      SUBROUTINE MICRO(Z,Z0,T1,T3,V,QC,AMOL,NAIR,ZZ,VV,T,ZEN)
+      SUBROUTINE MICRO(Z,Z0,ZH,D0,T1,T3,V,QC,AMOL,NAIR,ZZ,VV,T,ZEN)
       IMPLICIT NONE
 
 C     NicheMapR: software for biophysical mechanistic niche modelling
@@ -20,22 +20,25 @@ c     along with this program. If not, see http://www.gnu.org/licenses/.
 
 C    This subroutine computes a single unsegmented velocity and temperature profile
 
-      double precision ADUM,AMOL,AMOLN,DEL,DIFFT,DUM,GAM,PHI,PSI1
+      double precision A,ADUM,AMOL,AMOLN,D0,DEL,DIFFT,DUM,GAM,PHI,PSI1
       double precision PSI2,QC,RCP,RCPTKG,RHOCP,STB,STO,STS,T,T1,T3,TAVE
-     & ,TZO,USTAR
+     & ,T0,TZO,USTAR
       double precision V,VEL,VV,X,X1,Y,Y1,YY,YY2,Z,Z0,Z01
-      double precision Z02,ZEN,ZH1,ZH2,ZRATIO,ZZ
+      double precision Z02,ZEN,ZH,ZH1,ZH2,ZRATIO,ZZ,MAXSURF
 
       INTEGER I,ITER,NAIR,I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I11,I12,I91,I92
-     & ,I93,I94,I95,I96,I97,I98,I99,I100,I101
+     &,I93,I94,I95,I96,I97,I98,I99,I100,I101,I102,I103,I104,I105,I106
+     &,I107
       DIMENSION ZZ(10),VV(10),T(30)
       COMMON/DMYCRO/Z01,Z02,ZH1,ZH2
       COMMON/WMAIN/I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I11,I12,I91,I92,I93
-     & ,I94,I95,I96,I97,I98,I99,I100,I101
+     & ,I94,I95,I96,I97,I98,I99,I100,I101,I102,I103,I104,I105,I106,I107
+      COMMON/MAXTEMP/MAXSURF
+
 C
 C**** 1 SEGMENT VELOCITY PROFILE - W. PORTER
-C**** VELOCITY PROFILE - BUSSINGER
-C**** SUBLAYER MODEL - GARRATT AND HICKS
+C**** VELOCITY PROFILE - Businger, J. A., Wyngaard, J. C., Izumi, Y., & Bradley, E. F. (1971). Flux-Profile Relationships in the Atmospheric Surface Layer. Journal of the Atmospheric Sciences, 28(2), 181–189. doi:10.1175/1520-0469(1971)028<0181:FPRITA>2.0.CO;2
+C**** SUBLAYER MODEL - Garratt, J. R., & Hicks, B. B. (1973). Momentum, heat and water vapour transfer to and from natural and artificial surfaces. Quarterly Journal of the Royal Meteorological Society, 99(422), 680–687. doi:10.1002/qj.49709942209
 C     Z=REFERENCE HEIGHT
 C     Z0=ROUGHNESS HEIGHT
 C     T1=TEMPERATURE AT REFERENCE HEIGHT
@@ -77,7 +80,7 @@ C     ZH2=30.    13.                  60.          25
       PSI1(X)=2.*dLOG((1.+X)/2.)+dLOG((1.+X*X)/2.)-2.*ATAN(X)+3.14159/2
       PSI2(X)=2.*dLOG((1.+X*X)/2.)
       GAM=16.
-      RCPTKG=6.003E-8 !RHO*CP*T/(K*G) = 6.003E-8 IN CAL-MIN-CM-C UNITS
+      RCPTKG=6.003D-8 !RHO*CP*T/(K*G) = 6.003D-8 IN CAL-MIN-CM-C UNITS
 
 C     COMPUTING VEL. PROFILE PARAMETERS FROM 200 CM REFERENCE VELOCITY
       ZRATIO = Z/Z0 + 1 ! ratio of reference to roughness height
@@ -90,10 +93,14 @@ C     COMPUTING VEL. PROFILE PARAMETERS FROM 200 CM REFERENCE VELOCITY
       AMOL=-30.0 ! initial Monin-Obukhov length
       ITER=0 ! initialise counter
 
+C     Paul edit 9/12/19: adding alternative Campbell and Norman 1998 vertical air temperature profile calculation option
+      IF(ZH.GT.0)GO TO 1500
+
+
 C     CHECK FOR FREE CONVECTION (LAPSE) CONDITIONS
       IF(T1.GE.T3)GO TO 1000
-      IF(T3.LE.81.)GO TO 1000
-      IF(ZEN .GE. 81.)GO TO 1000
+      IF(T3.LE.MAXSURF)GO TO 1000
+      IF(ZEN .GE.90.)GO TO 1000
 
 C     NEGLECTING FREE CONV. CORRECTION (4%)FOR SEGMENTED PROFILES.
 
@@ -111,7 +118,7 @@ C
 C
       AMOLN=RCPTKG*USTAR**3/QC
       DEL=ABS((AMOLN-AMOL)/AMOL)
-      IF (DEL .LT. 1.0E-02) THEN
+      IF (DEL .LT. 1.0D-02) THEN
        GO TO 2
       ENDIF
       AMOL=AMOLN
@@ -149,6 +156,29 @@ C      COMPUTING FICTITIOUS TEMP. AT TOP OF SUBLAYER
        TZO=(T1*STB+T3*STS)/(STB+STS)
        T(I+20)=TZO+(T1-TZO)*dLOG(ZZ(I)/Z0+1)/DUM
     4 CONTINUE
+      RETURN
+    
+1500  CONTINUE
+      STS=.62/(Z0*USTAR/12.)**.45 !SUBLAYER STANTON NO.
+      STB=.64/DUM ! BULK STANTON NO.
+
+      QC=RCP*DIFFT*USTAR*STB/(1+STB/STS) ! convective heat transfer at the surface
+C     Use vertical temperature profile from Campbell and Norman 1998
+      IF(NAIR.LE.0) RETURN
+      DO 5 I=1,NAIR
+C      FILL OUT VEL. AND TEMP. PROFILES
+       IF((T1.GE.T3).or.(T3.LE.MAXSURF).or.(ZEN .GE. 90.))THEN
+        VV(I)=2.5*USTAR*dLOG(ZZ(I)/Z0+1)
+       ELSE
+        X1=PHI(ZZ(I))
+        Y1=PSI1(X1)
+        ADUM=ZZ(I)/Z0-Y1
+        VV(I)=2.5*USTAR*dLOG(ADUM)
+       ENDIF
+       A=(T1-T3)/(1-dLOG((Z-D0)/ZH))
+       T0=T1+A*dLOG((Z-D0)/ZH)
+       T(I+20)=T0-A*dLOG((ZZ(I)-D0)/ZH)
+    5 CONTINUE
       RETURN
 
  2000 continue
