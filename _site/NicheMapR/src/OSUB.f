@@ -25,7 +25,7 @@ C     IN COMMON STATEMENTS.
 C     VERSION 2 SEPT. 2000
       IMPLICIT NONE
 
-      DOUBLE PRECISION ALTT
+      DOUBLE PRECISION ALTT,ZH,D0
       DOUBLE PRECISION C,CP,DENAIR,DEP,DEPP,DP,DTAU,E,ERR1,ESAT
       DOUBLE PRECISION FIN,H,PI
       DOUBLE PRECISION LASTIME,MAXSHD,OUT,lastsurf,prevsnow
@@ -37,7 +37,7 @@ C     VERSION 2 SEPT. 2000
       DOUBLE PRECISION TSKY,ARAD,CRAD,CLOD,CLOUD,CLR,SOLR,QRADVG,QRADGR
       DOUBLE PRECISION RCSP,HGTP,RUFP,BEGP,PRTP,ERRP,snowout,curmoist
      & ,soiltemp,SLEP,NONP,SUN,PLT,rainfall,curhumid,surflux,IRDown
-      DOUBLE PRECISION CLEAR,QRADSK,SIGP,TAIR,SRAD,QEVAP,frosttest,vel2m
+      DOUBLE PRECISION CLEAR,QRADSK,SIGP,TAIR,SRAD,QEVAP,vel2m
       DOUBLE PRECISION htovpr,water,gwsurf,EP,zz,vv,curroot2
       DOUBLE PRECISION melthresh,time3,err
 
@@ -58,14 +58,17 @@ C     VERSION 2 SEPT. 2000
       double precision snowdens,snowmelt,snowtemp,cursnow,qphase,melt,
      & sumphase,sumphase2,snowage,prevden,qphase2,sumlayer,densrat,
      & cummelted,melted,snowfall,rainmelt,cpsnow,netsnow,hcap,meltheat,
-     & layermass,xtrain,QFREZE,grasshade
+     & layermass,xtrain,QFREZE,grasshade,MAXSURF,LAMBDA_E_D,CE
+      double precision Thconduct,Density,Spheat,dew,Q_AIR,Q_STAR_AIR
+      DOUBLE PRECISION Q_STAR_SURF,S,SIGMA_Q,G,R_N,GAMMA,ZP
 
       integer maxsnode2,maxsnode3,maxcount,js,numrun,rainhourly,hourly
       INTEGER I,IEND,IFINAL,ILOCT,IOUT,IPRINT,ITEST,trouble
-      INTEGER J,JULNUM,MM,DOY,N,NAIR,ND,NOUT,dew,writecsv,runsnow
+      INTEGER J,JULNUM,MM,DOY,N,NAIR,ND,NOUT,writecsv,runsnow
       INTEGER I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I11,I12,slipped,sat
       INTEGER I91,I92,I93,I94,I95,I96,runmoist,evenrain,step,timestep
-      INTEGER I97,I98,I99,I100,I101,errout,maxerr,errcount
+      INTEGER I97,I98,I99,I100,I101,I102,I103,I104,I105,I106,I107
+      INTEGER errout,maxerr,errcount
       INTEGER IPINT,NOSCAT,IUV,IALT,IDAYST,IDA,IEP,ISTART
 
       INTEGER methour,IRmode,microdaily,runshade,k,lamb,cnd
@@ -87,6 +90,7 @@ C      FILES 6,I2,I3 & I10 ARE CONSOLE, OUTPUT, METOUT & SOIL RESPECTIVELY
       DIMENSION curmoist2(18),curhumid2(18),curpot2(18),curroot2(18)
       DIMENSION PE(19),KS(19),BD(19),BB(19),L(19),curroot(18),DD(19)
       DIMENSION sumphase2(10)
+      DIMENSION Thconduct(30),Density(30),Spheat(30)
 
       COMMON/TABLE/TI(211),TD(211)
       COMMON/TABLE2/ILOCT(21)
@@ -103,7 +107,7 @@ C    BALANCES
       COMMON/WDSUB/TSKY,ARAD,CRAD,CLOUD,CLR,SOLR
       COMMON/WOSUB/DEPP
       COMMON/WMAIN/I1,I2,I3,I4,I5,I6,I7,I8,I9,I10,I11,I12,I91,I92,I93
-     & ,I94,I95,I96,I97,I98,I99,I100,I101
+     & ,I94,I95,I96,I97,I98,I99,I100,I101,I102,I103,I104,I105,I106,I107
       COMMON/DAYS/TANNUL
       COMMON/DAYJUL/JULNUM,DOY
       COMMON/SNOWPRED/snowtemp,snowdens,snowmelt,snownode,minsnow
@@ -114,6 +118,7 @@ C     PERCENT GROUND SHADE & ELEVATION (M) TO METOUT
       COMMON/LOCLHUM/RHLOCL
       COMMON/VIEWFACT/VIEWF
       COMMON/SOYFILS/DENDAY,SPDAY,TKDAY
+      COMMON/SOYVAR2/Thconduct,Density,Spheat
       common/prevtime/lastime,temp,lastsurf
       common/prevtime2/slipped
       common/soilmoist/condep,rainmult,maxpool
@@ -122,6 +127,7 @@ C     PERCENT GROUND SHADE & ELEVATION (M) TO METOUT
       COMMON/DAILY/microdaily
       COMMON/NICHEMAPRIO/SLE,ERR,soilprop,surflux
       common/moistcom/moist,ep
+      COMMON/CMYCRO/ZH,D0
       COMMON/DMYCRO/Z01,Z02,ZH1,ZH2
       COMMON/AIRRAY/ZZ(10),VV(10)
       common/campbell/PE,KS,BB,BD,L,LAI,DD
@@ -139,6 +145,7 @@ C     PERCENT GROUND SHADE & ELEVATION (M) TO METOUT
       COMMON/WIOCONS2/IPINT,NOSCAT,IUV,IALT,IDAYST,IDA,IEP,ISTART,IEND
       common/errormsg/errout,maxerr,errcount
       COMMON/WICHDAY/NUMRUN
+      COMMON/MAXTEMP/MAXSURF
 
       DATA NAME/'TIME ','TAIR','TSKY','TSURF','VEL','SOL  ','TLIZ',
      1 'QSOLAR','QRAD','QCOND','QCONV','MOL ','STEP','T2','T3','T4'
@@ -149,18 +156,18 @@ C     PERCENT GROUND SHADE & ELEVATION (M) TO METOUT
      5,'VA8','VA9','VA10','T/60  ','M-E','T*60'/
       DATA IFINAL/0/
       PI=3.14159
-      if((time.gt.0).and.(int(time).eq.int(lastime)))then
+      if((time.gt.0.D0).and.(int(time).eq.int(lastime)))then
           trouble=trouble+1
       endif
       
 C     INTITIALISE
       maxsnode3=0
-      rainmelt=0.
-      snowout=0.
-      snowpres=0.
+      rainmelt=0.D0
+      snowout=0.D0
+      snowpres=0.D0
       methour=0
       if(runsnow.eq.0)then
-       maxsnode1=0.
+       maxsnode1=0.D0
        maxsnode2=0
       endif
 
@@ -188,30 +195,30 @@ C
 C     DAY COUNTER TO DELETE OUTPUT FOR REPLICATE DAYS
 C     NEEDED TO ESTABLISH SOIL STEADY PERIODICS
       HTOFN=333.500 !J/g
-      melted=0.
+      melted=0.D0
       melthresh=0.4
-      time2=0.
-      time3=0.
-      melt=0.
-      layermass(:)=0.
-      qphase(:)=0.
-      qphase2(:)=0.
-      curhumid(:)=0.
-      curmoist(:)=0.
-      curpot(:)=0.
-      curroot(:)=0.
-      denday2(:)=0.
-      meant(:)=0.
-      meantpast(:)=0.
-      oldmoist(:)=0.
-      out2(:)=0.
-      soiltemp(:)=0.
-      spday2(:)=0.
-      tkday2(:)=0.
+      time2=0.D0
+      time3=0.D0
+      melt=0.D0
+      layermass(:)=0.D0
+      qphase(:)=0.D0
+      qphase2(:)=0.D0
+      curhumid(:)=0.D0
+      curmoist(:)=0.D0
+      curpot(:)=0.D0
+      curroot(:)=0.D0
+      denday2(:)=0.D0
+      meant(:)=0.D0
+      meantpast(:)=0.D0
+      oldmoist(:)=0.D0
+      out2(:)=0.D0
+      soiltemp(:)=0.D0
+      spday2(:)=0.D0
+      tkday2(:)=0.D0
       do 876 i=1,25
        if(time.ge.ti(i+11))then
         time2=ti(i+11)
-        time3=time2-60.
+        time3=time2-60.D0
        endif
 876   continue
       if(time.ne.time2)then
@@ -220,28 +227,30 @@ C     NEEDED TO ESTABLISH SOIL STEADY PERIODICS
       if(runsnow.eq.1)then
 c     check if no snow and make temp equal top temp
        do 555 i=1,8
-        if(snode(i).lt.1e-8)then
+        if(snode(i).lt.1D-8)then
          tt(i)=tt(1)
          t(i)=tt(1)
-         if((snode(8).lt.1e-8).and.(cursnow.lt.1e-8))then
+         if((snode(8).lt.1D-8).and.(cursnow.lt.1D-8))then
           tt(9)=tt(1)
           t(9)=t(1)
          endif
         endif
   555  continue
       endif
-      IF(TIME .GT. 0.0) GO TO 5
+      IF(TIME .GT. 0.D0) GO TO 5
        IFINAL=IFINAL+1
        IF(IFINAL .EQ. 1)THEN
 C       SETTING SNOW VARIABLE
 C       SETTING THIS MONTH'S SURFACE REFLECTIVITY FROM THE ABSORPTIVITIES
-        SABNEW = 1.0 - REFLS(DOY)
+        SABNEW = 1.D0 - REFLS(DOY)
 C       SETTING THIS MONTH'S PERCENT OF SURFACE WITH FREE WATER/SNOW ON IT
         PTWET = PCTWET(DOY)
         rainfall=RAIN(DOY)
         CONTINUE
        ENDIF
     5 CONTINUE
+
+      rainfall=RAIN(DOY)
 
       if(runsnow.eq.1)then
        PTWET=PCTWET(DOY)
@@ -372,7 +381,7 @@ C      CLEAR SKY RADIANT TEMPERATURE
        CLR=1.- (CLOUD/100.)
 C      CLEAR SKY RADIANT TEMPERATURE
        if(int(IRmode).eq.0)then
-c       Campbell and Norman eq. 10.10 to get emissivity of sky
+c       Campbell and Norman 1998 eq. 10.10 to get emissivity of sky
         RH = TAB('REL',TIME)
         if(RH.gt.100.)then
          RH= 100.
@@ -391,7 +400,7 @@ C       EQUATIONS FROM SUBROUTINE DRYAIR    (TRACY ET AL,1972)
 c       Below is the Gates formula (7.1)
 c       ARAD=(1.22*0.00000005673*(TAIR+273.)**4-171)
        else
-c       Swinbank, Eq. 10.11 in Campbell and Norman
+c       Swinbank, Eq. 10.11 in Campbell and Norman 1998
         ARAD=(0.0000092*(TAIR+273.16)**2)*0.0000000567*(TAIR+273.16)**4
      & *60./(4.185*10000.)
        endif
@@ -495,7 +504,7 @@ c     convert to W/m2
        endif
       if((OUT(2).le.snowtemp).and.(rainfall.gt.0.0))then
 c       compute snow fall using conversion from daily rain to daily snow (disaggregated over 24 hours) and convert from mm rain to cm snow
-        if((time.lt.1e-8).or.(int(rainhourly).eq.1))then
+        if((time.lt.1D-8).or.(int(rainhourly).eq.1))then
 c        account for undercatch
          snowfall=((rainfall*rainmult*undercatch*0.1)/snowdens)! snowfall in cm/m2
          if(SHAYD.gt.0)then
@@ -503,18 +512,18 @@ c        account for undercatch
          endif
          daysincesnow=0.3 !resets daysincesnow and ensures that the equation for snow albedo gives 90% reflectance immediately upon snowfall
         else
-         snowfall=0.
+         snowfall=0.D0
          daysincesnow=daysincesnow+1./25.
         endif
        else
-        snowfall=0.
+        snowfall=0.D0
         daysincesnow=daysincesnow+1./25.
        endif
        if(daysincesnow.lt.0.3)then
         daysincesnow=0.3 !ensures that the equation for snow albedo gives 90% reflectance immediately upon snowfall
        endif
       else
-       snowfall=0.
+       snowfall=0.D0
       endif
       if(out(4).gt.0)then
        HTOVPR=2500.8-2.36*out(4)+0.0016*out(4)**2-0.00006*out(4)**3
@@ -539,26 +548,26 @@ c     don't lose water if heat is just going into melting snow
 c       write(*,*) "in osub"
 c       write(*,*) methour
 c      get cm snow lost due to rainfall - from Anderson model
-       if((OUT(2).ge.snowtemp).and.(rainfall.gt.0).and.((time.lt.1e-8)
+       if((OUT(2).ge.snowtemp).and.(rainfall.gt.0).and.((time.lt.1D-8)
      & .or.(int(rainhourly).eq.1)))then ! mean air temperature warmer than snow temperature and more than 1 mm rain and midnight
         rainmelt=(rainmeltf*rainfall*(OUT(2)))*24./10./snowdens ! melt the snow as a function of the air temperature
         if(int(rainhourly).eq.1)then
          rainmelt=rainmelt/24.
         endif
         if(rainmelt.lt.0)then
-         rainmelt=0.
+         rainmelt=0.D0
         endif
        else
-        rainmelt=0.
+        rainmelt=0.D0
        endif
        netsnow=snowfall-gwsurf*0.0001/snowdens ! convert gwsurf from g/h/m2 (cm3/h/m2) to cm/m2 of evap, and then to snow depth equivalent (1mm/m2 rain/evap = 1000 cm3/m2)
        if(netsnow.lt.0)then
         netsnow=0
        endif
        netsnow = netsnow + xtrain/snowdens ! add any extra snow carried over by xtrain
-       xtrain=0. !reset xtrain
+       xtrain=0.D0 !reset xtrain
        maxsnode2=int(maxsnode1)
-       melt=0.
+       melt=0.D0
        if((methour.eq.1).and.(DOY.eq.1))then
         meanT=tt
        else
@@ -568,11 +577,11 @@ c      get cm snow lost due to rainfall - from Anderson model
 98      continue
        endif
        if((methour.eq.1).and.(DOY.eq.1))then
-        melt=0.
+        melt=0.D0
        else
         prevsnow=snowhr(methour-1)
         if(prevsnow.ge.minsnow)then ! melt the snow
-        WB = 0.
+        WB = 0.D0
         DP = 999.
 C       BP CALCULATED FROM ALTITUDE USING THE STANDARD ATMOSPHERE
 C       EQUATIONS FROM SUBROUTINE DRYAIR    (TRACY ET AL,1972)
@@ -589,16 +598,16 @@ C       EQUATIONS FROM SUBROUTINE DRYAIR    (TRACY ET AL,1972)
           if(j.ne.maxsnode2+1)then ! not at the bottom yet
            if(meanT(cnd).gt.melthresh)then ! check if greater than threshold above 0 deg C (here 0.4 deg C)
             meltheat=(meanT(cnd)-melthresh)*cpsnow* ! g snow melted (change in temp x heat capacity x g snow (1m2 * height of layer)
-     &       (snode(max(1,j+8-maxsnode2))-snode(max(1,cnd)))*10000* ! plus mass times heat of fusion since the layer got above zero
+     &       (snode(max(1,j+8-maxsnode2))-snode(max(1,cnd)))*10000.D0* ! plus mass times heat of fusion since the layer got above zero
      &        snowdens+HTOFN*(snode(max(1,j+8-maxsnode2))-
-     &        snode(max(1,cnd)))*10000*snowdens
+     &        snode(max(1,cnd)))*10000.D0*snowdens
             melt=melt+meltheat/HTOFN !(snow depth in cm x snow density in g/cm3 converted units of g/m2) gives J heat input,
            endif                     ! divided by heat of fusion to get g melted
           else
            if(meanT(cnd).gt.melthresh)then ! doing deepest node - depth here is flexible and is the difference between current snow and the
             meltheat=(meanT(cnd)-melthresh)*cpsnow* ! height of the current maximum node used of the 8 possible
-     &       (cursnow-snownode(max(1,maxsnode2)))*10000*snowdens+
-     &       HTOFN*(cursnow-snownode(max(1,maxsnode2)))*10000*snowdens
+     &       (cursnow-snownode(max(1,maxsnode2)))*10000.D0*snowdens+
+     &      HTOFN*(cursnow-snownode(max(1,maxsnode2)))*10000.D0*snowdens
             melt=melt+meltheat/HTOFN
            endif
           endif
@@ -607,40 +616,40 @@ C       EQUATIONS FROM SUBROUTINE DRYAIR    (TRACY ET AL,1972)
             if(j.ne.maxsnode2+1)then ! not at bottom yet
              if((meanTpast(cnd).ge.0).and.(meanT(cnd).le.0))then ! phase change, freezing
               layermass(cnd)=max(0.D+0,(snode(max(1,j+8-maxsnode2))-
-     &        snode(max(1,cnd)))*10000*snowdens)
+     &        snode(max(1,cnd)))*10000.D0*snowdens)
               qphase(max(1,cnd))=(meanTpast(max(1,cnd))-meanT(max(1,cnd)
      &        ))*layermass(max(1,cnd))*cpsnow
-              t(cnd)=0.
-              t(cnd+1)=0.
-              tt(cnd)=0.
-              tt(cnd+1)=0.
-              y(cnd)=0.
-              y(cnd+1)=0.
+              t(cnd)=0.D0
+              t(cnd+1)=0.D0
+              tt(cnd)=0.D0
+              tt(cnd+1)=0.D0
+              y(cnd)=0.D0
+              y(cnd+1)=0.D0
              endif
             else
-             if((meanTpast(max(1,cnd)).ge.0).and.
-     &(meanT(max(1,cnd)).le.0))then ! phase change, freezing        
+             if((meanTpast(max(1,cnd)).ge.0.D0).and.
+     &(meanT(max(1,cnd)).le.0.))then ! phase change, freezing        
               layermass(cnd)=max(0.D+0,(cursnow-snownode(max(1,maxsnode2
      &        )))*10000*snowdens)
               qphase(max(1,cnd))=(meanTpast(max(1,cnd))-meanT(max(1,cnd
      &        )))*layermass(max(1,cnd))*cpsnow
-              t(max(1,cnd))=0.
-              t(cnd+1)=0.
-              tt(max(1,cnd))=0.
-              tt(cnd+1)=0.
-              y(max(1,cnd))=0.
-              y(cnd+1)=0.
+              t(max(1,cnd))=0.D0
+              t(cnd+1)=0.D0
+              tt(max(1,cnd))=0.D0
+              tt(cnd+1)=0.D0
+              y(max(1,cnd))=0.D0
+              y(cnd+1)=0.D0
              endif
             endif
            else
-            if((meanTpast(8).ge.0).and.(meanT(8).le.0))then ! phase change, freezing
-             layermass(8)=max(0.D+0,(cursnow-snownode(8))*10000
+            if((meanTpast(8).ge.0.D0).and.(meanT(8).le.0.D0))then ! phase change, freezing
+             layermass(8)=max(0.D+0,(cursnow-snownode(8))*10000.D0
      &       *snowdens)
              qphase(8)=(meanTpast(8)-meanT(8))*layermass(8)*
      &       cpsnow
-             t(max(1,cnd))=0.
-             tt(max(1,cnd))=0.
-             y(max(1,cnd))=0.
+             t(max(1,cnd))=0.D0
+             tt(max(1,cnd))=0.D0
+             y(max(1,cnd))=0.D0
             endif
            endif
           endif
@@ -652,8 +661,8 @@ C       EQUATIONS FROM SUBROUTINE DRYAIR    (TRACY ET AL,1972)
            do 1121 j=1,(maxsnode2+1) ! loop through snow nodes
             if(j.lt.9)then
              cnd=j+7-maxsnode2
-             if((t(max(1,cnd)).lt.-1e-8).and.(qphase(max(1,cnd))
-     &        .gt.0))then
+             if((t(max(1,cnd)).lt.-1D-8).and.(qphase(max(1,cnd))
+     &        .gt.0.D0))then
               t(max(1,cnd))=-0.5
               t(cnd+1)=-0.5
               tt(max(1,cnd))=-0.5
@@ -664,7 +673,7 @@ C       EQUATIONS FROM SUBROUTINE DRYAIR    (TRACY ET AL,1972)
              endif
             endif
 1121       continue
-           sumphase=0.
+           sumphase=0.D0
           endif
          !write(*,*) sumphase
          !write(*,*) snode
@@ -674,9 +683,9 @@ C       EQUATIONS FROM SUBROUTINE DRYAIR    (TRACY ET AL,1972)
        melted=melt*0.0001 ! convert from g/m2 of ice to cm snow
        if(DOY.gt.1)then
         melted=melted*snowmelt
-        QFREZE=melted*(1-snowmelt)*79.7/60./10000. ! convert from g snow melted to cal/min/cm2, latent heat of fusion being 79.7 calories per gram, only affecting surface layer!
+        QFREZE=melted*(1-snowmelt)*79.7/60./10000.D0 ! convert from g snow melted to cal/min/cm2, latent heat of fusion being 79.7 calories per gram, only affecting surface layer!
         if(snowmelt.gt.1)then
-         QFREZE=0.
+         QFREZE=0.D0
         endif
        endif
        cummelted=melted+cummelted
@@ -686,8 +695,8 @@ C       EQUATIONS FROM SUBROUTINE DRYAIR    (TRACY ET AL,1972)
        if(methour.gt.1)then
         cursnow=snowhr(methour-1)+netsnow-rainmelt-melted
         snowhr(methour)=cursnow
-        if(snowhr(methour).lt.0)then
-         snowhr(methour)=0.
+        if(snowhr(methour).lt.0.D0)then
+         snowhr(methour)=0.D0
         endif
         snowpres = snowhr(methour)
         snowtest = snowhr(methour-1)
@@ -695,55 +704,56 @@ C       EQUATIONS FROM SUBROUTINE DRYAIR    (TRACY ET AL,1972)
          if(cummelted.gt.snowhr(methour-1))then
           cummelted=snowhr(methour-1)
          endif
-         cummelted=0.
+         cummelted=0.D0
         endif
        endif
-       if(snowhr(methour).lt.0)then
-        snowhr(methour)=0.
+       if(snowhr(methour).lt.0.D0)then
+        snowhr(methour)=0.D0
        endif
        if(methour.gt.1)then
-       if((snowhr(methour).lt.minsnow).and.(snowhr(methour-1).lt.1e-8)
+       if((snowhr(methour).lt.minsnow).and.(snowhr(methour-1).lt.1D-8)
      &)then
         xtrain=snowhr(methour)*snowdens !save snow below min level and add to next hour
-        snowhr(methour)=0.
+        snowhr(methour)=0.D0
        endif
        endif
        cursnow=snowhr(methour)
 C      make sure snow is 0 degrees or less, now that melting is done
        do 102 i=1,8
         if(snode(i).gt.0)then
-         if(tt(i).gt.0)then
-          t(i)=0
-          tt(i)=0
-          y(i)=0
-          if((i.eq.8).and.(tt(9).gt.0))then
-           t(9)=0
-           tt(9)=0
-           y(9)=0
+         if(tt(i).gt.0.D0)then
+          t(i)=0.D0
+          tt(i)=0.D0
+          y(i)=0.D0
+          if((i.eq.8).and.(tt(9).gt.0.D0))then
+           t(9)=0.D0
+           tt(9)=0.D0
+           y(9)=0.D0
           endif
          endif
         endif
 102    continue
 c      ensure that recently fallen snow is frozen
        if(methour.gt.1)then
-        if((snowhr(methour).gt.0).and.(snowhr(methour-1).lt.1e-8))then
+        if((snowhr(methour).gt.0.D0).and.(snowhr(methour-1).lt.
+     &   1D-8))then
          do 101 i=1,8
           if(snowhr(methour).gt.snownode(i))then
            maxsnode3=i
           endif
 101      continue
          if(maxsnode3.eq.0)then
-          if(tt(9).gt.0)then
-           t(9)=0
-           tt(9)=0
-           y(9)=0
+          if(tt(9).gt.0.D0)then
+           t(9)=0.D0
+           tt(9)=0.D0
+           y(9)=0.D0
           endif
          else
           do 989 i=9-maxsnode3,8-maxsnode3
-           if(tt(i).gt.0)then
-            t(i)=0
-            tt(i)=0
-            y(i)=0
+           if(tt(i).gt.0.D0)then
+            t(i)=0.D0
+            tt(i)=0.D0
+            y(i)=0.D0
            endif
 989       continue
          endif
@@ -756,11 +766,11 @@ c      ensure that recently fallen snow is frozen
         call snowlayer
        endif
        if(methour.gt.1)then
-        if(snowhr(methour-1).gt.0)then
+        if(snowhr(methour-1).gt.0.D0)then
          snowalbedo=(-9.8740*dlog(daysincesnow) + 78.3434)/100.
          SABNEW = 1-snowalbedo
 C        SETTING THIS MONTH'S PERCENT OF SURFACE WITH FREE WATER/SNOW ON IT
-         PTWET = 100
+         PTWET = 100.
          SLE = 0.98
         else
          SABNEW = 1.0 - REFLS(DOY)
@@ -795,21 +805,21 @@ C       SETTING THIS MONTH'S PERCENT OF SURFACE WITH FREE WATER/SNOW ON IT
        call snowlayer
        tt_past=tt
       else
-       xtrain=0.
-       SNOWOUT=0.
+       xtrain=0.D0
+       SNOWOUT=0.D0
       endif
       ! count days of snow in a row
       if((methour.eq.1).and.(DOY.eq.1))then
-       snowage=0.
+       snowage=0.D0
       else
-       if(snowhr(methour).gt.0.)then
-        if(snowhr(methour-1).gt.0.)then
+       if(snowhr(methour).gt.0.D0)then
+        if(snowhr(methour-1).gt.0.D0)then
          snowage=snowage+1./25.
         else
-         snowage=0.
+         snowage=0.D0
         endif
        else
-        snowage=0.
+        snowage=0.D0
        endif
       endif
       prevden=snowdens
@@ -840,8 +850,8 @@ c      choosing between even rainfall through the day or one event at midnight
        else
         if(int(rainhourly).eq.0)then
          if(evenrain.eq.0)then
-          if((time.gt.1e-8).or.(cursnow.gt.0))then
-           rainfallb=0
+          if((time.gt.1D-8).or.(cursnow.gt.0))then
+           rainfallb=0.D0
           endif
           condep=condep+rainfallb*rainmult+melted
          else
@@ -851,19 +861,19 @@ c      choosing between even rainfall through the day or one event at midnight
          condep=condep+rainfallb*rainmult+melted
         endif
        endif
-       if(condep.lt.0.)then
-        condep=0.
+       if(condep.lt.0.D0)then
+        condep=0.D0
        endif
        soiltemp(1)=OUT(4)
        soiltemp(2:10)=OUT(14:22)
-       if(snowout.lt.1e-8)then
+       if(snowout.lt.1D-8)then
 c       now compute potential evaporation, EP
         VELR=TAB('VEL',TIME)
 C       COMPUTE VELOCITY AND TEMPERATURE PROFILES
         IF((ZH1.LE.0.000).AND.(ZH2.LE.0.000))THEN
 C        NO SEGMENTED VELOCITY PROFILE (SINGLE LOG PROFILE)
-         CALL MICRO(HGTP,RUFP,TAIR,soiltemp(1),VELR,QCONV,AMOL,NAIR,ZZ
-     &,VV,T,ZENR)
+         CALL MICRO(HGTP,RUFP,ZH,D0,TAIR,soiltemp(1),VELR,QCONV,AMOL,
+     &NAIR,ZZ,VV,T,ZENR)
         ELSE
 C        SEGMENTED VELOCITY PROFILE (VEGETATION OR OTHER OBJECTS MODIFYING VELOCITY PROFILE)
          CALL MICROSEGMT(HGTP,RUFP,TAIR,soiltemp(1),VELR,QCONV,AMOL,NAIR
@@ -900,7 +910,7 @@ C       CHECK FOR OUTSIZE T(1)
         IF(TTEST.GT. 100)THEN
          T(1)=TAIR + 1.0
         ENDIF
-        HC=max(ABS((QCONV*4.184/60.*10000)/(T(1)-TAIR)),0.5D+0)
+        HC=max(ABS((QCONV*4.184/60.*10000.D0)/(T(1)-TAIR)),0.5D+0)
         HD=(HC/(CP*DENAIR))*(0.71/0.60)**0.666
         sat=2 ! setting for evap to simulate wet surface and return SI units
         CALL EVAP(soiltemp(1),TAIR,RH,HD,QEVAP,SAT)
@@ -910,10 +920,10 @@ C       CHECK FOR OUTSIZE T(1)
         else
          HTOVPR=2834.1-0.29*soiltemp(1)-0.004*soiltemp(1)**2
         endif
-        HTOVPR=HTOVPR*1000
+        HTOVPR=HTOVPR*1000.D0
 c       evaporation potential, mm/s (kg/s)
         EP = QEVAP/HTOVPR
-        if(EP.le.0)then
+        if(EP.le.0.D0)then
          EP=0.0000001
         endif
         SAT=1
@@ -921,21 +931,22 @@ c       evaporation potential, mm/s (kg/s)
        else
         EP=0.0000001
        endif ! end check for snow cover - no evap if there is
-       if((condep.gt.0).or.((snowout.gt.0).and.(soiltemp(1).gt.0)))then
+       if((condep.gt.0.D0).or.((snowout.gt.0.D0).and.(soiltemp(1).gt.
+     &  0.D0)))then
         curmoist(1)=1.-BD(1)/DD(1)
         curmoist2(1)=curmoist(1)
        endif
 
        CALL RELHUMID
-       if(RHLOCL.ge.99)then
-        RHLOCL=99
+       if(RHLOCL.ge.99.)then
+        RHLOCL=99.
        endif
-       if(rhlocl.lt.0)then
-        rhlocl=0.
+       if(rhlocl.lt.0.D0)then
+        rhlocl=0.D0
        endif
        oldmoist=curmoist
        oldcondep=condep
-       wccfinal=0
+       wccfinal=0.D0
        curmoist=oldmoist
        condep=oldcondep
        timestep=3600/10
@@ -948,7 +959,7 @@ c       evaporation potential, mm/s (kg/s)
          wcc=0
         endif
         if(surflux.lt.0)then
-         surflux=0
+         surflux=0.D0
         endif
         j=1
         do 228 k=1,18
@@ -965,38 +976,38 @@ c       evaporation potential, mm/s (kg/s)
         curpot(10)=curpot2(18)
         wccfinal=wccfinal+wcc
         condep=condep-WCC-surflux
-        if(snowout.lt.1e-8)then
-         ptwet=surflux/(ep*timestep)*100
+        if(snowout.lt.1D-8)then
+         ptwet=surflux/(ep*real(timestep,8))*100.D0
         endif
-        if(condep.lt.0)then
-         condep=0.
+        if(condep.lt.0.D0)then
+         condep=0.D0
         endif
-        if(condep.gt.0)then
+        if(condep.gt.0.D0)then
          curmoist(1)=1-BD(1)/DD(1)
          curmoist2(1)=curmoist(1)
         endif
 222    continue
-       if(condep.lt.0)then
-        condep=0.
+       if(condep.lt.0.D0)then
+        condep=0.D0
        endif
        if(condep.gt.maxpool)then
         condep=maxpool
        endif
-       if(snowout.lt.1e-8)then
+       if(snowout.lt.1D-8)then
         SABNEW = 1.0 - REFLS(DOY)
        endif
 c      curmoist(1)=condep/((depp(2)*10)*(1-BD(1)/DD(1)))
        moists(1:10,DOY)=curmoist
        moist(1:10)=curmoist
-       if(ptwet.lt.0)then
-        ptwet=0
+       if(ptwet.lt.0.D0)then
+        ptwet=0.D0
        endif
-       if(ptwet.gt.100)then
-        ptwet=100
+       if(ptwet.gt.100.)then
+        ptwet=100.
        endif
-       if(snowout.lt.1e-8)then
-        if(condep.gt.0)then
-         if(condep.gt.10)then ! use Fresnel's reflection law, p. 212 Gates 1980
+       if(snowout.lt.1D-8)then
+        if(condep.gt.0.D0)then
+         if(condep.gt.10.)then ! use Fresnel's reflection law, p. 212 Gates 1980
           inrad = TAB('ZEN',TIME)*pi/180.
           refrad=asin(sin(inrad)/1.33)
           SABNEW = 1.-0.5*((sin(inrad-refrad)**2/(sin(inrad+refrad)**2))
@@ -1014,35 +1025,77 @@ c*******************************************************************
 c     end check for soil moisture model running
 
       if(gwsurf.lt.0)then
-       gwsurf=0
+       gwsurf=0.D0
       endif
       if(int(SIOUT(1)).eq.1440)then
        methour=(int(1380/60)+1)+24*(DOY-1)
       else
        methour=(int(SIOUT(1)/60)+1)+24*(DOY-1)
       endif
-      tide=0
+      tide=0.D0
       tide=tides(methour,3)
 c      get wave splash value and if greater than zero, override prev pctwet value
-      if(tide.gt.0)then
+      if(tide.gt.0.D0)then
        PTWET=tides(methour,3)
       endif
 
-      frosttest=(out(34)+out(4))/2.
-      if((QEVAP.lt.-0.0000025).and.(out(34).lt.0))then
-c    if((QEVAP.lt.-0.0000025).and.(out(4).lt.0))then
-c    if((out(34).lt.0))then
-c    if((QEVAP.lt.0).and.(frosttest.lt.0))then
-       FROST = 1
+C	  CALCULATING DEWFALL
+c     caculations based on Garratt, J. R., & Segal, M. (1988). On the contribution of atmospheric moisture to dew formation. Boundary-Layer Meteorology, 45(3), 209–236. https://doi.org/10.1007/BF01066671
+c     NOTE: difference between this model and Garratt & Segal is that QCONV +VE means gain in this model and loss in Garratt and Segal
+      soiltemp(1)=OUT(4)
+      VEL2M=TAB('VEL',TIME)/(100.*60.)
+      RH = TAB('REL',TIME)
+      if(RH.gt.100.)then
+       RH= 100.
+      endif
+      CALL MICRO(HGTP,RUFP,ZH,D0,TAIR,soiltemp(1),VELR,QCONV,AMOL,
+     &NAIR,ZZ,VV,T,ZENR)
+      WB = 0.
+      DP = 999.
+C     BP CALCULATED FROM ALTITUDE USING THE STANDARD ATMOSPHERE
+C     EQUATIONS FROM SUBROUTINE DRYAIR    (TRACY ET AL,1972)
+      PSTD=101325.
+      PATMOS=PSTD*((1.-(0.0065*ALTT/288.))**(1./0.190284))
+      BP=PATMOS
+      CALL WETAIR (TAIR,WB,RH,DP,BP,E,ESAT,VD,RW,TVIR,TVINC,DENAIR,
+     &      CP,WTRPOT)
+      Q_AIR=VD/DENAIR ! kg water / kg air, air specific humidity
+      RH=100.
+      CALL WETAIR (TAIR,WB,RH,DP,BP,E,ESAT,VD,RW,TVIR,TVINC,DENAIR,
+     &      CP,WTRPOT)
+      Q_STAR_AIR=VD/DENAIR ! kg water / kg air, air saturated specific humidity
+      CALL WETAIR(soiltemp(1),WB,RH,DP,BP,E,ESAT,VD,RW,TVIR,TVINC,
+     &      DENAIR,CP,WTRPOT) 
+      Q_STAR_SURF=VD/DENAIR ! kg water / kg air, surface saturated specific humidity
+      S=(Q_STAR_SURF-Q_STAR_AIR)/(soiltemp(1)-TAIR) ! kg water / kg air / K, slope of saturation curve, EQ.5 FROM GARRATT ET AL 1988
+      if(soiltemp(1).gt.0)then
+       HTOVPR=2500.8-2.36*soiltemp(1)+0.0016*soiltemp(1)**2-0.00006
+     &*soiltemp(1)**3
       else
-       FROST = 0
+       HTOVPR=2834.1-0.29*soiltemp(1)-0.004*soiltemp(1)**2
+      endif
+      HTOVPR=HTOVPR*1000.D0 ! J / kg, latent heat of vapourisation
+      GAMMA=CP/HTOVPR ! kg water / kg air / K, psychometric constant
+      SIGMA_Q=Q_STAR_AIR-Q_AIR ! kg water / kg air, difference between saturated and actual specific humidity of air
+      R_N=(SOLR+QRAD)*4.185*10000./60. ! W / m2, net radiation
+      G=(SOLR+QRAD+QCONV-QEVAP)*4.185*10000./60. ! W / m2, soil heat flux (negative at night)
+      ZP=(RUFP/100.)/EXP(REAL(2.0)) ! m, 'analogous scaling length for property "p"', ln(z_0/z_p) = 2. in GARRATT ET AL 1988 p. 234
+      CE=(0.4**2.)/(LOG((HGTP/100.)/(RUFP/100.))*LOG((HGTP/100.)/ZP)) ! -, bulk transfer coefficient, eq. A10 FROM GARRATT ET AL 1988
+      LAMBDA_E_D=(S/(S+GAMMA))*(R_N-G)
+     & +(GAMMA/(S+GAMMA))*(DENAIR*HTOVPR*SIGMA_Q)*CE*VEL2M ! W, EQ. 6B FROM GARRATT ET AL 1988
+       DEW = -1.*LAMBDA_E_D/HTOVPR * 3600. ! kg / h / m2 = mm / h
+      IF((DEW.LT.0.).or.(cursnow.gt.0))THEN
+       DEW=0.
+      ENDIF
+
+C	  TESTING FOR FROST
+      if((cursnow.eq.0).and.(DEW.GT.0.).and.(out(34).lt.0))then
+       FROST = DEW
+       DEW = 0.
+      else
+       FROST = 0.
       endif
 
-      if(QEVAP.lt.0)then
-       DEW = 1
-      else
-       DEW = 0
-      endif
 C     END OF OUTPUT SETUP
 
 
@@ -1051,11 +1104,11 @@ c     SET UP LOCAL RELATIVE HUMIDITY
       CALL RELHUMID
 
       TKDAY2=(TKDAY/60.)*418.6
-      SPDAY2=SPDAY*4185
-      DENDAY2=DENDAY*1.0E+3
+      SPDAY2=SPDAY*4185.
+      DENDAY2=DENDAY*1.0D+3
 
       if(slipped.gt.0)then
-       if(time.le.1380)then
+       if(time.le.1380.)then
         IF(SHAYD.LT.MAXSHD)THEN
          methour=int(temp(31)-1)
          metout(methour,1:18)=temp(1:18)
@@ -1132,11 +1185,11 @@ c     SET UP LOCAL RELATIVE HUMIDITY
 c     end check for previous slippage
       endif
 
-      IF (((DOY.eq.1).and.(time.lt.1e-8)).or.(int(TIME).NE.int(LASTIME))
-     & .and.(int(max(maxval(abs(out(14:22))),abs(out(4)))).ne.81).or.
-     & ((int(lastsurf).eq.81)).or.(int(abs(out(4))).eq.81).or.
-     &((int(TIME).eq.int(LASTIME)).and.(int(max(maxval(abs(out(14:22))),
-     &abs(out(4)))).ne.81))) THEN
+      IF (((DOY.eq.1).and.(time.lt.1D-8)).or.(int(TIME).NE.int(LASTIME))
+     & .and.(int(max(maxval(abs(out(14:22))),abs(out(4)))).ne.MAXSURF)
+     & .or.((int(lastsurf).eq.int(MAXSURF))).or.(int(abs(out(4)))
+     &.eq.int(MAXSURF)).or.((int(TIME).eq.int(LASTIME)).and.
+     &(int(max(maxval(abs(out(14:22))),abs(out(4)))).ne.MAXSURF))) THEN
        if(SIOUT(1).le.1380)then
         IF(SHAYD.LT.MAXSHD)THEN
          methour=0
@@ -1190,9 +1243,18 @@ c     end check for previous slippage
           soilpot(methour,3:12)=curpot(1:10)
           plant(methour,1)=JULDAY(DOY)
           plant(methour,2)=SIOUT(1)
-          plant(methour,3)=trans2 * 1000 * 3600 !g/m2/h
+          plant(methour,3)=trans2 * 1000.D0 * 3600.D0 !g/m2/h
           plant(methour,4)=leafpot
           plant(methour,5:14)=curroot(1:10)
+          tcond(methour,1)=JULDAY(DOY)
+          tcond(methour,2)=SIOUT(1)
+          tcond(methour,3:12)=(Thconduct(1:10)/60.D0)*418.6D0
+          specheat(methour,1)=JULDAY(DOY)
+          specheat(methour,2)=SIOUT(1)
+          specheat(methour,3:12)=spheat(1:10)*4185.D0
+          densit(methour,1)=JULDAY(DOY)
+          densit(methour,2)=SIOUT(1)
+          densit(methour,3:12)=Density(1:10)*1.0D+3            
          endif
          if(writecsv.eq.1)then
           WRITE(I3,154) metout(methour,1),",",metout(methour,2),",",
@@ -1229,6 +1291,21 @@ c     end check for previous slippage
      &(methour,8),",",plant(methour,9),",",plant(methour,10)
      &,",",plant(methour,11),",",plant(methour,12),",",plant(methour,13)
      &,",",plant(methour,14)
+      WRITE(I102,161) tcond(methour,1),",",tcond(methour,2),","
+     &,tcond(methour,3),",",tcond(methour,4),",",tcond(metho
+     &ur,5),",",tcond(methour,6),",",tcond(methour,7),",",tcond
+     &(methour,8),",",tcond(methour,9),",",tcond(methour,10)
+     &,",",tcond(methour,11),",",tcond(methour,12)
+      WRITE(I103,161) specheat(methour,1),",",specheat(methour,2),","
+     &,specheat(methour,3),",",specheat(methour,4),",",specheat(metho
+     &ur,5),",",specheat(methour,6),",",specheat(methour,7),",",specheat
+     &(methour,8),",",specheat(methour,9),",",specheat(methour,10)
+     &,",",specheat(methour,11),",",specheat(methour,12)
+      WRITE(I104,161) densit(methour,1),",",densit(methour,2),","
+     &,densit(methour,3),",",densit(methour,4),",",densit(metho
+     &ur,5),",",densit(methour,6),",",densit(methour,7),",",densit
+     &(methour,8),",",densit(methour,9),",",densit(methour,10)
+     &,",",densit(methour,11),",",densit(methour,12)     
         endif
       if(runsnow.eq.1)then
       WRITE(I7,159) JULDAY(DOY),",",SIOUT(1),",",
@@ -1435,9 +1512,18 @@ c     end check for previous slippage
           shadpot(methour,3:12)=curpot(1:10)
           shadplant(methour,1)=JULDAY(DOY)
           shadplant(methour,2)=SIOUT(1)
-          shadplant(methour,3)=trans2 * 1000 * 3600 !g/m2/h
+          shadplant(methour,3)=trans2 * 1000D0 * 3600D0 !g/m2/h
           shadplant(methour,4)=leafpot
           shadplant(methour,5:14)=curroot(1:10)
+          shadtcond(methour,1)=JULDAY(DOY)
+          shadtcond(methour,2)=SIOUT(1)
+          shadtcond(methour,3:12)=(Thconduct(1:10)/60.D0)*418.6D0
+          shadspecheat(methour,1)=JULDAY(DOY)
+          shadspecheat(methour,2)=SIOUT(1)
+          shadspecheat(methour,3:12)=spheat(1:10)*4185.D0
+          shaddensit(methour,1)=JULDAY(DOY)
+          shaddensit(methour,2)=SIOUT(1)
+          shaddensit(methour,3:12)=Density(1:10)*1.0D+3    
          endif
          if((writecsv.eq.1).and.(runshade.eq.1))then
           WRITE(I12,154) shadmet(methour,1),",",shadmet(methour,2),",",
@@ -1483,13 +1569,31 @@ c     end check for previous slippage
      &,shadplant(methour,10),",",shadplant(methour,11),","
      &,shadplant(methour,12),",",shadplant(methour,13),","
      &,shadplant(methour,14)
+      WRITE(I105,161) shadtcond(methour,1),",",shadtcond(methour,2),","
+     &,shadtcond(methour,3),",",shadtcond(methour,4),",",shadtcond(metho
+     &ur,5),",",shadtcond(methour,6),",",shadtcond(methour,7),",",shadtc
+     &ond(methour,8),",",shadtcond(methour,9),",",shadtcond(methour,10)
+     &,",",shadtcond(methour,11),",",shadtcond(methour,12)
+      WRITE(I106,161) shadspecheat(methour,1),",",shadspecheat(methour,2
+     &),",",shadspecheat(methour,3),",",shadspecheat(methour,4),",",shad
+     &specheat(methour,5),",",shadspecheat(methour,6),",",shadspecheat(m
+     &ethour,7),",",shadspecheat(methour,8),",",shadspecheat(methour,9)
+     &,",",shadspecheat(methour,10),",",shadspecheat(methour,11),",",sha
+     &dspecheat(methour,12)
+      WRITE(I107,161) shaddensit(methour,1),",",shaddensit(methour,2)
+     &,",",shaddensit(methour,3),",",shaddensit(methour,4),",",shaddensi
+     &t(methour,5),",",shaddensit(methour,6),",",shaddensit(methour,7)
+     &,",",shaddensit(methour,8),",",shaddensit(methour,9),",",shaddensi
+     &t(methour,10),",",shaddensit(methour,11),",",
+     &shaddensit(methour,12)         
           endif
          endif
         ENDIF
        endif
 c     check if duplicate time due to integrator slipping
       else
-       if(int(max(maxval(abs(out(14:22))),abs(out(4)))).ne.81)then
+       if(int(max(maxval(abs(out(14:22))),abs(out(4))))
+     &  .ne.INT(MAXSURF))then
         slipped=slipped+1
         errcount=errcount+1
         temp(31)=(int(SIOUT(1)/60)+1)+24*(DOY-1)
@@ -1531,7 +1635,7 @@ c     end check for current slippage
 
       IF (int(SIOUT(1)) .EQ. 1440) THEN
 C      INCREMENT MONTH/TIME INTERVAL COUNTER
-       IF (((DOY.eq.1).and.(time.lt.1e-8)).or.(TIME .NE. LASTIME)) THEN
+       IF (((DOY.eq.1).and.(time.lt.1D-8)).or.(TIME .NE. LASTIME)) THEN
         DOY = DOY + 1
        ENDIF
       ENDIF
