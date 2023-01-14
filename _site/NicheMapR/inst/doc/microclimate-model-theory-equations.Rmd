@@ -1,16 +1,3 @@
----
-title: "Underlying theory and equations of the NicheMapR microclimate model"
-author: "Michael Kearney & Warren P. Porter"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Microclimate Model Theory and Equations}
-  %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{knitr::rmarkdown}
-editor_options:
-  chunk_output_type: console
----
-
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(
  eval = TRUE

@@ -1,20 +1,44 @@
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
 
 <head>
 
 <meta charset="utf-8" />
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 <meta name="generator" content="pandoc" />
+<meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1" />
 
 <meta name="author" content="Michael R. Kearney" />
 
-<meta name="date" content="2020-03-14" />
+<meta name="date" content="2022-10-12" />
 
 <title>Microclimate Model Input Data</title>
+
+<script>// Pandoc 2.9 adds attributes on both header and div. We remove the former (to
+// be compatible with the behavior of Pandoc < 2.8).
+document.addEventListener('DOMContentLoaded', function(e) {
+  var hs = document.querySelectorAll("div.section[class*='level'] > :first-child");
+  var i, h, a;
+  for (i = 0; i < hs.length; i++) {
+    h = hs[i];
+    if (!/^h[1-6]$/i.test(h.tagName)) continue;  // it should be a header h1-h6
+    a = h.attributes;
+    while (a.length > 0) h.removeAttribute(a[0].name);
+  }
+});
+</script>
+
+<style type="text/css">
+  code{white-space: pre-wrap;}
+  span.smallcaps{font-variant: small-caps;}
+  span.underline{text-decoration: underline;}
+  div.column{display: inline-block; vertical-align: top; width: 50%;}
+  div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+  ul.task-list{list-style: none;}
+    </style>
+
 
 
 
@@ -31,9 +55,6 @@ padding-right: 2em;
 font-family: "Open Sans", "Helvetica Neue", Helvetica, Arial, sans-serif;
 font-size: 14px;
 line-height: 1.35;
-}
-#header {
-text-align: center;
 }
 #TOC {
 clear: both;
@@ -202,7 +223,8 @@ code > span.st { color: #d14; }
 code > span.co { color: #888888; font-style: italic; } 
 code > span.ot { color: #007020; } 
 code > span.al { color: #ff0000; font-weight: bold; } 
-code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61717; background-color: #e3d2d2; } 
+code > span.fu { color: #900; font-weight: bold; } 
+code > span.er { color: #a61717; background-color: #e3d2d2; } 
 </style>
 
 
@@ -217,7 +239,7 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 
 <h1 class="title toc-ignore">Microclimate Model Input Data</h1>
 <h4 class="author">Michael R. Kearney</h4>
-<h4 class="date">2020-03-14</h4>
+<h4 class="date">2022-10-12</h4>
 
 
 
@@ -225,10 +247,10 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <h2>Model mode settings</h2>
 <table style="width:100%;">
 <colgroup>
-<col width="34%"></col>
-<col width="23%"></col>
-<col width="23%"></col>
-<col width="19%"></col>
+<col width="34%" />
+<col width="23%" />
+<col width="23%" />
+<col width="19%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -298,7 +320,13 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </div>
 <div id="time-and-location-parameters" class="section level2">
 <h2>Time and location parameters</h2>
-<table>
+<table style="width:100%;">
+<colgroup>
+<col width="34%" />
+<col width="23%" />
+<col width="23%" />
+<col width="19%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th><em>Name</em></th>
@@ -381,10 +409,10 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <h2>Air and wind vertical profile parameters</h2>
 <table style="width:100%;">
 <colgroup>
-<col width="34%"></col>
-<col width="23%"></col>
-<col width="23%"></col>
-<col width="19%"></col>
+<col width="34%" />
+<col width="23%" />
+<col width="23%" />
+<col width="19%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -405,13 +433,15 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <td>Refhyt</td>
 <td>m</td>
 <td>0.50-10</td>
-<td>reference height for air temp, wind speed and humidity input data</td>
+<td>reference height for air temp, wind speed and humidity input
+data</td>
 </tr>
 <tr class="odd">
 <td>Usrhyt</td>
 <td>m</td>
 <td>&gt; 0.005, &lt; Refhyt</td>
-<td>local height at which to compute air temp, wind speed and humidity</td>
+<td>local height at which to compute air temp, wind speed and
+humidity</td>
 </tr>
 <tr class="even">
 <td>ZH</td>
@@ -451,11 +481,18 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\(^1\)</span>Set to 0 if no experimental data</p>
+<p><span class="math inline">\(^1\)</span>Set to 0 if no experimental
+data</p>
 </div>
 <div id="radiation-related-parameters" class="section level2">
 <h2>Radiation-related parameters</h2>
-<table>
+<table style="width:100%;">
+<colgroup>
+<col width="34%" />
+<col width="23%" />
+<col width="23%" />
+<col width="19%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th><em>Name</em></th>
@@ -481,7 +518,8 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <td>CMH2O</td>
 <td>cm</td>
 <td>0.1-2</td>
-<td>precipitable cm H<span class="math inline">\(_2\)</span>O in air column</td>
+<td>precipitable cm H<span class="math inline">\(_2\)</span>O in air
+column</td>
 </tr>
 <tr class="even">
 <td>TAI</td>
@@ -509,13 +547,29 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\(^{1}\)</span>Vector of length = doynum</p>
-<p><span class="math inline">\(^{2}\)</span>Vector of length 111 for wavelengths between 290 and 4000 nm. Wavelenghth increments are: 290,295,300,305,310,315,320,330,340,350,360,370,380,390,400,420,440,460,480,500, 520,540,560,580,600,620,640,660,680,700,720,740,760,780,800,820,840,860,880,900, 920,940,960,980,1000,1020,1080,1100,1120,1140,1160,1180,1200,1220,1240,1260,1280, 1300,1320,1380,1400,1420,1440,1460,1480,1500,1540,1580,1600,1620,1640,1660,1700, 1720,1780,1800,1860,1900,1950,2000,2020,2050,2100,2120,2150,2200,2260,2300,2320, 2350,2380,2400,2420,2450,2490,2500,2600,2700,2800,2900,3000,3100,3200,3300,3400, 3500,3600,3700,3800,3900,4000</p>
-<p><span class="math inline">\(^{3}\)</span>Computationally intensive</p>
+<p><span class="math inline">\(^{1}\)</span>Vector of length =
+doynum</p>
+<p><span class="math inline">\(^{2}\)</span>Vector of length 111 for
+wavelengths between 290 and 4000 nm. Wavelenghth increments are:
+290,295,300,305,310,315,320,330,340,350,360,370,380,390,400,420,440,460,480,500,
+520,540,560,580,600,620,640,660,680,700,720,740,760,780,800,820,840,860,880,900,
+920,940,960,980,1000,1020,1080,1100,1120,1140,1160,1180,1200,1220,1240,1260,1280,
+1300,1320,1380,1400,1420,1440,1460,1480,1500,1540,1580,1600,1620,1640,1660,1700,
+1720,1780,1800,1860,1900,1950,2000,2020,2050,2100,2120,2150,2200,2260,2300,2320,
+2350,2380,2400,2420,2450,2490,2500,2600,2700,2800,2900,3000,3100,3200,3300,3400,
+3500,3600,3700,3800,3900,4000</p>
+<p><span class="math inline">\(^{3}\)</span>Computationally
+intensive</p>
 </div>
 <div id="terrain-and-shading-parameters" class="section level2">
 <h2>Terrain and shading parameters</h2>
-<table>
+<table style="width:100%;">
+<colgroup>
+<col width="34%" />
+<col width="23%" />
+<col width="23%" />
+<col width="19%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th><em>Name</em></th>
@@ -575,15 +629,27 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\(^{1}\)</span>angle to the effective horizon, due to e.g. hills, buildings, in 24 directions from 0 degrees azimuth (north) clockwise in 15 degree intervals</p>
-<p><span class="math inline">\(^{2}\)</span>Fraction of sky obscured by terrain</p>
-<p><span class="math inline">\(^{3}\)</span>vector of length = doynum</p>
-<p><span class="math inline">\(^{4}\)</span>must be greater than minimum shade</p>
-<p><span class="math inline">\(^{5}\)</span>drives evaporation - set internally when runmoist==1</p>
+<p><span class="math inline">\(^{1}\)</span>angle to the effective
+horizon, due to e.g. hills, buildings, in 24 directions from 0 degrees
+azimuth (north) clockwise in 15 degree intervals</p>
+<p><span class="math inline">\(^{2}\)</span>Fraction of sky obscured by
+terrain</p>
+<p><span class="math inline">\(^{3}\)</span>vector of length =
+doynum</p>
+<p><span class="math inline">\(^{4}\)</span>must be greater than minimum
+shade</p>
+<p><span class="math inline">\(^{5}\)</span>drives evaporation - set
+internally when runmoist==1</p>
 </div>
 <div id="substrate-profile-settings" class="section level2">
 <h2>Substrate profile settings</h2>
-<table>
+<table style="width:100%;">
+<colgroup>
+<col width="34%" />
+<col width="23%" />
+<col width="23%" />
+<col width="19%" />
+</colgroup>
 <thead>
 <tr class="header">
 <th><em>Name</em></th>
@@ -612,6 +678,12 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <td>annual mean temperature</td>
 </tr>
 <tr class="even">
+<td>spinup</td>
+<td>-</td>
+<td>0 or 1</td>
+<td>repeate first day’s simulation for steady state?</td>
+</tr>
+<tr class="odd">
 <td>soilinit</td>
 <td>°C</td>
 <td>-80 - +60</td>
@@ -619,17 +691,21 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\(^{1}\)</span>Acting as nodes for substrate heat budget calculations. Must start at 0 and nodes must be closely spaced near the surface. Typical depth profile c(0., 2.5, 5., 10., 15, 20, 30, 50, 100, 200)</p>
-<p><span class="math inline">\(^{2}\)</span>Vector of length 10, corresponding to depths specified in variable DEP</p>
+<p><span class="math inline">\(^{1}\)</span>Acting as nodes for
+substrate heat budget calculations. Must start at 0 and nodes must be
+closely spaced near the surface. Typical depth profile c(0., 2.5, 5.,
+10., 15, 20, 30, 50, 100, 200)</p>
+<p><span class="math inline">\(^{2}\)</span>Vector of length 10,
+corresponding to depths specified in variable DEP</p>
 </div>
 <div id="time-varying-environmental-data" class="section level2">
 <h2>Time varying environmental data</h2>
 <table style="width:100%;">
 <colgroup>
-<col width="34%"></col>
-<col width="23%"></col>
-<col width="23%"></col>
-<col width="19%"></col>
+<col width="34%" />
+<col width="23%" />
+<col width="23%" />
+<col width="19%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -756,20 +832,28 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\(^{1}\)</span>Vector of 4 integers, air temp &amp; wind mins relative to sunrise, humidity and cloud cover mins relative to solar noon - typical TIMINS vector c(0, 0, 1, 1).</p>
-<p><span class="math inline">\(^{2}\)</span>Vector of 4 integers, air temp &amp; wind maxs relative to solar noon, humidity and cloud cover maxs relative to sunrise - typical TIMAXS vector c(1, 1, 0, 0).</p>
-<p><span class="math inline">\(^{3}\)</span>Vector of length = doynum.</p>
-<p><span class="math inline">\(^{4}\)</span>Matrix of 10 rows (depths) and doynum columns. The first column is used to specify the initial soil moisture when running the soil moisture model.</p>
-<p><span class="math inline">\(^{5}\)</span>Vector of length = doynum*24.</p>
+<p><span class="math inline">\(^{1}\)</span>Vector of 4 integers, air
+temp &amp; wind mins relative to sunrise, humidity and cloud cover mins
+relative to solar noon - typical TIMINS vector c(0, 0, 1, 1).</p>
+<p><span class="math inline">\(^{2}\)</span>Vector of 4 integers, air
+temp &amp; wind maxs relative to solar noon, humidity and cloud cover
+maxs relative to sunrise - typical TIMAXS vector c(1, 1, 0, 0).</p>
+<p><span class="math inline">\(^{3}\)</span>Vector of length =
+doynum.</p>
+<p><span class="math inline">\(^{4}\)</span>Matrix of 10 rows (depths)
+and doynum columns. The first column is used to specify the initial soil
+moisture when running the soil moisture model.</p>
+<p><span class="math inline">\(^{5}\)</span>Vector of length =
+doynum*24.</p>
 </div>
 <div id="substrate-properties" class="section level2">
 <h2>Substrate properties</h2>
 <table>
 <colgroup>
-<col width="32%"></col>
-<col width="25%"></col>
-<col width="23%"></col>
-<col width="18%"></col>
+<col width="32%" />
+<col width="25%" />
+<col width="23%" />
+<col width="18%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -824,19 +908,31 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\(^{1}\)</span>Matrix of 10 rows (depths) and doynum columns</p>
-<p><span class="math inline">\(^{2}\)</span>The number of nodes specified should correspond with the variable numtypes, and in turn with the number of substrate types specified in soilprops in the soil props matrix. E.g. for a uniform profile, the first row of Nodes would be 10 (deepest soil node - the subsequent nodes all being left as 0), Numtyps would be 1, and only one and only the first row of soilprops would be filled, the rest being zero. At the other extreme, if all nodes were to have a different substrate type, values for a given row of each Nodes column would be 1, 2, …, 10 and a different value would be specified for each row of each soilprops column.</p>
-<p><span class="math inline">\(^{3}\)</span>Matrix of 10 rows (depths) and 6 columns</p>
-<p><span class="math inline">\(^{4}\)</span>at a matric potential of 0.1 bar</p>
+<p><span class="math inline">\(^{1}\)</span>Matrix of 10 rows (depths)
+and doynum columns</p>
+<p><span class="math inline">\(^{2}\)</span>The number of nodes
+specified should correspond with the variable numtypes, and in turn with
+the number of substrate types specified in soilprops in the soil props
+matrix. E.g. for a uniform profile, the first row of Nodes would be 10
+(deepest soil node - the subsequent nodes all being left as 0), Numtyps
+would be 1, and only one and only the first row of soilprops would be
+filled, the rest being zero. At the other extreme, if all nodes were to
+have a different substrate type, values for a given row of each Nodes
+column would be 1, 2, …, 10 and a different value would be specified for
+each row of each soilprops column.</p>
+<p><span class="math inline">\(^{3}\)</span>Matrix of 10 rows (depths)
+and 6 columns</p>
+<p><span class="math inline">\(^{4}\)</span>at a matric potential of 0.1
+bar</p>
 </div>
 <div id="soil-moisture-parameters" class="section level2">
 <h2>Soil moisture parameters</h2>
 <table>
 <colgroup>
-<col width="32%"></col>
-<col width="26%"></col>
-<col width="22%"></col>
-<col width="18%"></col>
+<col width="32%" />
+<col width="26%" />
+<col width="22%" />
+<col width="18%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -869,13 +965,15 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <td>BD</td>
 <td>Mg m<span class="math inline">\(^{-3}\)</span></td>
 <td>&gt;0</td>
-<td>bulk density (should be matched to same variable in the soilprops matrix)</td>
+<td>bulk density (should be matched to same variable in the soilprops
+matrix)</td>
 </tr>
 <tr class="odd">
 <td>DD</td>
 <td>Mg m<span class="math inline">\(^{-3}\)</span></td>
 <td>&gt;0</td>
-<td>soil mineral density (should be matched to same variable in the soilprops matrix)</td>
+<td>soil mineral density (should be matched to same variable in the
+soilprops matrix)</td>
 </tr>
 <tr class="even">
 <td>L</td>
@@ -929,7 +1027,8 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <td>LAI</td>
 <td>-</td>
 <td>0-90</td>
-<td>leaf area index, used to partition traspiration/evaporation from PET</td>
+<td>leaf area index, used to partition traspiration/evaporation from
+PET</td>
 </tr>
 <tr class="odd">
 <td>rainmult</td>
@@ -951,17 +1050,20 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\(^{1}\)</span>The 19 values represent the 10 depths as specified in the DEP vector, and an extra 9 depths in between.</p>
-<p><span class="math inline">\(^{2}\)</span>To account for runoff - can be used to simulate a wetland.</p>
+<p><span class="math inline">\(^{1}\)</span>The 19 values represent the
+10 depths as specified in the DEP vector, and an extra 9 depths in
+between.</p>
+<p><span class="math inline">\(^{2}\)</span>To account for runoff - can
+be used to simulate a wetland.</p>
 </div>
 <div id="snow-model-parameters" class="section level2">
 <h2>Snow model parameters</h2>
 <table>
 <colgroup>
-<col width="32%"></col>
-<col width="25%"></col>
-<col width="23%"></col>
-<col width="18%"></col>
+<col width="32%" />
+<col width="25%" />
+<col width="23%" />
+<col width="18%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -1018,27 +1120,41 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 <td>intercept</td>
 <td>-</td>
 <td>0-1</td>
-<td>proportion of snow intercepted by vegetation under shaded conditions</td>
+<td>proportion of snow intercepted by vegetation under shaded
+conditions</td>
 </tr>
 <tr class="odd">
 <td>grasshade</td>
 <td>-</td>
 <td>0 or 1</td>
-<td>if 1, shade is not present when snow is present (because shade is cast by grass/low veg)</td>
+<td>if 1, shade is not present when snow is present (because shade is
+cast by grass/low veg)</td>
 </tr>
 </tbody>
 </table>
-<p><span class="math inline">\(^{1}\)</span> Four values, c(a, b, c, d) representing either 1) slope (a) and intercept (b, Mg m-3) of model of snow density as a linear function of snowpack age (days) if first two values are nonzero, or, if all values are non-zero, b) following the exponential function of Sturm et al. 2010 J. of Hydromet. 11:1380-1394 where density = (a - b) x (1 - exp(-c x depth - d x age)) + b, where a and b are the maximum and minimum densities, respectively, in Mg m-3, and c and d are fitted parameters. If all values are zero, i.e. c(0,0,0,0), then a fixed density is used as specified by parameter snowdens</p>
-<p><span class="math inline">\(^{2}\)</span>For equation from Anderson’s SNOW-17 model that melts snow with rainfall as a function of air temp (typical value 1.25)</p>
+<p><span class="math inline">\(^{1}\)</span> Four values, c(a, b, c, d)
+representing either 1) slope (a) and intercept (b, Mg m-3) of model of
+snow density as a linear function of snowpack age (days) if first two
+values are nonzero, or, if all values are non-zero, b) following the
+exponential function of Sturm et al. 2010 J. of Hydromet. 11:1380-1394
+where density = (a - b) x (1 - exp(-c x depth - d x age)) + b, where a
+and b are the maximum and minimum densities, respectively, in Mg m-3,
+and c and d are fitted parameters. If all values are zero,
+i.e. c(0,0,0,0), then a fixed density is used as specified by parameter
+snowdens</p>
+<p><span class="math inline">\(^{2}\)</span>For equation from Anderson’s
+SNOW-17 model that melts snow with rainfall as a function of air temp
+(typical value 1.25)</p>
 </div>
 <div id="intertidal-simulation-parameters-currently-experimental-and-untested" class="section level2">
-<h2>Intertidal simulation parameters (currently experimental and untested)</h2>
+<h2>Intertidal simulation parameters (currently experimental and
+untested)</h2>
 <table>
 <colgroup>
-<col width="32%"></col>
-<col width="25%"></col>
-<col width="23%"></col>
-<col width="18%"></col>
+<col width="32%" />
+<col width="25%" />
+<col width="23%" />
+<col width="18%" />
 </colgroup>
 <thead>
 <tr class="header">
@@ -1071,6 +1187,9 @@ code > span.fu { color: #900; font-weight: bold; }  code > span.er { color: #a61
 </table>
 </div>
 
+
+
+<!-- code folding -->
 
 
 <!-- dynamically load mathjax for compatibility with self-contained -->
