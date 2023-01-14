@@ -26,9 +26,9 @@ Usrhyt = 0.01, ...)
 
 \item{DEP}{Soil depths at which calculations are to be made (cm), must be 10 values starting from 0, and more closely spaced near the surface}
 
-\item{minshade}{Minimum shade level to use (\%)}
+\item{minshade}{Minimum shade level to use (\%) (can be a single value or a vector of daily values)}
 
-\item{maxshade}{Maximum shade level to us (\%)}
+\item{maxshade}{Maximum shade level to us (\%) (can be a single value or a vector of daily values)}
 
 \item{Usrhyt}{Local height (m) at which air temperature, wind speed and humidity are to be computed for organism of interest}
 
@@ -62,6 +62,18 @@ shadplant Hourly predictions of plant transpiration, leaf water potential and ro
 sunsnow Hourly predictions of snow temperature under the minimum specified shade
 
 shadsnow Hourly predictions snow temperature under the maximum specified shade
+
+tcond Hourly predictions of the soil thermal conductivity under the minimum specified shade
+
+shadtcond Hourly predictions of the soil thermal conductivity under the maximum specified shade
+
+specheat Hourly predictions of the soil specific heat capacity under the minimum specified shade
+
+shadspecheat Hourly predictions of soil specific heat capacity under the maximum specified shade
+
+densit Hourly predictions of the soil density under the minimum specified shade
+
+shaddensit Hourly predictions of the soil density under the maximum specified shade
 }
 \description{
 An implementation of the NicheMapR microclimate model that uses the Virtual Climate Station Network (VCSN) for NZ https://www.niwa.co.nz/climate/our-services/virtual-climate-stations
@@ -72,18 +84,19 @@ An implementation of the NicheMapR microclimate model that uses the Virtual Clim
 
 \code{runshade}{ = 1, Run the microclimate model twice, once for each shade level (1) or just once for the minimum shade (0)?}\cr\cr
 \code{clearsky}{ = 0, Run for clear skies (1) or with observed cloud cover (0)}\cr\cr
-\code{run.gads}{ = 1, Use the Global Aerosol Database? 1=yes, 0=no}\cr\cr
+\code{run.gads}{ = 1, Use the Global Aerosol Database? 1=yes (Fortran version), 2=yes (R version), 0=no}\cr\cr
 \code{IR}{ = 0, Clear-sky longwave radiation computed using Campbell and Norman (1998) eq. 10.10 (includes humidity) (0) or Swinbank formula (1)}\cr\cr
 \code{solonly}{ = 0, Only run SOLRAD to get solar radiation? 1=yes, 0=no}\cr\cr
 \code{lamb}{ = 0, Return wavelength-specific solar radiation output?}\cr\cr
 \code{IUV}{ = 0, Use gamma function for scattered solar radiation? (computationally intensive)}\cr\cr
+\code{Soil_Init}{ = NA, initial soil temperature at each soil node, °C (if NA, will use the mean air temperature to initialise)}\cr\cr
 \code{write_input}{ = 0, Write csv files of final input to folder 'csv input' in working directory? 1=yes, 0=no}\cr\cr
 \code{writecsv}{ = 0, Make Fortran code write output as csv files? 1=yes, 0=no}\cr\cr
 \code{terrain}{ = 0, Use 250m resolution terrain data? 1=yes, 0=no}\cr\cr
 \code{dailywind}{ = 1, Make Fortran code write output as csv files? 1=yes, 0=no}\cr\cr
 \code{windfac}{ = 1, factor to multiply wind speed by e.g. to simulate forest}\cr\cr
 \code{adiab_cor}{ = 1, use adiabatic lapse rate correction? 1=yes, 0=no}\cr\cr
-\code{warm}{ = 0, uniform warming, °C}\cr\cr
+\code{warm}{ = 0, warming offset vector, °C (negative values mean cooling). Can supply a single value or a vector the length of the number of days to be simulated.}\cr\cr
 \code{spatial}{ = "c:/Australian Environment/", choose location of terrain data}\cr\cr
 \code{vlsci}{ = 0, running on the VLSCI system? 1=yes, 0=no}\cr\cr
 \code{soilgrids}{ = 0, query soilgrids.org database for soil hydraulic properties?}\cr\cr
@@ -95,23 +108,25 @@ An implementation of the NicheMapR microclimate model that uses the Virtual Clim
 \code{ERR}{ = 1.5, Integrator error tolerance for soil temperature calculations}\cr\cr
 \code{Refhyt}{ = 1.2, Reference height (m), reference height at which air temperature, wind speed and relative humidity input data are measured}\cr\cr
 \code{RUF}{ = 0.004, Roughness height (m), e.g. smooth desert is 0.0003, closely mowed grass may be 0.001, bare tilled soil 0.002-0.006, current allowed range: 0.00001 (snow) - 0.02 m.}\cr\cr
+\code{ZH}{ = 0, heat transfer roughness height (m) for Campbell and Norman air temperature/wind speed profile (invoked if greater than 0, 0.02 * canopy height in m if unknown)}\cr\cr
+\code{D0}{ = 0, zero plane displacement correction factor (m) for Campbell and Norman air temperature/wind speed profile (0.6 * canopy height in m if unknown)}\cr\cr
 \code{Z01}{ = 0, Top (1st) segment roughness height(m) - IF NO EXPERIMENTAL WIND PROFILE DATA SET THIS TO ZERO! (then RUF and Refhyt used)}\cr\cr
 \code{Z02}{ = 0, 2nd segment roughness height(m) - IF NO EXPERIMENTAL WIND PROFILE DATA SET THIS TO ZERO! (then RUF and Refhyt used).}\cr\cr
 \code{ZH1}{ = 0, Top of (1st) segment, height above surface(m) - IF NO EXPERIMENTAL WIND PROFILE DATA SET THIS TO ZERO! (then RUF and Refhyt used).}\cr\cr
 \code{ZH2}{ = 0, 2nd segment, height above surface(m) - IF NO EXPERIMENTAL WIND PROFILE DATA SET THIS TO ZERO! (then RUF and Refhyt used).}\cr\cr
 \code{EC}{ = 0.0167238, Eccenricity of the earth's orbit (current value 0.0167238, ranges between 0.0034 to 0.058)}\cr\cr
 \code{SLE}{ = 0.95, Substrate longwave IR emissivity (decimal \%), typically close to 1}\cr\cr
-\code{Thcond}{ = 2.5, Soil minerals thermal conductivity (W/mK)}\cr\cr
-\code{Density}{ = 2.56, Soil minerals density (Mg/m3)}\cr\cr
-\code{SpecHeat}{ = 870, Soil minerals specific heat (J/kg-K)}\cr\cr
-\code{BulkDensity}{ = 1.3, Soil bulk density (Mg/m3)}\cr\cr
-\code{PCTWET}{ = 0, \% of ground surface area acting as a free water surface}\cr\cr
+\code{Thcond}{ = 2.5, Soil minerals thermal conductivity, single value or vector of 10 specific to each depth (W/mK)}\cr\cr
+\code{Density}{ = 2.56, Soil minerals density, single value or vector of 10 specific to each depth (Mg/m3)}\cr\cr
+\code{SpecHeat}{ = 870, Soil minerals specific heat, single value or vector of 10 specific to each depth (J/kg-K)}\cr\cr
+\code{BulkDensity}{ = 1.3, Soil bulk density (Mg/m3), single value or vector of 10 specific to each depth}\cr\cr
+\code{PCTWET}{ = 0, \% of ground surface area acting as a free water surface (overridden if soil moisture model is running)}\cr\cr
 \code{rainwet}{ = 1.5, mm of rainfall causing the ground to be 90\% wet for the day}\cr\cr
 \code{cap}{ = 1, organic cap present on soil surface? (cap has lower conductivity - 0.2 W/mC - and higher specific heat 1920 J/kg-K)}\cr\cr
 \code{CMH2O}{ = 1, Precipitable cm H2O in air column, 0.1 = very dry; 1.0 = moist air conditions; 2.0 = humid, tropical conditions (note this is for the whole atmospheric profile, not just near the ground)}\cr\cr
 \code{hori}{ = rep(0,24), Horizon angles (degrees), from 0 degrees azimuth (north) clockwise in 15 degree intervals}\cr\cr
-\code{lapse_min}{ = 0.0039 Lapse rate for minimum air temperature (degrees C/m)}
-\code{lapse_max}{ = 0.0077 Lapse rate for maximum air temperature (degrees C/m)}
+\code{lapse_min}{ = 0.0039 Lapse rate for minimum air temperature (degrees C/m)}\cr\cr
+\code{lapse_max}{ = 0.0077 Lapse rate for maximum air temperature (degrees C/m)}\cr\cr
 \code{TIMAXS}{ = c(1.0, 1.0, 0.0, 0.0), Time of Maximums for Air Wind RelHum Cloud (h), air & Wind max's relative to solar noon, humidity and cloud cover max's relative to sunrise}\cr\cr
 \code{TIMINS}{ = c(0, 0, 1, 1), Time of Minimums for Air Wind RelHum Cloud (h), air & Wind min's relative to sunrise, humidity and cloud cover min's relative to solar noon}\cr\cr
 \code{timezone}{ = 0, Use GNtimezone function in package geonames to correct to local time zone (excluding daylight saving correction)? 1=yes, 0=no}\cr\cr
@@ -136,7 +151,7 @@ An implementation of the NicheMapR microclimate model that uses the Virtual Clim
 { and points half way between)}\cr\cr
 \code{maxpool}{ = 10000, Max depth for water pooling on the surface (mm), to account for runoff}\cr\cr
 \code{rainmult}{ = 1, Rain multiplier for surface soil moisture (-), used to induce runon}\cr\cr
-\code{rainoff}{ = 0, Rain offset (mm), used to induce constant extra input}\cr\cr
+\code{rainoff}{ = 0, Rain offset (mm), used to induce changes in rainfall from NIWA values. Can be a single value or a vector matching the number of days to simulate. If negative values are used, rainfall will be prevented from becomming negative.}\cr\cr
 \code{evenrain}{ = 0, Spread daily rainfall evenly across 24hrs (1) or one event at midnight (0)}\cr\cr
 \code{SoilMoist_Init}{ = c(0.1,0.12,0.15,0.2,0.25,0.3,0.3,0.3,0.3,0.3), initial soil water content at each soil node, m3/m3}\cr\cr
 \code{L}{ = c(0,0,8.2,8.0,7.8,7.4,7.1,6.4,5.8,4.8,4.0,1.8,0.9,0.6,0.8,0.4,0.4,0,0)*10000, root density (m/m3), (19 values descending through soil for specified soil nodes in parameter}\cr\cr
@@ -147,7 +162,7 @@ An implementation of the NicheMapR microclimate model that uses the Virtual Clim
 \code{SP}{ = 10, stability parameter for stomatal closure equation, -}\cr\cr
 \code{IM}{ = 1e-06, maximum allowable mass balance error, kg}\cr\cr
 { and points half way between)}\cr\cr
-\code{LAI}{ = 0.1, leaf area index, used to partition traspiration/evaporation from PET}\cr\cr
+\code{LAI}{ = 0.1, leaf area index (can be a single value or a vector of daily values), used to partition traspiration/evaporation from PET}\cr\cr
 
 \strong{ Snow mode parameters:}
 
@@ -159,7 +174,7 @@ An implementation of the NicheMapR microclimate model that uses the Virtual Clim
 \code{undercatch}{ = 1, undercatch multipier for converting rainfall to snow}\cr\cr
 \code{rainmelt}{ = 0.0125, paramter in equation that melts snow with rainfall as a function of air temp}\cr\cr
 \code{snowcond}{ = 0, effective snow thermal conductivity W/mC (if zero, uses inbuilt function of density)}\cr\cr
-\code{intercept}{ = maxshade / 100 * 0.3, snow interception fraction for when there's shade (0-1)}\cr\cr
+\code{intercept}{ = max(maxshade) / 100 * 0.3, snow interception fraction for when there's shade (0-1)}\cr\cr
 \code{grasshade}{ = 0, if 1, means shade is removed when snow is present, because shade is cast by grass/low shrubs}\cr\cr
 
 \strong{ Intertidal mode parameters:}
@@ -167,7 +182,7 @@ An implementation of the NicheMapR microclimate model that uses the Virtual Clim
 \code{shore}{ Include tide effects? If 1, the matrix}
 \code{tides}
 { is used to specify tide presence, sea water temperature and presence of wavesplash}\cr\cr
-\code{tides}{ = matrix(data = 0., nrow = 24*365*nyears, ncol = 3), matrix for each how of the simulation of 1. tide state (0=out, 1=in), 2. Water temperature (°C) and 3. Wave splash (0=yes, 1=no)}\cr\cr
+\code{tides}{ = matrix(data = 0., nrow = 24*365*nyears, ncol = 3), matrix of 1. tide state (0=out, 1=in), 2. Water temperature (°C) and 3. Wave splash (0=yes, 1=no)}\cr\cr
 }
 
 \strong{Outputs:}
@@ -179,9 +194,8 @@ An implementation of the NicheMapR microclimate model that uses the Virtual Clim
 \code{nyears}{ - number of years for which predictions are made}\cr\cr
 \code{RAINFALL}{ - vector of daily rainfall (mm)}\cr\cr
 \code{elev}{ - elevation at point of simulation (m)}\cr\cr
-\code{minshade}{ - minimum shade for simulation (\%)}\cr\cr
-\code{maxshade}{ - maximum shade for simulation (single value - if time varying, in 'MAXSHADES') (\%)}\cr\cr
-\code{MAXSHADES}{ - vector of maximum shades used (\%)}\cr\cr
+\code{minshade}{ - minimum shade for each day of simulation (\%)}\cr\cr
+\code{maxshade}{ - maximum shade for each day of simulation (\%)}\cr\cr
 \code{DEP}{ - vector of depths used (cm)}\cr\cr
 
 metout/shadmet variables:
@@ -198,10 +212,10 @@ metout/shadmet variables:
 \item 10 POOLDEP - water pooling on surface (mm)
 \item 11 PCTWET - soil surface wetness (\%)
 \item 12 ZEN - zenith angle of sun (degrees - 90 = below the horizon)
-\item 13 SOLR - solar radiation (W/m2)
+\item 13 SOLR - solar radiation (W/m2) (unshaded, horizontal plane)
 \item 14 TSKYC - sky radiant temperature (°C)
-\item 15 DEW - dew presence (0 or 1)
-\item 16 FROST - frost presence (0 or 1)
+\item 15 DEW - dew fall (mm / h)
+\item 16 FROST - frost (mm / h)
 \item 17 SNOWFALL - snow predicted to have fallen (cm)
 \item 18 SNOWDEP - predicted snow depth (cm)
 \item 19 SNOWDENS - snow density (g/cm3)
@@ -219,13 +233,13 @@ soilmoist and shadmoist variables:
 \itemize{
 \item 1 DOY - day-of-year
 \item 2 TIME - time of day (mins)
-\item 3-12 WC0cm ... - soil moisuture (m3/m3) at each of the 10 specified depths
+\item 3-12 WC0cm ... - soil moisture (m3/m3) at each of the 10 specified depths
 }
 soilpot and shadpot variables:
 \itemize{
 \item 1 DOY - day-of-year
 \item 2 TIME - time of day (mins)
-\item 3-12 PT0cm ... - soil water potential (J/kg = kpa = bar/100) at each of the 10 specified depths
+\item 3-12 PT0cm ... - soil water potential (J/kg = kPa = bar/100) at each of the 10 specified depths
 }
 humid and shadhumid variables:
 \itemize{
@@ -237,9 +251,27 @@ plant and shadplant variables:
 \itemize{
 \item  1 DOY - day-of-year
 \item  2 TIME - time of day (mins)
-\item  3 TRANS - plant transpiration rate (kg/m2/s)
-\item  4 LEAFPOT - leaf water potential (J/kg)
-\item  5-14 RPOT0cm ... - root water potential (J/kg), at each of the 10 specified depths
+\item  3 TRANS - plant transpiration rate (g/m2/h)
+\item  4 LEAFPOT - leaf water potential (J/kg = kPa = bar/100)
+\item  5-14 RPOT0cm ... - root water potential (J/kg = kPa = bar/100), at each of the 10 specified depths
+}
+tcond and shadtcond variables:
+\itemize{
+\item  1 DOY - day-of-year
+\item  2 TIME - time of day (mins)
+\item  3-12 TC0cm ... - soil thermal conductivity (W/m-K), at each of the 10 specified depths
+}
+specheat and shadspecheat variables:
+\itemize{
+\item  1 DOY - day-of-year
+\item  2 TIME - time of day (mins)
+\item  3-12 SP0cm ... - soil specific heat capacity (J/kg-K), at each of the 10 specified depths
+}
+densit and shaddensit variables:
+\itemize{
+\item  1 DOY - day-of-year
+\item  2 TIME - time of day (mins)
+\item  3-12 DE0cm ... - soil density (Mg/m3), at each of the 10 specified depths
 }
 
 if snow model is run i.e. parameter lamb = 1\cr
@@ -278,19 +310,19 @@ plotsoil<-cbind(dates,soil)
 plotshadmet<-cbind(dates,shadmet)
 plotshadsoil<-cbind(dates,shadsoil)
 
-minshade<-micro$minshade
-maxshade<-micro$maxshade
+minshade<-micro$minshade[1]
+maxshade<-micro$maxshade[1]
 
 # plotting above-ground conditions in minimum shade
-with(plotmetout,{plot(TALOC ~ dates,xlab = "Date and Time", ylab = "Air Temperature (Â°C)"
+with(plotmetout,{plot(TALOC ~ dates,xlab = "Date and Time", ylab = "Air Temperature (°C)"
 , type = "l",main=paste("air temperature, ",minshade,"\% shade",sep=""))})
-with(plotmetout,{points(TAREF ~ dates,xlab = "Date and Time", ylab = "Air Temperature (Â°C)"
+with(plotmetout,{points(TAREF ~ dates,xlab = "Date and Time", ylab = "Air Temperature (°C)"
 , type = "l",lty=2,col='blue')})
 with(plotmetout,{plot(RHLOC ~ dates,xlab = "Date and Time", ylab = "Relative Humidity (\%)"
 , type = "l",ylim=c(0,100),main=paste("humidity, ",minshade,"\% shade",sep=""))})
 with(plotmetout,{points(RH ~ dates,xlab = "Date and Time", ylab = "Relative Humidity (\%)"
 , type = "l",col='blue',lty=2,ylim=c(0,100))})
-with(plotmetout,{plot(TSKYC ~ dates,xlab = "Date and Time", ylab = "Sky Temperature (Â°C)"
+with(plotmetout,{plot(TSKYC ~ dates,xlab = "Date and Time", ylab = "Sky Temperature (°C)"
 ,  type = "l",main=paste("sky temperature, ",minshade,"\% shade",sep=""))})
 with(plotmetout,{plot(VREF ~ dates,xlab = "Date and Time", ylab = "Wind Speed (m/s)"
 ,  type = "l",main="wind speed",ylim = c(0, 15))})
@@ -304,34 +336,34 @@ with(plotmetout,{plot(SOLR ~ dates,xlab = "Date and Time", ylab = "Solar Radiati
 # plotting soil temperature for minimum shade
 for(i in 1:10){
  if(i==1){
-   plot(plotsoil[,i+3]~plotsoil[,1],xlab = "Date and Time", ylab = "Soil Temperature (Â°C)"
+   plot(plotsoil[,i+3]~plotsoil[,1],xlab = "Date and Time", ylab = "Soil Temperature (°C)"
    ,col=i,type = "l",main=paste("soil temperature ",minshade,"\% shade",sep=""))
  }else{
    points(plotsoil[,i+3]~plotsoil[,1],xlab = "Date and Time", ylab = "Soil Temperature
-    (Â°C)",col=i,type = "l")
+    (°C)",col=i,type = "l")
  }
 }
 
 # plotting above-ground conditions in maximum shade
-with(plotshadmet,{plot(TALOC ~ dates,xlab = "Date and Time", ylab = "Air Temperature (Â°C)"
+with(plotshadmet,{plot(TALOC ~ dates,xlab = "Date and Time", ylab = "Air Temperature (°C)"
 , type = "l",main="air temperature, sun")})
-with(plotshadmet,{points(TAREF ~ dates,xlab = "Date and Time", ylab = "Air Temperature (Â°C)"
+with(plotshadmet,{points(TAREF ~ dates,xlab = "Date and Time", ylab = "Air Temperature (°C)"
 , type = "l",lty=2,col='blue')})
 with(plotshadmet,{plot(RHLOC ~ dates,xlab = "Date and Time", ylab = "Relative Humidity (\%)"
 , type = "l",ylim=c(0,100),main="humidity, shade")})
 with(plotshadmet,{points(RH ~ dates,xlab = "Date and Time", ylab = "Relative Humidity (\%)"
 , type = "l",col='blue',lty=2,ylim=c(0,100))})
-with(plotshadmet,{plot(TSKYC ~ dates,xlab = "Date and Time", ylab = "Sky Temperature (Â°C)",
+with(plotshadmet,{plot(TSKYC ~ dates,xlab = "Date and Time", ylab = "Sky Temperature (°C)",
  type = "l",main="sky temperature, shade")})
 
 # plotting soil temperature for maximum shade
 for(i in 1:10){
  if(i==1){
    plot(plotshadsoil[,i+3]~plotshadsoil[,1],xlab = "Date and Time", ylab = "Soil Temperature
-    (Â°C)",col=i,type = "l",main=paste("soil temperature ",maxshade,"\% shade",sep=""))
+    (°C)",col=i,type = "l",main=paste("soil temperature ",maxshade,"\% shade",sep=""))
  }else{
    points(plotshadsoil[,i+3]~plotshadsoil[,1],xlab = "Date and Time", ylab = "Soil Temperature
-    (Â°C)",col=i,type = "l")
+    (°C)",col=i,type = "l")
  }
 }
 }
