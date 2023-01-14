@@ -1,16 +1,3 @@
----
-title: "Introduction to the NicheMapR ectotherm model"
-author: "Michael Kearney"
-date: "`r Sys.Date()`"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Ectotherm Model Tutorial}
-  %\VignetteEncoding{UTF-8}
-  %\VignetteEngine{knitr::rmarkdown}
-editor_options: 
-  chunk_output_type: console
----
-
 ```{r, echo = FALSE}
 knitr::opts_chunk$set(
  eval = TRUE
@@ -169,18 +156,13 @@ nocturn <- 0      # nocturnal activity
 crepus <- 0       # crepuscular activity
 diurn <- 1        # diurnal activity
 minshades <- rep(0, 12)   # min available shade?
-maxshades <- micro$MAXSHADES # max available shade?
+maxshades <- micro$maxshade # max available shade?
 ```
 
 Run the ectotherm model, retrieve the output and create some mock dates.
 
 ```{r, warning=FALSE, message=FALSE}
-ecto <- ectotherm(Ww_g = Ww_g, alpha_max = alpha_max, alpha_min = alpha_min, shape = shape, pct_wet = pct_wet,
-                  T_F_max = T_F_max, T_F_min = T_F_min, T_B_min = T_B_min, T_RB_min = T_RB_min,
-                  CT_max = CT_max, CT_min = CT_min, T_pref = T_pref, mindepth = mindepth, 
-                  maxdepth = maxdepth, shade_seek = shade_seek, burrow = burrow, climb = climb,
-                  minshades = minshades, nocturn = nocturn, diurn = diurn, crepus = crepus,
-                  maxshades = maxshades)
+ecto <- ectotherm(Ww_g = Ww_g, alpha_max = alpha_max, alpha_min = alpha_min, shape = shape, pct_wet = pct_wet, T_F_max = T_F_max, T_F_min = T_F_min, T_B_min = T_B_min, T_RB_min = T_RB_min, CT_max = CT_max, CT_min = CT_min, T_pref = T_pref, mindepth = mindepth, maxdepth = maxdepth, shade_seek = shade_seek, burrow = burrow, climb = climb, minshades = minshades, nocturn = nocturn, diurn = diurn, crepus = crepus, maxshades = maxshades)
 
 # retrieve output
 environ <- as.data.frame(ecto$environ) # behaviour, Tb and environment
@@ -209,6 +191,7 @@ with(environ, points(ACT * 2 + 7 ~ dates, type = "p", pch = 16, col = "orange"))
 with(environ, points(SHADE / 10 - 6 ~ dates, type = "l", col = "dark green"))
 with(environ, points(DEP - 10 ~ dates, type = "l", col = "brown"))
 abline(ecto$T_F_min, 0, lty = 2, col = 'blue')
+abline(T_pref, 0, lty = 2, col = 'orange')
 abline(ecto$T_F_max, 0, lty = 2, col = 'red')
 ytick<-seq(15, 40, by=5)
 axis(side=2, at=ytick, labels = TRUE)
@@ -224,7 +207,7 @@ mtext(text = c('body temperature (°C)', 'activity', 'shade (%)', 'depth (cm)'),
 text(0.1, c(ecto$T_F_max + 1, ecto$T_F_min + 1), c('T_F_max', 'T_F_min'), col = c('red', 'blue'), cex = 0.75)
 ```
 
-In Figure 1 you can see the daily cycles, for each month, of the body temperature (black), % shade selected (green, divided by 10 for plotting), activity level in orange (multiplied by 5 for plotting, so 5 = basking, 10 = active) and depth in brown (m). Also superimposed are the foraging thresholds `T_F_min` (blue dashed line) and `T_F_max` (red dashed line), and the preferred or target temperature `T_pref` (orange dashed line). 
+In Figure 1 you can see the daily cycles, for each month, of the body temperature (black), % shade selected (green, divided by 10 for plotting), activity level in orange (multiplied by 5 for plotting, so 5 = basking, 10 = active) and depth in brown (cm). Also superimposed are the foraging thresholds `T_F_min` (blue dashed line) and `T_F_max` (red dashed line), and the preferred or target temperature `T_pref` (orange dashed line). 
 
 Note how this lizard is active every day, but requires shade for this, and how body temperature jumps up on some evenings when it goes into its burrow (remember when inactive the body temperature may rise to a maximum of half way between `T_F_max` and `CT_max` before the animal moves deeper into the burrow).
 
@@ -245,7 +228,7 @@ Explore what changing the thermal thresholds `CT_min`, `T_RB_min`, `T_B_min`, `T
 
 ```{r, echo=FALSE, fig.width=7, fig.height=7, fig.show = "hold", message=FALSE, warnings=FALSE, fig.cap="**Body temperature, depth, shade and activity of for the lizard *Eulamprus quoyii* with shade options ranging from 0% to 10%**"}
 micro <- micro_global(loc = longlat, maxshade = 10)
-maxshades <- micro$MAXSHADES
+maxshades <- micro$maxshade
 
 ecto <- ectotherm(Ww_g = Ww_g, alpha_max = alpha_max, alpha_min = alpha_min, pct_wet = pct_wet, T_F_max = T_F_max, T_F_min = T_F_min, T_B_min = T_B_min, T_RB_min = T_RB_min, CT_max = CT_max, CT_min = CT_min, T_pref = T_pref, mindepth = mindepth, maxdepth = maxdepth, shade_seek = shade_seek, burrow = burrow, climb = climb, minshades = minshades, nocturn = nocturn, diurn = diurn, crepus = crepus, maxshades = maxshades)
 
@@ -339,7 +322,7 @@ for(i in 1:length(par.names)){
 if(exists("E.Hj")==FALSE){E.Hj <- E.Hb}
 if(exists("E.He")==FALSE){E.He <- E.Hb}
 if(exists("L.j")==FALSE){L.j <- L.b}
-F.m <- p.Am / kap.X # redefining F.m to max possible value
+p.Xm <- p.Am / kap.X * 10 # redefining p.Xm to a large value relative ot p.Am
 z.mult <- 1         # DEB body size scaling parameter
 
 # assign missing 5-par thermal response curve parameters if necessary
@@ -371,13 +354,11 @@ maxdepth <- 10    # max depth (node, 1-10) allowed
 shade_seek <- 1   # shade seeking?
 burrow <- 1       # can it burrow?
 climb <- 0        # can it climb to thermoregulate?
-minshade <- 0     # min available shade?
-maxshade <- 90    # min available shade?
 nocturn <- 0      # nocturnal activity
 crepus <- 0       # crepuscular activity
 diurn <- 1        # diurnal activity
 minshades <- rep(0, nyear * 365)   # min available shade?
-maxshades <- micro$MAXSHADES # max available shade?
+maxshades <- micro$maxshade # max available shade?
 
 # DEB initial state
 
@@ -428,11 +409,10 @@ ecto<-ectotherm(DEB=1,
                 climb=climb,
                 mindepth=mindepth,
                 maxdepth=maxdepth,
-                minshade=minshade,
                 pct_wet=pct_wet,
                 z=z*z.mult,
                 del_M=del.M,
-                F_m=F.m,
+                p_Xm=p.Xm/24,
                 kap_X=kap.X,
                 v=v/24,
                 kap=kap,

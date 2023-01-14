@@ -4,34 +4,34 @@
 #' under a constant environment
 #' Michael Kearney, Raymond Huey and Warren Porter developed this R function and example in September 2017.
 #' @param t = seq(1,3600,60), time intervals (s) at which output is required
-#' @param Tc_init = 5, initial temperature (deg C)
+#' @param Tc_init = 5, initial temperature (°C)
 #' @param Ww_g = 500, animal weight (g)
 #' @param rho_body = 932, animal density (kg/m3)
 #' @param q = 0, metabolic heat production rate W/m3
-#' @param c_body = 3073, Specific heat of flesh J/(kg-K)
-#' @param k_flesh = 0.5, Thermal conductivity of flesh (W/mK, range: 0.412-2.8)
-#' @param emis = 0.95, Emissivity of animal (0-1)
-#' @param abs = 0.85, solar absorptivity, decimal percent
-#' @param geom = 2, Organism shape, 0-5, Determines whether standard or custom shapes/surface area/volume relationships are used: 0=plate, 1=cyl, 2=ellips, 3=lizard (desert iguana), 4=frog (leopard frog), 5=custom (see parameter 'shape_coefs')
-#' @param shape_b = 1/5, Proportionality factor (-) for going from volume to area, represents ratio of width:height for a plate, length:diameter for cylinder, b axis:a axis for ellipsoid
-#' @param shape_c = 1/5, Proportionality factor (-) for going from volume to area, represents ratio of length:height for a plate, c axis:a axis for ellipsoid
-#' @param shape_coefs = c(10.4713,.688,0.425,0.85,3.798,.683,0.694,.743), Custom shape coefficients. Operates if geom=5, and consists of 4 pairs of values representing the parameters a and b of a relationship AREA=a*Ww_g^b, where AREA is in cm2 and Ww_g is in g. The first pair are a and b for total surface area, then a and b for ventral area, then for sillhouette area normal to the sun, then sillhouette area perpendicular to the sun
+#' @param c_body = 3073, specific heat of flesh J/(kg-K)
+#' @param k_flesh = 0.5, thermal conductivity of flesh (W/mK, range: 0.412-2.8)
+#' @param emis = 0.95, emissivity of animal (0-1)
+#' @param alpha = 0.85, solar absorptivity, decimal percent
+#' @param geom = 2, organism shape, 0-5, Determines whether standard or custom shapes/surface area/volume relationships are used: 0=plate, 1=cyl, 2=ellips, 3=lizard (desert iguana), 4=frog (leopard frog), 5=custom (see parameter 'shape_coefs')
+#' @param shape_b = 1/5, proportionality factor (-) for going from volume to area, represents ratio of width:height for a plate, length:diameter for cylinder, b axis:a axis for ellipsoid
+#' @param shape_c = 1/5, proportionality factor (-) for going from volume to area, represents ratio of length:height for a plate, c axis:a axis for ellipsoid
+#' @param shape_coefs = c(10.4713,.688,0.425,0.85,3.798,.683,0.694,.743), custom shape coefficients. Operates if geom=5, and consists of 4 pairs of values representing the parameters a and b of a relationship AREA=a*Ww_g^b, where AREA is in cm2 and Ww_g is in g. The first pair are a and b for total surface area, then a and b for ventral area, then for silhouette area normal to the sun, then silhouette area perpendicular to the sun
 #' @param posture = 'n' pointing normal 'n', parallel 'p' to the sun's rays, or 'a' in between?
 #' @param orient = 1, does the object orient toward the sun? (0,1)
-#' @param fatosk = 0.4, Configuration factor to sky (-) for infrared calculations
-#' @param fatosb = 0.4, Configuration factor to subsrate for infrared calculations
+#' @param fatosk = 0.4, configuration factor to sky (-) for infrared calculations
+#' @param fatosb = 0.4, configuration factor to substrate for infrared calculations
 #' @param alpha_sub = 0.2, substrate solar reflectivity, decimal percent
 #' @param pdif = 0.1, proportion of solar energy that is diffuse (rather than direct beam)
-#' @param Tair = 30, air temperature (deg C)
-#' @param Trad = 30, radiant temperature (deg C), averaging ground and sky
+#' @param Tair = 30, air temperature (°C)
+#' @param Trad = 30, radiant temperature (°C), averaging ground and sky
 #' @param vel = 0.1, wind speed (m/s)
 #' @param Qsol = 500, solar radiation (W/m2)
 #' @param Zen = 20, zenith angle of sun (90 is below horizon), degrees
 #' @param press = 101325, air pressure (Pa)
-#' @return Tc Core temperature (deg C)
-#' @return Tcf Final (steady state) temperature (deg C), if conditions remained constant indefinately
+#' @return Tc Core temperature (°C)
+#' @return Tcf Final (steady state) temperature (°C), if conditions remained constant indefinitely
 #' @return tau Time constant (s)
-#' @return dTc Rate of change of core temperature (deg C/s)
+#' @return dTc Rate of change of core temperature (°C/s)
 #' @usage onelump(t, Tc_init, Ww_g, geom, Tair, Trad, vel, Qsol, Zen, ...)
 #' @examples
 #' library(NicheMapR)
@@ -43,10 +43,10 @@
 #'
 #' par(mfrow = c(1,2))
 #' Ww_g <- 5 # body weight, g
-#' Tc_init <- 20 # initial body temperature, deg C
+#' Tc_init <- 20 # initial body temperature, °C
 #' geom <- 2 # shape (2 = ellipsoid)
-#' Tair <- 20 # air temperature, deg C
-#' Trad <- Tair # radiant temperature, deg C
+#' Tair <- 20 # air temperature, °C
+#' Trad <- Tair # radiant temperature, °C
 #' vel <- 1 # wind speed, m/s
 #' Qsol <- 500 # horizontal plane solar radiation, W/m2
 #' Zen <- 20 # zenith angle of sun, degrees
@@ -54,12 +54,12 @@
 #'
 #' Tbs<-onelump(t=t, alpha = alpha, Tc_init = Tc_init, Ww_g = Ww_g,
 #'   geom = geom, Tair = Tair, Trad = Trad, vel = vel, Qsol = Qsol, Zen = Zen)
-#' plot(Tbs$Tc ~ tmins, type= 'l' ,col = 1, ylim = c(20, 30), ylab = 'Temperature, deg C',xlab='time, min', las = 1)
+#' plot(Tbs$Tc ~ tmins, type= 'l' ,col = 1, ylim = c(20, 30), ylab = 'Temperature, °C',xlab='time, min', las = 1)
 #' text(80, 27, "    500 g")
 #' text(80, 24.5, "5 g")
 #' text(90, 20.5, "Tair for both sizes", col = "blue")
 #' text(90, 26, "   vel = 1.0 m/s")
-#' text(90, 23.5, "     vel = 1.0 m/s")"     vel = 1.0 m/s")
+#' text(90, 23.5, "     vel = 1.0 m/s")
 #'
 #' Ww_g <- 500 # body weight, g
 #' Tbs<-onelump(t=t, alpha = alpha, Tc_init = Tc_init, Ww_g = Ww_g,
@@ -69,16 +69,16 @@
 #' abline(h = Tair + .1, lty = 2, col = 'blue')
 #'
 #' Ww_g <- 5 # body weight, g
-#' Tair <- 25 # air temperature, deg C
+#' Tair <- 25 # air temperature, °C
 #' vel <-0.5 # wind speed, m/s
 #'
 #' Tbs<-onelump(t=t, alpha = alpha, Tc_init = Tc_init, Ww_g = Ww_g,
 #'   geom = geom, Tair = Tair, Trad = Trad, vel = vel, Qsol = Qsol, Zen = Zen)
-#' plot(Tbs$Tc~tmins,type='l',col=1,ylim=c(20,30),ylab='Temperature, deg C',xlab='time, min', las = 1)
+#' plot(Tbs$Tc~tmins,type='l',col=1,ylim=c(20,30),ylab='Temperature, °C',xlab='time, min', las = 1)
 #' abline(h = Tair, lty = 1, col = 'blue')
 #'
 #' Ww_g <- 500 # body weight, g
-#' Tair <- 20 # air temperature, deg C
+#' Tair <- 20 # air temperature, °C
 #' vel <-1 # wind speed, m/s
 #'
 #' Tbs<-onelump(t=t, alpha = alpha, Tc_init = Tc_init, Ww_g = Ww_g,
@@ -109,6 +109,8 @@ onelump<-function(t = seq(1, 3600, 60), Tc_init = 5, Ww_g = 500,
   DENSTY <- press / (287.04 * (Tair + 273.15)) # air density, kg/m3
   THCOND <- 0.02425 + (7.038 * 10 ^ -5 * Tair) # air thermal conductivity, W/(m.K)
   VISDYN <- (1.8325 * 10 ^ -5 * ((296.16 + 120) / ((Tair + 273.15) + 120))) * (((Tair + 273.15) / 296.16) ^ 1.5) # dynamic viscosity of air, kg/(m.s)
+  VISKIN <- VISDYN / DENSTY
+  DIFVPR <- 2.26e-05 * (((Tair + 273.15) / 273.15) ^ 1.81) * (1e+05 / press)
 
   # geometry section ############################################################
   m <- Ww_g / 1000 # convert weight to kg
@@ -158,11 +160,11 @@ onelump<-function(t = seq(1, 3600, 60), Tc_init = 5, Ww_g = 500,
     B1 <- A1 * shape_b # axis B, m
     C1 <- A1 * shape_c # axis C, m
     P1 <- 1.6075 # a constant
-    ATOT <- (4 * pi * (((A1 ^ P1 * B1 ^ P1 + A1 ^ P1 * C1 ^ P1 + B1 ^ P1 * C1 ^ P1)        ) / 3) ^ (1 / P1)) # total surface area, m2
+    ATOT <- (4 * pi * (((A1 ^ P1 * B1 ^ P1 + A1 ^ P1 * C1 ^ P1 + B1 ^ P1 * C1 ^ P1)) / 3) ^ (1 / P1)) # total surface area, m2
     ASILN <- max(pi * A1 * C1, pi * B1 * C1) # max silhouette area, m2
     ASILP <- min(pi * A1 * C1, pi * B1 * C1) # min silhouette area, m2
     S2 <- (A1 ^ 2 * B1 ^ 2 * C1 ^ 2) / (A1 ^ 2 * B1 ^ 2 + A1 ^ 2 * C1 ^ 2 + B1 ^ 2 * C1 ^ 2) # fraction of semi-major and minor axes, see Porter and Kearney 2009 supp1
-    k_flesh <- 0.5# + 6.14 * B1 + 0.439 # thermal conductivity of flesh as a function of radius, see Porter and Kearney 2009
+    #k_flesh <- 0.5 + 6.14 * B1 + 0.439 # thermal conductivity of flesh as a function of radius, see Porter and Kearney 2009
   }
 
   # Lizard geometry - DESERT IGUANA (PORTER ET AL. 1973 OECOLOGIA)
@@ -204,7 +206,7 @@ onelump<-function(t = seq(1, 3600, 60), Tc_init = 5, Ww_g = 500,
 
   if (max(Zen) >= 89) {
     Q_norm <- 0
-  } else{
+  }else{
     if(orient == 1){
       Q_norm <- (Qsol / cos(Zenith))
     }else{
@@ -226,6 +228,7 @@ onelump<-function(t = seq(1, 3600, 60), Tc_init = 5, Ww_g = 500,
 
   Re <- DENSTY * vel * L / VISDYN # Reynolds number
   PR <- 1005.7 * VISDYN / THCOND # Prandlt number
+  SC <- VISDYN / (DENSTY * DIFVPR) # Schmidt number
 
   if (geom == 0) {
     NUfor <- 0.102 * Re ^ 0.675 * PR ^ (1. / 3.)
@@ -302,9 +305,9 @@ onelump<-function(t = seq(1, 3600, 60), Tc_init = 5, Ww_g = 500,
     Raylei = (GR ^ 0.25) * (PR ^ 0.333)
     NUfre = 2 + 0.60 * Raylei
   }
-  h_conv_free <- NUfre * THCOND / L # convection coefficent, forced
-  h_conv <- h_conv_free + h_conv_forced # combined convection coefficient
-  Nu <- h_conv * L / THCOND # Nu combined
+  Nutotal <- (NUfre^3 + NUfor^3)^(1./3.)
+  sh <- Nutotal * (SC / PR) ^ (1 / 3)
+  h_conv <- Nutotal*(THCOND/L) # combined convection coefficient
   #R_conv <- 1 / (h_conv * ATOT) # convective resistance, eq. 3 of Transient Equations Derivation vignette
   h_rad <- 4 * emis * sigma * ((Tc + Trad) / 2 + 273.15) ^ 3 # radiation heat transfer coefficient, eq. 46 of Transient Equations Derivation vignette
 
@@ -319,6 +322,6 @@ onelump<-function(t = seq(1, 3600, 60), Tc_init = 5, Ww_g = 500,
   Tci <- Tc # initial temperature
   Tc <- (Tci - Tcf) * exp(-1 * theta * t) + Tcf # Tc at time t, based on eq. 33 of Transient Equations Derivation vignette
   tau <- 1 / theta # time constant
-  dTc <- j - theta_Tc # rate of temperature change (deg C/sec)
+  dTc <- j - theta_Tc # rate of temperature change (°C/sec)
   return(list(Tc = Tc, Tcf = Tcf, tau = tau, dTc = dTc))
 }

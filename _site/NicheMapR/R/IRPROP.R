@@ -1,44 +1,25 @@
 #' IRPROP
 #'
 #' R wrapper for Fortran binary of IRPROP (endotherm model)
-#' @param TA A
-#' @param GMULTMAX A
-#' @param GMREF A
-#' @param GMULT A
-#' @param DHAIRD A
-#' @param DHAIRV A
-#' @param LHAIRD A
-#' @param LHAIRV A
-#' @param ZFURD A
-#' @param ZFURV A
-#' @param RHOD A
-#' @param RHOV A
-#' @param REFLD A
-#' @param REFLV A
-#' @param MAXPTVEN A
+#' @encoding UTF-8
+#' @param TA air temperature at local height (°C)
+#' @param DHAIRD hair diameter, dorsal (m)
+#' @param DHAIRV hair diameter, ventral (m)
+#' @param LHAIRD hair length, dorsal (m)
+#' @param LHAIRV hair length, ventral (m)
+#' @param ZFURD fur depth, dorsal (m)
+#' @param ZFURV fur depth, ventral (m)
+#' @param RHOD hair density, dorsal (1/m2)
+#' @param RHOV hair density, ventral (1/m2)
+#' @param REFLD fur reflectivity dorsal (fractional, 0-1)
+#' @param REFLV fur reflectivity ventral (fractional, 0-1)
+#' @param ZFURCOMP depth of compressed fur (for conduction) (m)
+#' @param PVEN fraction of surface area that is ventral fur (fractional, 0-1)
+#' @param KHAIR hair thermal conductivity (W/m°C)
 #' @export
-IRPROP <- function(TA, GMULTMAX, GMREF, GMULT, DHAIRD, DHAIRV, LHAIRD, LHAIRV,
-  ZFURD, ZFURV, RHOD, RHOV, REFLD, REFLV, MAXPTVEN){
-  os = Sys.info()['sysname']
-  if (os == "Windows") {
-    if (R.Version()$arch=="x86_64") {
-      libpath='/NicheMapR/libs/win/x64/IRPROP.dll'
-    } else {
-      libpath='/NicheMapR/libs/win/i386/IRPROP.dll'
-    }
-  } else if (os == "Linux") {
-    libpath='/NicheMapR/libs/linux/IRPROP.so'
-  } else if (os == "Darwin") {
-    libpath='/NicheMapR/libs/mac/IRPROP.so'
-  }
-  if (!is.loaded('IRPROP')) {
-    dyn.load(paste0(lib.loc = .libPaths()[1],libpath))
-  }
+IRPROP <- function(TA, DHAIRD, DHAIRV, LHAIRD, LHAIRV, ZFURD, ZFURV, RHOD, RHOV, REFLD, REFLV, ZFURCOMP, PVEN, KHAIR){
   a <- .Fortran("IRPROP",
                 as.double(TA),
-                as.double(GMULTMAX),
-                as.double(GMREF),
-                as.double(GMULT),
                 as.double(DHAIRD),
                 as.double(DHAIRV),
                 as.double(LHAIRD),
@@ -49,10 +30,11 @@ IRPROP <- function(TA, GMULTMAX, GMREF, GMULT, DHAIRD, DHAIRV, LHAIRD, LHAIRV,
                 as.double(RHOV),
                 as.double(REFLD),
                 as.double(REFLV),
-                as.double(MAXPTVEN),
+                as.double(ZFURCOMP),
+                as.double(PVEN),
+                as.double(KHAIR),
                 results=matrix(data = 0., nrow = 1, ncol = 26),
-                PACKAGE = "IRPROP")
-  #dyn.unload("IRPROP.dll")
+                PACKAGE = "NicheMapR")
 
   results <- matrix(data = 0., nrow = 1, ncol = 26)
 

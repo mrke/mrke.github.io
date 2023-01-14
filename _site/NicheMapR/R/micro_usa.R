@@ -3,15 +3,15 @@
 #' An implementation of the NicheMapR microclimate model that uses the GRIDMET daily weather database http://www.climatologylab.org/gridmet.html, and specifically uses the following variables: pr, rmax, rmin, srad, tmmn, tmmx, vs. Also uses the following DEM "metdata_elevationdata.nc".
 #' @encoding UTF-8
 #' @param loc Longitude and latitude (decimal degrees)
-#' @param dstart First day to run, date in format "d/m/Y" e.g. "01-01-2016"
-#' @param dfinish Last day to run, date in format "d/m/Y" e.g. "31-12-2016"
+#' @param dstart First day to run, date in format "d/m/Y" e.g. "01/01/2016"
+#' @param dfinish Last day to run, date in format "d/m/Y" e.g. "31/12/2016"
 #' @param REFL Soil solar reflectance, decimal \%
 #' @param elev Elevation, if to be user specified (m)
 #' @param slope Slope in degrees
 #' @param aspect Aspect in degrees (0 = north)
 #' @param DEP Soil depths at which calculations are to be made (cm), must be 10 values starting from 0, and more closely spaced near the surface
-#' @param minshade Minimum shade level to use (\%)
-#' @param maxshade Maximum shade level to us (\%)
+#' @param minshade Minimum shade level to use (\%) (can be a single value or a vector of daily values)
+#' @param maxshade Maximum shade level to us (\%) (can be a single value or a vector of daily values)
 #' @param Usrhyt Local height (m) at which air temperature, wind speed and humidity are to be computed for organism of interest
 #' @param ... Additional arguments, see Details
 #' @return metout The above ground micrometeorological conditions under the minimum specified shade
@@ -28,6 +28,12 @@
 #' @return shadplant Hourly predictions of plant transpiration, leaf water potential and root water potential under the maximum specified shade
 #' @return sunsnow Hourly predictions of snow temperature under the minimum specified shade
 #' @return shadsnow Hourly predictions snow temperature under the maximum specified shade
+#' @return tcond Hourly predictions of the soil thermal conductivity under the minimum specified shade
+#' @return shadtcond Hourly predictions of the soil thermal conductivity under the maximum specified shade
+#' @return specheat Hourly predictions of the soil specific heat capacity under the minimum specified shade
+#' @return shadspecheat Hourly predictions of soil specific heat capacity under the maximum specified shade
+#' @return densit Hourly predictions of the soil density under the minimum specified shade
+#' @return shaddensit Hourly predictions of the soil density under the maximum specified shade
 #' @usage micro_USA(loc = c(-117.8919161, 36.582016), dstart = "01/01/2016", dfinish = "31/12/2016",
 #' REFL = 0.15, slope = 0, aspect = 0, DEP = c(0, 2.5,  5,  10,  15,  20,  30,  50,  100,  200), minshade = 0, maxshade = 90,
 #' Usrhyt = 0.01, ...)
@@ -37,18 +43,17 @@
 #'
 #' \code{runshade}{ = 1, Run the microclimate model twice, once for each shade level (1) or just once for the minimum shade (0)?}\cr\cr
 #' \code{clearsky}{ = 0, Run for clear skies (1) or with observed cloud cover (0)}\cr\cr
-#' \code{run.gads}{ = 1, Use the Global Aerosol Database? 1=yes, 0=no}\cr\cr
+#' \code{run.gads}{ = 1, Use the Global Aerosol Database? 1=yes (Fortran version), 2=yes (R version), 0=no}\cr\cr
 #' \code{lamb}{ = 0, Return wavelength-specific solar radiation output?}\cr\cr
 #' \code{IR}{ = 0, Clear-sky longwave radiation computed using Campbell and Norman (1998) eq. 10.10 (includes humidity) (0) or Swinbank formula (1)}\cr\cr
 #' \code{solonly}{ = 0, Only run SOLRAD to get solar radiation? 1=yes, 0=no}\cr\cr
 #' \code{IUV}{ = 0, Use gamma function for scattered solar radiation? (computationally intensive)}\cr\cr
+#' \code{Soil_Init}{ = NA, initial soil temperature at each soil node, °C (if NA, will use the mean air temperature to initialise)}\cr\cr
 #' \code{write_input}{ = 0, Write csv files of final input to folder 'csv input' in working directory? 1=yes, 0=no}\cr\cr
 #' \code{writecsv}{ = 0, Make Fortran code write output as csv files? 1=yes, 0=no}\cr\cr
-#' \code{terrain}{ = 0, Use 250m resolution terrain data? 1=yes, 0=no}\cr\cr
-#' \code{dailywind}{ = 1, Make Fortran code write output as csv files? 1=yes, 0=no}\cr\cr
 #' \code{windfac}{ = 1, factor to multiply wind speed by e.g. to simulate forest}\cr\cr
 #' \code{adiab_cor}{ = 1, use adiabatic lapse rate correction? 1=yes, 0=no}\cr\cr
-#' \code{warm}{ = 0, uniform warming, °C}\cr\cr
+#' \code{warm}{ = 0, warming offset vector, °C (negative values mean cooling). Can supply a single value or a vector the length of the number of days to be simulated.}\cr\cr
 #' \code{spatial}{ = "c:/Australian Environment/", choose location of terrain data}\cr\cr
 #' \code{opendap}{ = 1, query met grids via opendap}\cr\cr
 #' \code{soilgrids}{ = 0, query soilgrids.org database for soil hydraulic properties?}\cr\cr
@@ -60,23 +65,25 @@
 #' \code{ERR}{ = 1.5, Integrator error tolerance for soil temperature calculations}\cr\cr
 #' \code{Refhyt}{ = 2, Reference height (m), reference height at which air temperature, wind speed and relative humidity input data are measured}\cr\cr
 #' \code{RUF}{ = 0.004, Roughness height (m), e.g. smooth desert is 0.0003, closely mowed grass may be 0.001, bare tilled soil 0.002-0.006, current allowed range: 0.00001 (snow) - 0.02 m.}\cr\cr
+#' \code{ZH}{ = 0, heat transfer roughness height (m) for Campbell and Norman air temperature/wind speed profile (invoked if greater than 0, 0.02 * canopy height in m if unknown)}\cr\cr
+#' \code{D0}{ = 0, zero plane displacement correction factor (m) for Campbell and Norman air temperature/wind speed profile (0.6 * canopy height in m if unknown)}\cr\cr
 #' \code{Z01}{ = 0, Top (1st) segment roughness height(m) - IF NO EXPERIMENTAL WIND PROFILE DATA SET THIS TO ZERO! (then RUF and Refhyt used)}\cr\cr
 #' \code{Z02}{ = 0, 2nd segment roughness height(m) - IF NO EXPERIMENTAL WIND PROFILE DATA SET THIS TO ZERO! (then RUF and Refhyt used).}\cr\cr
 #' \code{ZH1}{ = 0, Top of (1st) segment, height above surface(m) - IF NO EXPERIMENTAL WIND PROFILE DATA SET THIS TO ZERO! (then RUF and Refhyt used).}\cr\cr
 #' \code{ZH2}{ = 0, 2nd segment, height above surface(m) - IF NO EXPERIMENTAL WIND PROFILE DATA SET THIS TO ZERO! (then RUF and Refhyt used).}\cr\cr
 #' \code{EC}{ = 0.0167238, Eccenricity of the earth's orbit (current value 0.0167238, ranges between 0.0034 to 0.058)}\cr\cr
 #' \code{SLE}{ = 0.95, Substrate longwave IR emissivity (decimal \%), typically close to 1}\cr\cr
-#' \code{Thcond}{ = 2.5, Soil minerals thermal conductivity (W/mK)}\cr\cr
-#' \code{Density}{ = 2.56, Soil minerals density (Mg/m3)}\cr\cr
-#' \code{SpecHeat}{ = 870, Soil minerals specific heat (J/kg-K)}\cr\cr
-#' \code{BulkDensity}{ = 1.3, Soil bulk density (Mg/m3)}\cr\cr
-#' \code{PCTWET}{ = 0, \% of ground surface area acting as a free water surface}\cr\cr
+#' \code{Thcond}{ = 2.5, Soil minerals thermal conductivity, single value or vector of 10 specific to each depth (W/mK)}\cr\cr
+#' \code{Density}{ = 2.56, Soil minerals density, single value or vector of 10 specific to each depth (Mg/m3)}\cr\cr
+#' \code{SpecHeat}{ = 870, Soil minerals specific heat, single value or vector of 10 specific to each depth (J/kg-K)}\cr\cr
+#' \code{BulkDensity}{ = 1.3, Soil bulk density (Mg/m3), single value or vector of 10 specific to each depth}\cr\cr
+#' \code{PCTWET}{ = 0, \% of ground surface area acting as a free water surface (overridden if soil moisture model is running)}\cr\cr
 #' \code{rainwet}{ = 1.5, mm of rainfall causing the ground to be 90\% wet for the day}\cr\cr
 #' \code{cap}{ = 1, organic cap present on soil surface? (cap has lower conductivity - 0.2 W/mC - and higher specific heat 1920 J/kg-K)}\cr\cr
 #' \code{CMH2O}{ = 1, Precipitable cm H2O in air column, 0.1 = very dry; 1.0 = moist air conditions; 2.0 = humid, tropical conditions (note this is for the whole atmospheric profile, not just near the ground)}\cr\cr
 #' \code{hori}{ = rep(0,24), Horizon angles (degrees), from 0 degrees azimuth (north) clockwise in 15 degree intervals}\cr\cr
-#' \code{lapse_min}{ = 0.0039 Lapse rate for minimum air temperature (degrees C/m)}
-#' \code{lapse_max}{ = 0.0077 Lapse rate for maximum air temperature (degrees C/m)}
+#' \code{lapse_min}{ = 0.0039 Lapse rate for minimum air temperature (degrees C/m)}\cr\cr
+#' \code{lapse_max}{ = 0.0077 Lapse rate for maximum air temperature (degrees C/m)}\cr\cr
 #' \code{TIMAXS}{ = c(1.0, 1.0, 0.0, 0.0), Time of Maximums for Air Wind RelHum Cloud (h), air & Wind max's relative to solar noon, humidity and cloud cover max's relative to sunrise}\cr\cr
 #' \code{TIMINS}{ = c(0, 0, 1, 1), Time of Minimums for Air Wind RelHum Cloud (h), air & Wind min's relative to sunrise, humidity and cloud cover min's relative to solar noon}\cr\cr
 #' \code{timezone}{ = 0, Use GNtimezone function in package geonames to correct to local time zone (excluding daylight saving correction)? 1=yes, 0=no}\cr\cr
@@ -101,7 +108,7 @@
 #' { and points half way between)}\cr\cr
 #' \code{maxpool}{ = 10000, Max depth for water pooling on the surface (mm), to account for runoff}\cr\cr
 #' \code{rainmult}{ = 1, Rain multiplier for surface soil moisture (-), used to induce runon}\cr\cr
-#' \code{rainoff}{ = 0, Rain offset (mm), used to induce constant extra input}\cr\cr
+#' \code{rainoff}{ = 0, Rain offset (mm), used to induce changes in rainfall from GRIDMET values. Can be a single value or a vector matching the number of days to simulate. If negative values are used, rainfall will be prevented from becomming negative.}\cr\cr
 #' \code{evenrain}{ = 0, Spread daily rainfall evenly across 24hrs (1) or one event at midnight (0)}\cr\cr
 #' \code{SoilMoist_Init}{ = c(0.1,0.12,0.15,0.2,0.25,0.3,0.3,0.3,0.3,0.3), initial soil water content at each soil node, m3/m3}\cr\cr
 #' \code{L}{ = c(0,0,8.2,8.0,7.8,7.4,7.1,6.4,5.8,4.8,4.0,1.8,0.9,0.6,0.8,0.4,0.4,0,0)*10000, root density (m/m3), (19 values descending through soil for specified soil nodes in parameter}\cr\cr
@@ -112,7 +119,7 @@
 #' \code{SP}{ = 10, stability parameter for stomatal closure equation, -}\cr\cr
 #' \code{IM}{ = 1e-06, maximum allowable mass balance error, kg}\cr\cr
 #' \code{MAXCOUNT}{ = 500, maximum iterations for mass balance, -}\cr\cr
-#' \code{LAI}{ = 0.1, leaf area index, used to partition traspiration/evaporation from PET}\cr\cr
+#' \code{LAI}{ = 0.1, leaf area index (can be a single value or a vector of daily values), used to partition traspiration/evaporation from PET}\cr\cr
 #'
 #' \strong{ Snow mode parameters:}
 #'
@@ -124,7 +131,7 @@
 #' \code{undercatch}{ = 1, undercatch multipier for converting rainfall to snow}\cr\cr
 #' \code{rainmelt}{ = 0.0125, paramter in equation that melts snow with rainfall as a function of air temp}\cr\cr
 #' \code{snowcond}{ = 0, effective snow thermal conductivity W/mC (if zero, uses inbuilt function of density)}\cr\cr
-#' \code{intercept}{ = maxshade / 100 * 0.3, snow interception fraction for when there's shade (0-1)}\cr\cr
+#' \code{intercept}{ = max(maxshade) / 100 * 0.3, snow interception fraction for when there's shade (0-1)}\cr\cr
 #' \code{grasshade}{ = 0, if 1, means shade is removed when snow is present, because shade is cast by grass/low shrubs}\cr\cr
 #'
 #' \strong{ Intertidal mode parameters:}
@@ -132,7 +139,7 @@
 #' \code{shore}{ Include tide effects? If 1, the matrix}
 #' \code{tides}
 #' { is used to specify tide presence, sea water temperature and presence of wavesplash}\cr\cr
-#' \code{tides}{ = matrix(data = 0, nrow = length(seq(as.POSIXct(dstart, format = "%d/%m/%Y"), as.POSIXct(dfinish, format = "%d/%m/%Y"), by = "days")) * 24, ncol = 3), matrix for each how of the simulation of 1. tide state (0=out, 1=in), 2. Water temperature (°C) and 3. Wave splash (0=yes, 1=no)}\cr\cr
+#' \code{tides}{ = matrix(data = 0, nrow = length(seq(as.POSIXct(dstart, format = '%d/%m/%Y'), as.POSIXct(dfinish, format = '%d/%m/%Y'), by = 'days')) * 24, ncol = 3), matrix of 1. tide state (0=out, 1=in), 2. Water temperature (°C) and 3. Wave splash (0=yes, 1=no)}\cr\cr
 #' }
 #'
 #' \strong{Outputs:}
@@ -144,9 +151,8 @@
 #' \code{nyears}{ - number of years for which predictions are made}\cr\cr
 #' \code{RAINFALL}{ - vector of daily rainfall (mm)}\cr\cr
 #' \code{elev}{ - elevation at point of simulation (m)}\cr\cr
-#' \code{minshade}{ - minimum shade for simulation (\%)}\cr\cr
-#' \code{maxshade}{ - maximum shade for simulation (single value - if time varying, in 'MAXSHADES') (\%)}\cr\cr
-#' \code{MAXSHADES}{ - vector of maximum shades used (\%)}\cr\cr
+#' \code{minshade}{ - minimum shade for each day of simulation (\%)}\cr\cr
+#' \code{maxshade}{ - maximum shade for each day of simulation (\%)}\cr\cr
 #' \code{DEP}{ - vector of depths used (cm)}\cr\cr
 #'
 #' metout/shadmet variables:
@@ -163,10 +169,10 @@
 #' \item 10 POOLDEP - water pooling on surface (mm)
 #' \item 11 PCTWET - soil surface wetness (\%)
 #' \item 12 ZEN - zenith angle of sun (degrees - 90 = below the horizon)
-#' \item 13 SOLR - solar radiation (W/m2)
+#' \item 13 SOLR - solar radiation (W/m2) (unshaded, horizontal plane)
 #' \item 14 TSKYC - sky radiant temperature (°C)
-#' \item 15 DEW - dew presence (0 or 1)
-#' \item 16 FROST - frost presence (0 or 1)
+#' \item 15 DEW - dew fall (mm / h)
+#' \item 16 FROST - frost (mm / h)
 #' \item 17 SNOWFALL - snow predicted to have fallen (cm)
 #' \item 18 SNOWDEP - predicted snow depth (cm)
 #' \item 19 SNOWDENS - snow density (g/cm3)
@@ -184,13 +190,13 @@
 #' \itemize{
 #' \item 1 DOY - day-of-year
 #' \item 2 TIME - time of day (mins)
-#' \item 3-12 WC0cm ... - soil moisuture (m3/m3) at each of the 10 specified depths
+#' \item 3-12 WC0cm ... - soil moisture (m3/m3) at each of the 10 specified depths
 #' }
 #' soilpot and shadpot variables:
 #' \itemize{
 #' \item 1 DOY - day-of-year
 #' \item 2 TIME - time of day (mins)
-#' \item 3-12 PT0cm ... - soil water potential (J/kg = kpa = bar/100) at each of the 10 specified depths
+#' \item 3-12 PT0cm ... - soil water potential (J/kg = kPa = bar/100) at each of the 10 specified depths
 #' }
 #' humid and shadhumid variables:
 #' \itemize{
@@ -202,9 +208,27 @@
 #' \itemize{
 #' \item  1 DOY - day-of-year
 #' \item  2 TIME - time of day (mins)
-#' \item  3 TRANS - plant transpiration rate (kg/m2/s)
-#' \item  4 LEAFPOT - leaf water potential (J/kg)
-#' \item  5-14 RPOT0cm ... - root water potential (J/kg), at each of the 10 specified depths
+#' \item  3 TRANS - plant transpiration rate (g/m2/h)
+#' \item  4 LEAFPOT - leaf water potential (J/kg = kPa = bar/100)
+#' \item  5-14 RPOT0cm ... - root water potential (J/kg = kPa = bar/100), at each of the 10 specified depths
+#' }
+#' tcond and shadtcond variables:
+#' \itemize{
+#' \item  1 DOY - day-of-year
+#' \item  2 TIME - time of day (mins)
+#' \item  3-12 TC0cm ... - soil thermal conductivity (W/m-K), at each of the 10 specified depths
+#' }
+#' specheat and shadspecheat variables:
+#' \itemize{
+#' \item  1 DOY - day-of-year
+#' \item  2 TIME - time of day (mins)
+#' \item  3-12 SP0cm ... - soil specific heat capacity (J/kg-K), at each of the 10 specified depths
+#' }
+#' densit and shaddensit variables:
+#' \itemize{
+#' \item  1 DOY - day-of-year
+#' \item  2 TIME - time of day (mins)
+#' \item  3-12 DE0cm ... - soil density (Mg/m3), at each of the 10 specified depths
 #' }
 #'
 #' if snow model is run i.e. parameter lamb = 1\cr
@@ -306,16 +330,18 @@ micro_usa <- function(
   clearsky = 0,
   solonly = 0,
   run.gads = 1,
+  Soil_Init = NA,
   write_input = 0,
   writecsv = 0,
-  terrain = 0,
-  dailywind = 1,
+  #terrain = 0,
   windfac = 1,
   adiab_cor = 1,
   warm = 0,
   spatial = "P:",
   ERR = 1.5,
   RUF = 0.004,
+  ZH = 0,
+  D0 = 0,
   EC = 0.0167238,
   SLE = 0.95,
   Thcond = 2.5,
@@ -373,7 +399,7 @@ micro_usa <- function(
   fail = nyears * 24 * 365,
   save = 0,
   snowcond = 0,
-  intercept = maxshade / 100 * 0.4,
+  intercept = max(maxshade) / 100 * 0.3,
   grasshade = 0) { # end function parameters
 
   ystart <- as.numeric(substr(dstart, 7, 10))
@@ -387,6 +413,9 @@ micro_usa <- function(
   if(DEP[2]-DEP[1]<2){
     cat("warning, nodes might be too close near the surface, try a different spacing if the program is crashing \n")
   }
+  if(DEP[10] != 200){
+    cat("warning, last depth in soil should not be changed from 200 without good reason \n")
+  }
   if(is.numeric(loc[1])){
     if(loc[1]>180 | loc[2] > 90){
       cat("ERROR: Latitude or longitude (longlat) is out of bounds.
@@ -399,8 +428,11 @@ micro_usa <- function(
         Please correct.", '\n')
     errors<-1
   }
-  if(run.gads%in%c(0,1)==FALSE){
-    cat("ERROR: the variable 'run.gads' be either 0 or 1.
+  if(run.gads == 1){
+    message("If program is crashing, try run.gads = 2.", '\n')
+  }
+  if(run.gads%in%c(0, 1, 2)==FALSE){
+    cat("ERROR: the variable 'run.gads' be either 0, 1 or 2.
         Please correct.", '\n')
     errors<-1
   }
@@ -443,17 +475,17 @@ micro_usa <- function(
     cat("ERROR: Deepest soil depth (DEP array) is too large (<=500 cm)", '\n')
     errors<-1
   }
-  if(Thcond<0){
+  if(min(Thcond)<0){
     cat("ERROR: Thermal variable conductivity (THCOND) is negative.
         Please input a positive value.", '\n')
     errors<-1
   }
-  if(Density<0){
+  if(min(Density)<0){
     cat("ERROR: Density variable (Density) is negative.
         Please input a positive value.", '\n')
     errors<-1
   }
-  if(SpecHeat<0){
+  if(min(SpecHeat)<0){
     cat("ERROR: Specific heat variable (SpecHeat) is negative.
         Please input a positive value.", '\n')
     errors<-1
@@ -487,7 +519,7 @@ micro_usa <- function(
     cat("ERROR: You must enter 24 horizon angle values.", '\n')
     errors<-1
   }
-  if(SLE<0.5 | SLE > 1){
+  if(SLE<0.05 | SLE > 1){
     cat("ERROR: Emissivity (SLE) is out of bounds.
         Please enter a correct value (0.05 - 1.00).", '\n')
     errors<-1
@@ -522,18 +554,18 @@ micro_usa <- function(
         Please input a value between 0 and 24", '\n')
     errors<-1
   }
-  if(minshade>maxshade | minshade==maxshade){
-    cat("ERROR: Your value for minimum shade (minshade) is greater than or equal to the maximum shade (maxshade).
+  if(max(minshade-maxshade) >= 0){
+    cat("ERROR: Your value(s) for minimum shade (minshade) is greater than or equal to the maximum shade (maxshade).
         Please correct this.", '\n')
     errors<-1
   }
-  if(minshade>100 | minshade<0){
-    cat("ERROR: Your value for minimum shade (minshade) is out of bounds.
+  if(max(minshade)>100 | min(minshade)<0){
+    cat("ERROR: Your value(s) for minimum shade (minshade) is out of bounds.
         Please input a value between 0 and 100.", '\n')
     errors<-1
   }
-  if(maxshade>100 | maxshade<0){
-    cat("ERROR: Your value for maximum shade (maxshade) is out of bounds.
+  if(max(maxshade)>100 | min(maxshade)<0){
+    cat("ERROR: Your value(s) for maximum shade (maxshade) is out of bounds.
         Please input a value between 0 and 100.", '\n')
     errors<-1
   }
@@ -542,7 +574,7 @@ micro_usa <- function(
   if(errors==0){ # continue
 
     ################## time related variables #################################
-    doys12<-c(15.,46.,74.,105.,135.,166.,196.,227.,258.,288.,319.,349.) # middle day of each month
+    doys12<-c(15, 46, 74, 105, 135, 166, 196, 227, 258, 288, 319, 349) # middle day of each month
 
     microdaily<-1 # run microclimate model where one iteration of each day occurs and last day gives initial conditions for present day with an initial 3 day burn in
 
@@ -624,7 +656,7 @@ micro_usa <- function(
           start = start, count = count, unpack = TRUE)))
         RNetCDF::close.nc(nc)
       }else{
-        USADEM <- extract(raster::raster(paste0(spatial,"/metdata_elevationdata.nc")), x) # metres above sea level
+        USADEM <- raster::extract(raster::raster(paste0(spatial,"/metdata_elevationdata.nc")), x) # metres above sea level
       }
       if(save == 1){
         cat("saving DEM data for later \n")
@@ -636,16 +668,20 @@ micro_usa <- function(
       load('USADEM.Rda')
     }
 
-    ALTITUDES <- NA# extract(raster(paste0(spatial,"/terr50.tif")), x) # to do
+    ALTITUDES <- NA# raster::extract(raster(paste0(spatial,"/terr50.tif")), x) # to do
     if(is.na(elev) == FALSE){ALTITUDES <- elev} # check if user-specified elevation
     if(is.na(ALTITUDES)==TRUE){ALTITUDES<-USADEM}
     if(save != 2){
       if(soilgrids == 1){
         cat('extracting soil texture data from SoilGrids \n')
         require(jsonlite)
-        ov <- jsonlite::fromJSON(paste0('https://rest.soilgrids.org/query?lon=',x[1],'&lat=',x[2],',&attributes=BLDFIE,SLTPPT,SNDPPT,CLYPPT'), flatten = TRUE)
+        #ov <- fromJSON(paste0('https://rest.isric.org/query?lon=',x[1],'&lat=',x[2],',&attributes=BLDFIE,SLTPPT,SNDPPT,CLYPPT'), flatten = TRUE)
+        ov <- jsonlite::fromJSON(paste0('https://rest.isric.org/soilgrids/v2.0/properties/query?lon=',x[1],'&lat=',x[2],'&property=bdod&property=silt&property=clay&property=sand'), flatten = TRUE)
         if(length(ov) > 3){
-          soilpro <- cbind(c(0,5,15,30,60,100,200), unlist(ov$properties$BLDFIE$M)/1000, unlist(ov$properties$SLTPPT$M), unlist(ov$properties$SNDPPT$M), unlist(ov$properties$CLYPPT$M) )
+          soilpro <- cbind(c(0, 5, 15, 30, 60, 100), unlist(ov$properties$layers$depths[[1]]$values.mean) / 100, unlist(ov$properties$layers$depths[[2]]$values.mean) / 10, unlist(ov$properties$layers$depths[[4]]$values.mean) / 10, unlist(ov$properties$layers$depths[[3]]$values.mean) / 10)
+          soilpro <- rbind(soilpro, soilpro[6, ])
+          soilpro[7, 1] <- 200
+          #soilpro <- cbind(c(0,5,15,30,60,100,200), unlist(ov$properties$BLDFIE$M)/1000, unlist(ov$properties$CLYPPT$M), unlist(ov$properties$SLTPPT$M), unlist(ov$properties$SNDPPT$M) )
           colnames(soilpro) <- c('depth', 'blkdens', 'clay', 'silt', 'sand')
           #Now get hydraulic properties for this soil using Cosby et al. 1984 pedotransfer functions.
           soil.hydro<-pedotransfer(soilpro = as.data.frame(soilpro), DEP = DEP)
@@ -676,24 +712,24 @@ micro_usa <- function(
       save(KS, file = 'KS.Rda')
       save(BulkDensity, file = 'BulkDensity.Rda')
     }
-    if(terrain==1){ # to do
-      cat("extracting terrain data \n")
-      # now extract terrain data from elevslpasphori.nc
-      # get UTM from dec degrees, NZTM
-      HORIZONS <- elevslpasphori[4:27]
-      SLOPES <- elevslpasphori[2]
-      AZMUTHS <- elevslpasphori[3]
-      # the horizons have been arranged so that they go from 0 degrees azimuth (north) clockwise - r.horizon starts
-      # in the east and goes counter clockwise!
-      HORIZONS <- (ifelse(is.na(HORIZONS),0,HORIZONS))/10 # get rid of na and get back to floating point
-      HORIZONS <- data.frame(HORIZONS)
-    }else{
+    #if(terrain==1){ # to do
+      # cat("extracting terrain data \n")
+      # # now extract terrain data from elevslpasphori.nc
+      # # get UTM from dec degrees, NZTM
+      # HORIZONS <- elevslpasphori[4:27]
+      # SLOPES <- elevslpasphori[2]
+      # AZMUTHS <- elevslpasphori[3]
+      # # the horizons have been arranged so that they go from 0 degrees azimuth (north) clockwise - r.horizon starts
+      # # in the east and goes counter clockwise!
+      # HORIZONS <- (ifelse(is.na(HORIZONS),0,HORIZONS))/10 # get rid of na and get back to floating point
+      # HORIZONS <- data.frame(HORIZONS)
+    #}else{
       HORIZONS <- hori
       HORIZONS <- data.frame(HORIZONS)
       VIEWF_all <- 1-sum(sin(as.data.frame(hori)*pi/180))/length(hori) # convert horizon angles to radians and calc view factor(s)
       SLOPES<-rep(slope,length(x[,1]))
       AZMUTHS<-rep(aspect,length(x[,1]))
-    }
+    #}
     hori<-HORIZONS
     row.names(hori)<-NULL
     hori<-as.numeric(as.matrix(hori))
@@ -716,7 +752,7 @@ micro_usa <- function(
         baseurl <- "http://thredds.northwestknowledge.net:8080/thredds/dodsC/agg_met_"
         cat(paste0("reading weather input for ", dstart, " to ", dfinish, " \n"))
         cat(paste0("tmin weather input \n"))
-        nc <- RNetCDF::open.nc(paste0(baseurl, "tmmn_1979_CurrentYear_CONUS.nc"))
+        nc <- RNetCDF::open.nc(paste0(baseurl, "tmmn_1979_CurrentYear_CONUS.nc#fillmismatch"))
         day <- retry(as.numeric(RNetCDF::var.get.nc(nc, variable = "day", unpack = TRUE)))
         lon <- RNetCDF::var.get.nc(nc, "lon", unpack = TRUE)
         lat <- RNetCDF::var.get.nc(nc, "lat", unpack = TRUE)
@@ -729,27 +765,27 @@ micro_usa <- function(
         Tmin <- retry(as.numeric(RNetCDF::var.get.nc(nc, variable = "daily_minimum_temperature", start = start, count = count, unpack = TRUE))) - 273.15
         RNetCDF::close.nc(nc)
         cat(paste0("tmax weather input \n"))
-        nc <- RNetCDF::open.nc(paste0(baseurl, "tmmx_1979_CurrentYear_CONUS.nc"))
+        nc <- RNetCDF::open.nc(paste0(baseurl, "tmmx_1979_CurrentYear_CONUS.nc#fillmismatch"))
         Tmax <- retry(as.numeric(RNetCDF::var.get.nc(nc, variable = "daily_maximum_temperature", start = start, count = count, unpack = TRUE))) - 273.15
         RNetCDF::close.nc(nc)
         cat(paste0("rhmin weather input \n"))
-        nc <- RNetCDF::open.nc(paste0(baseurl, "rmin_1979_CurrentYear_CONUS.nc"))
+        nc <- RNetCDF::open.nc(paste0(baseurl, "rmin_1979_CurrentYear_CONUS.nc#fillmismatch"))
         rhmin <- retry(as.numeric(RNetCDF::var.get.nc(nc, variable = "daily_minimum_relative_humidity", start = start, count = count, unpack = TRUE)))
         RNetCDF::close.nc(nc)
         cat(paste0("rhmax weather input \n"))
-        nc <- RNetCDF::open.nc(paste0(baseurl, "rmax_1979_CurrentYear_CONUS.nc"))
+        nc <- RNetCDF::open.nc(paste0(baseurl, "rmax_1979_CurrentYear_CONUS.nc#fillmismatch"))
         rhmax <- retry(as.numeric(RNetCDF::var.get.nc(nc, variable = "daily_maximum_relative_humidity", start = start, count = count, unpack = TRUE)))
         RNetCDF::close.nc(nc)
         cat(paste0("rain weather input \n"))
-        nc <- RNetCDF::open.nc(paste0(baseurl, "pr_1979_CurrentYear_CONUS.nc"))
+        nc <- RNetCDF::open.nc(paste0(baseurl, "pr_1979_CurrentYear_CONUS.nc#fillmismatch"))
         Rain <- retry(as.numeric(RNetCDF::var.get.nc(nc, variable = "precipitation_amount", start = start, count = count, unpack = TRUE)))
         RNetCDF::close.nc(nc)
         cat(paste0("solar weather input \n"))
-        nc <- RNetCDF::open.nc(paste0(baseurl, "srad_1979_CurrentYear_CONUS.nc"))
+        nc <- RNetCDF::open.nc(paste0(baseurl, "srad_1979_CurrentYear_CONUS.nc#fillmismatch"))
         solar <- retry(as.numeric(RNetCDF::var.get.nc(nc, variable = "daily_mean_shortwave_radiation_at_surface", start = start, count = count, unpack = TRUE)))
         RNetCDF::close.nc(nc)
         cat(paste0("wind weather input \n"))
-        nc <- RNetCDF::open.nc(paste0(baseurl, "vs_1979_CurrentYear_CONUS.nc"))
+        nc <- RNetCDF::open.nc(paste0(baseurl, "vs_1979_CurrentYear_CONUS.nc#fillmismatch"))
         Wind <- retry(as.numeric(RNetCDF::var.get.nc(nc, variable = "daily_mean_wind_speed", start = start, count = count, unpack = TRUE)))
         RNetCDF::close.nc(nc)
       }else{
@@ -931,21 +967,32 @@ micro_usa <- function(
     if(opendap == 1 & save != 2){ # could be less than whole years
       doy <- doy[cut:(cut+countday-1)]
     }
-    ida<-ndays
+    ida <- ndays
     idayst <- 1
 
-    ndays<-length(Tmin)
-    maxshades=rep(maxshade,ndays)
-    minshades=rep(minshade,ndays)
-    shademax<-maxshades
+    if(length(minshade) != ndays){
+      MINSHADES <- rep(0, ndays) + minshade[1] # daily min shade (%)
+    }else{
+      MINSHADES <- rep(0, ndays) + minshade # daily min shade (%)
+    }
+    if(length(maxshade) != ndays){
+      MAXSHADES <- rep(0, ndays) + maxshade[1] # daily max shade (%)
+    }else{
+      MAXSHADES <- rep(0, ndays) + maxshade # daily max shade (%)
+    }
 
     if(is.na(ALTITUDES)!=TRUE){
 
-      if(run.gads==1){
+      if(run.gads > 0){
         ####### get solar attenuation due to aerosols with program GADS #####################
-        relhum<-1.
-        optdep.summer<-as.data.frame(rungads(longlat[2],longlat[1],relhum,0))
-        optdep.winter<-as.data.frame(rungads(longlat[2],longlat[1],relhum,1))
+        relhum <- 1
+        if(run.gads == 1){ # fortran version
+          optdep.summer <- as.data.frame(rungads(longlat[2], longlat[1], relhum, 0))
+          optdep.winter <- as.data.frame(rungads(longlat[2], longlat[1], relhum, 1))
+        }else{ # r version
+          optdep.summer <- as.data.frame(gads.r(longlat[2], longlat[1], relhum, 0))
+          optdep.winter <- as.data.frame(gads.r(longlat[2], longlat[1], relhum, 1))
+        }
         optdep<-cbind(optdep.winter[,1],rowMeans(cbind(optdep.summer[,2],optdep.winter[,2])))
         optdep<-as.data.frame(optdep)
         colnames(optdep)<-c("LAMBDA","OPTDEPTH")
@@ -966,10 +1013,11 @@ micro_usa <- function(
       }
       if(warm != 0){
         # impose uniform temperature change
-        TMAXX<-TMAXX+seq(0, ndays-1)/(ndays-1)*warm
-        TMINN<-TMINN+seq(0, ndays-1)/(ndays-1)*warm
+        TMAXX<-TMAXX+warm
+        TMINN<-TMINN+warm
       }
       RAINFALL<-Rain+rainoff
+      RAINFALL[RAINFALL < 0] <- 0
 
       # correct for potential change in RH with elevation-corrected Tair
       es <- WETAIR(db = TMAXX, rh = 100)$esat
@@ -989,9 +1037,6 @@ micro_usa <- function(
 
       WNMAXX <- Wind * windfac
       WNMINN <- Wind * windfac
-
-      MAXSHADES<-maxshades
-      MINSHADES<-minshades
 
       REFLS <- rep(REFL, ndays)
       PCTWET <- rep(PCTWET, ndays)
@@ -1022,7 +1067,17 @@ micro_usa <- function(
       AZMUTH<-AZMUTHS
 
       avetemp<-(sum(TMAXX)+sum(TMINN))/(length(TMAXX)*2)
-      soilinit<-rep(avetemp,20)
+      if(is.na(Soil_Init[1])){
+        soilinit <- rep(avetemp, 20)
+        spinup <- 1
+      }else{
+        if(snowmodel == 0){
+          soilinit <- c(Soil_Init, rep(avetemp, 10))
+        }else{
+          soilinit <- c(rep(avetemp, 8), Soil_Init[1:10], rep(avetemp, 2))
+        }
+        spinup <- 0
+      }
       tannul<-mean(unlist(ALLTEMPS))
 
       if(nyears==1){
@@ -1077,7 +1132,8 @@ micro_usa <- function(
       soilprops<-matrix(data = 0, nrow = 10, ncol = 5)
 
       soilprops[,1]<-BulkDensity
-      soilprops[,2]<-min(0.26, 1 - BulkDensity / Density) # not used if soil moisture computed
+      soilprops[,2] <- 1 - BulkDensity / Density # not used if soil moisture computed
+      soilprops[soilprops[,2] < 0.26, 2] <- 0.26
       soilprops[,3]<-Thcond
       soilprops[,4]<-SpecHeat
       soilprops[,5]<-Density
@@ -1102,7 +1158,7 @@ micro_usa <- function(
       ALAT<-as.numeric(ALAT)
 
       # microclimate input parameters list
-      microinput<-c(ndays,RUF,ERR,Usrhyt,Refhyt,Numtyps,Z01,Z02,ZH1,ZH2,idayst,ida,HEMIS,ALAT,AMINUT,ALONG,ALMINT,ALREF,slope,azmuth,ALTT,CMH2O,microdaily,tannul,EC,VIEWF,snowtemp,snowdens,snowmelt,undercatch,rainmult,runshade,runmoist,maxpool,evenrain,snowmodel,rainmelt,writecsv,densfun,hourly,rainhourly,lamb,IUV,RW,PC,RL,SP,R1,IM,MAXCOUNT,IR,message,fail,snowcond,intercept,grasshade,solonly)
+      microinput<-c(ndays,RUF,ERR,Usrhyt,Refhyt,Numtyps,Z01,Z02,ZH1,ZH2,idayst,ida,HEMIS,ALAT,AMINUT,ALONG,ALMINT,ALREF,slope,azmuth,ALTT,CMH2O,microdaily,tannul,EC,VIEWF,snowtemp,snowdens,snowmelt,undercatch,rainmult,runshade,runmoist,maxpool,evenrain,snowmodel,rainmelt,writecsv,densfun,hourly,rainhourly,lamb,IUV,RW,PC,RL,SP,R1,IM,MAXCOUNT,IR,message,fail,snowcond,intercept,grasshade,solonly,ZH,D0,TIMAXS,TIMINS,spinup)
 
       # hourly option set to 0, so make empty vectors
       if(hourly==0){
@@ -1120,49 +1176,14 @@ micro_usa <- function(
         RAINhr = rainhour
       }
 
-      doy1=matrix(data = 0., nrow = ndays, ncol = 1)
-      SLES1=matrix(data = 0., nrow = ndays, ncol = 1)
-      MAXSHADES1=matrix(data = 0., nrow = ndays, ncol = 1)
-      MINSHADES1=matrix(data = 0., nrow = ndays, ncol = 1)
-      TMAXX1=matrix(data = 0., nrow = ndays, ncol = 1)
-      TMINN1=matrix(data = 0., nrow = ndays, ncol = 1)
-      CCMAXX1=matrix(data = 0., nrow = ndays, ncol = 1)
-      CCMINN1=matrix(data = 0., nrow = ndays, ncol = 1)
-      RHMAXX1=matrix(data = 0., nrow = ndays, ncol = 1)
-      RHMINN1=matrix(data = 0., nrow = ndays, ncol = 1)
-      WNMAXX1=matrix(data = 0., nrow = ndays, ncol = 1)
-      WNMINN1=matrix(data = 0., nrow = ndays, ncol = 1)
-      REFLS1=matrix(data = 0., nrow = ndays, ncol = 1)
-      PCTWET1=matrix(data = 0., nrow = ndays, ncol = 1)
-      RAINFALL1=matrix(data = 0, nrow = ndays, ncol = 1)
-      tannul1=matrix(data = 0, nrow = ndays, ncol = 1)
-      moists1=matrix(data = 0., nrow = 10, ncol = ndays)
-      doy1[1:ndays]<-doy
-      SLES1[1:ndays]<-SLES
-      MAXSHADES1[1:ndays]<-MAXSHADES
-      MINSHADES1[1:ndays]<-MINSHADES
-      TMAXX1[1:ndays]<-TMAXX
-      TMINN1[1:ndays]<-TMINN
-      CCMAXX1[1:ndays]<-CCMAXX
-      CCMINN1[1:ndays]<-CCMINN
-      RHMAXX1[1:ndays]<-RHMAXX
-      RHMINN1[1:ndays]<-RHMINN
-      WNMAXX1[1:ndays]<-WNMAXX
-      WNMINN1[1:ndays]<-WNMINN
-      REFLS1[1:ndays]<-REFLS
-      PCTWET1[1:ndays]<-PCTWET
-      RAINFALL1[1:ndays]<-RAINFALL
-      tannul1[1:ndays]<-tannul
-      moists1[1:10,1:ndays]<-moists
       if(length(LAI)<ndays){
         LAI<-rep(LAI[1],ndays)
-        LAI1 <- LAI
       }
       if(shore==0){
         tides<-matrix(data = 0, nrow = 24*ndays, ncol = 3) # make an empty matrix
       }
       # all microclimate data input list - all these variables are expected by the input argument of the fortran micro2014 subroutine
-      micro<-list(tides=tides,microinput=microinput,doy=doy,SLES=SLES1,DEP=DEP,Nodes=Nodes,MAXSHADES=MAXSHADES,MINSHADES=MINSHADES,TIMAXS=TIMAXS,TIMINS=TIMINS,TMAXX=TMAXX1,TMINN=TMINN1,RHMAXX=RHMAXX1,RHMINN=RHMINN1,CCMAXX=CCMAXX1,CCMINN=CCMINN1,WNMAXX=WNMAXX1,WNMINN=WNMINN1,TAIRhr=TAIRhr,RHhr=RHhr,WNhr=WNhr,CLDhr=CLDhr,SOLRhr=SOLRhr,RAINhr=RAINhr,ZENhr=ZENhr,IRDhr=IRDhr,REFLS=REFLS1,PCTWET=PCTWET1,soilinit=soilinit,hori=hori,TAI=TAI,soilprops=soilprops,moists=moists1,RAINFALL=RAINFALL1,tannulrun=tannulrun,PE=PE,KS=KS,BB=BB,BD=BD,DD=DD,L=L,LAI=LAI1)
+      micro<-list(tides=tides,microinput=microinput,doy=doy,SLES=SLES,DEP=DEP,Nodes=Nodes,MAXSHADES=MAXSHADES,MINSHADES=MINSHADES,TMAXX=TMAXX,TMINN=TMINN,RHMAXX=RHMAXX,RHMINN=RHMINN,CCMAXX=CCMAXX,CCMINN=CCMINN,WNMAXX=WNMAXX,WNMINN=WNMINN,TAIRhr=TAIRhr,RHhr=RHhr,WNhr=WNhr,CLDhr=CLDhr,SOLRhr=SOLRhr,RAINhr=RAINhr,ZENhr=ZENhr,IRDhr=IRDhr,REFLS=REFLS,PCTWET=PCTWET,soilinit=soilinit,hori=hori,TAI=TAI,soilprops=soilprops,moists=moists,RAINFALL=RAINFALL,tannulrun=tannulrun,PE=PE,KS=KS,BB=BB,BD=BD,DD=DD,L=L,LAI=LAI)
       # write all input to csv files in their own folder
       if(write_input==1){
         if(dir.exists("micro csv input")==FALSE){
@@ -1217,6 +1238,7 @@ micro_usa <- function(
         location<-loc
       }
       cat(paste('running microclimate model for',ndays,'days from',dstart,' to ', dfinish, ' at site ',location,'\n'))
+      message('Note: the output column `SOLR` in metout and shadmet is for unshaded horizontal plane solar radiation \n')
       ptm <- proc.time() # Start timing
       microut<-microclimate(micro)
       print(proc.time() - ptm) # Stop the clock
@@ -1225,6 +1247,12 @@ micro_usa <- function(
       shadmet<-microut$shadmet # retrieve above ground microclimatic conditions, max shade
       soil<-microut$soil # retrieve soil temperatures, minimum shade
       shadsoil<-microut$shadsoil # retrieve soil temperatures, maximum shade
+      tcond <- microut$tcond
+      shadtcond <- microut$shadtcond
+      specheat <- microut$specheat
+      shadspecheat <- microut$shadspecheat
+      densit <- microut$densit
+      shaddensit <- microut$shaddensit
       if(runmoist==1){
         soilmoist<-microut$soilmoist # retrieve soil moisture, minimum shade
         shadmoist<-microut$shadmoist # retrieve soil moisture, maximum shade
@@ -1259,22 +1287,22 @@ micro_usa <- function(
       if(max(metout[,1] == 0)){
         cat("ERROR: the model crashed - try a different error tolerance (ERR) or a different spacing in DEP", '\n')
       }
-      dates <- seq(as.POSIXct(paste0("01/01/",ystart), format = "%d/%m/%Y", tz = 'America/Los_Angeles'), as.POSIXct(paste0("01/01/",yfinish+1), format = "%d/%m/%Y", tz = 'America/Los_Angeles'), by = 'hours')[1:(length(TMAXX) * 24)]
-      dates2 <- seq(as.POSIXct(paste0("01/01/",ystart), format = "%d/%m/%Y", tz = 'America/Los_Angeles'), as.POSIXct(paste0("01/01/",yfinish+1), format = "%d/%m/%Y", tz = 'America/Los_Angeles'), by = 'days')[1:(length(TMAXX))]
+      dates <- seq(as.POSIXct(dstart, format = "%d/%m/%Y", tz = 'America/Los_Angeles'), as.POSIXct(dfinish, format = "%d/%m/%Y", tz = 'America/Los_Angeles')+23*3600, by = 'hours')[1:(length(TMAXX) * 24)]
+      dates2 <- seq(as.POSIXct(dstart, format = "%d/%m/%Y", tz = 'America/Los_Angeles'), as.POSIXct(dfinish, format = "%d/%m/%Y", tz = 'America/Los_Angeles'), by = 'days')[1:(length(TMAXX))]
       if(lamb == 1){
         drlam<-as.data.frame(microut$drlam) # retrieve direct solar irradiance
         drrlam<-as.data.frame(microut$drrlam) # retrieve direct Rayleigh component solar irradiance
         srlam<-as.data.frame(microut$srlam) # retrieve scattered solar irradiance
         if(snowmodel == 1){
-          return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,humid=humid,shadhumid=shadhumid,soilpot=soilpot,shadpot=shadpot,sunsnow=sunsnow,shdsnow=shdsnow,plant=plant,shadplant=shadplant,RAINFALL=RAINFALL,ndays=ndays,elev=ALTT,REFL=REFL[1],MAXSHADES=MAXSHADES,longlat=c(x[1],x[2]),nyears=nyears,minshade=minshade,maxshade=maxshade,DEP=DEP,drlam=drlam,drrlam=drrlam,srlam=srlamd,dates=dates,dates2=dates2))
+          return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,humid=humid,shadhumid=shadhumid,soilpot=soilpot,shadpot=shadpot,sunsnow=sunsnow,shdsnow=shdsnow,plant=plant,shadplant=shadplant,tcond=tcond,shadtcond=shadtcond,specheat=specheat,shadspecheat=shadspecheat,densit=densit,shaddensit=shaddensit,RAINFALL=RAINFALL,ndays=ndays,elev=ALTT,REFL=REFL[1],longlat=c(x[1],x[2]),nyears=nyears,minshade=MINSHADES,maxshade=MAXSHADES,DEP=DEP,drlam=drlam,drrlam=drrlam,srlam=srlamd,dates=dates,dates2=dates2,PE=PE,BD=BD,DD=DD,BB=BB,KS=KS))
         }else{
-          return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,humid=humid,shadhumid=shadhumid,soilpot=soilpot,shadpot=shadpot,plant=plant,shadplant=shadplant,RAINFALL=RAINFALL,ndays=ndays,elev=ALTT,REFL=REFL[1],MAXSHADES=MAXSHADES,longlat=c(x[1],x[2]),nyears=nyears,minshade=minshade,maxshade=maxshade,DEP=DEP,drlam=drlam,drrlam=drrlam,srlam=srlam,dates=dates,dates2=dates2))
+          return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,humid=humid,shadhumid=shadhumid,soilpot=soilpot,shadpot=shadpot,plant=plant,shadplant=shadplant,tcond=tcond,shadtcond=shadtcond,specheat=specheat,shadspecheat=shadspecheat,densit=densit,shaddensit=shaddensit,RAINFALL=RAINFALL,ndays=ndays,elev=ALTT,REFL=REFL[1],longlat=c(x[1],x[2]),nyears=nyears,minshade=MINSHADES,maxshade=MAXSHADES,DEP=DEP,drlam=drlam,drrlam=drrlam,srlam=srlam,dates=dates,dates2=dates2,PE=PE,BD=BD,DD=DD,BB=BB,KS=KS))
         }
       }else{
         if(snowmodel == 1){
-          return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,humid=humid,shadhumid=shadhumid,soilpot=soilpot,shadpot=shadpot,sunsnow=sunsnow,shdsnow=shdsnow,plant=plant,shadplant=shadplant,RAINFALL=RAINFALL,ndays=ndays,elev=ALTT,REFL=REFL[1],MAXSHADES=MAXSHADES,longlat=c(x[1],x[2]),nyears=nyears,minshade=minshade,maxshade=maxshade,DEP=DEP,dates=dates,dates2=dates2))
+          return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,humid=humid,shadhumid=shadhumid,soilpot=soilpot,shadpot=shadpot,sunsnow=sunsnow,shdsnow=shdsnow,plant=plant,shadplant=shadplant,tcond=tcond,shadtcond=shadtcond,specheat=specheat,shadspecheat=shadspecheat,densit=densit,shaddensit=shaddensit,RAINFALL=RAINFALL,ndays=ndays,elev=ALTT,REFL=REFL[1],longlat=c(x[1],x[2]),nyears=nyears,minshade=MINSHADES,maxshade=MAXSHADES,DEP=DEP,dates=dates,dates2=dates2,PE=PE,BD=BD,DD=DD,BB=BB,KS=KS))
         }else{
-          return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,humid=humid,shadhumid=shadhumid,soilpot=soilpot,shadpot=shadpot,plant=plant,shadplant=shadplant,RAINFALL=RAINFALL,ndays=ndays,elev=ALTT,REFL=REFL[1],MAXSHADES=MAXSHADES,longlat=c(x[1],x[2]),nyears=nyears,minshade=minshade,maxshade=maxshade,DEP=DEP,dates=dates,dates2=dates2))
+          return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,humid=humid,shadhumid=shadhumid,soilpot=soilpot,shadpot=shadpot,plant=plant,shadplant=shadplant,tcond=tcond,shadtcond=shadtcond,specheat=specheat,shadspecheat=shadspecheat,densit=densit,shaddensit=shaddensit,RAINFALL=RAINFALL,ndays=ndays,elev=ALTT,REFL=REFL[1],longlat=c(x[1],x[2]),nyears=nyears,minshade=MINSHADES,maxshade=MAXSHADES,DEP=DEP,dates=dates,dates2=dates2,PE=PE,BD=BD,DD=DD,BB=BB,KS=KS))
         }
       }
     } # end of check for na sites

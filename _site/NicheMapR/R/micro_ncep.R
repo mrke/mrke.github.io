@@ -1,22 +1,26 @@
 #' NCEP implementation of the microclimate model, with package microclima computing hourly forcing.
 #'
-#' An implementation of the NicheMapR microclimate model that uses the RNCEP package daily weather database https://sites.google.com/site/michaelukemp/rncep, and specifically uses the following variables: air.2m, prate.sfc, shum.2m, pres.sfc, tcdc.eatm, uwnd.10m, vwnd.10m, dswrf.sfc. At the moment uses the same DEM from the CRU global climate data set.
+#' An implementation of the NicheMapR microclimate model that integrates the RNCEP 6-hourly weather data and the elevatr package for obtaining DEM using downscaling functions from the microclima package as described in more detail in Kearney, M. R., Gillingham, P. K., Bramer, I., Duffy, J. P., & Maclean, I. M. D. (2019). A method for computing hourly, historical, terrain-corrected microclimate anywhere on Earth. Methods in Ecology and Evolution.
 #' @encoding UTF-8
 #' @param loc Longitude and latitude (decimal degrees)
 #' @param dstart First day to run, date in format "d/m/Y" e.g. "01/01/2016"
 #' @param dfinish Last day to run, date in format "d/m/Y" e.g. "31/12/2016"
-#' @param dem a digital elevation model used by microclima for micro-topographic effects, produced by microclima function 'get_dem' via R package 'elevatr' (internally generated via same function based on 'loc' if NA)
-#' @param dem2 a digital elevation model used by microclima for meso-climate calculations, produced by microclima function 'get_dem' via R package 'elevatr' (internally generated via same function based on 'loc' if NA)
+#' @param dem A digital elevation model used by microclima for micro-topographic effects, produced by microclima function 'get_dem' via R package 'elevatr' (internally generated via same function based on 'loc' if NA)
+#' @param dem2 A digital elevation model used by microclima for meso-climate calculations, produced by microclima function 'get_dem' via R package 'elevatr' (internally generated via same function based on 'loc' if NA)
+#' @param dem.res Requested resolution of the DEM from elevatr, m
+#' @param pixels Number of pixels along one edge of square requested of DEM requested from elevatr, #
 #' @param REFL Soil solar reflectance, decimal \%
 #' @param slope Slope in degrees (if NA, then derived from DEM with package microclima)
 #' @param aspect Aspect in degrees (0 = north) (if NA, then derived from DEM with microclima)
 #' @param DEP Soil depths at which calculations are to be made (cm), must be 10 values starting from 0, and more closely spaced near the surface
-#' @param minshade Minimum shade level to use (\%)
-#' @param maxshade Maximum shade level to us (\%)
+#' @param minshade Minimum shade level to use (\%) (can be a single value or a vector of daily values)
+#' @param maxshade Maximum shade level to use (\%) (can be a single value or a vector of daily values)
 #' @param Usrhyt Local height (m) at which air temperature, wind speed and humidity are to be computed for organism of interest
 #' @param coastal Compute coastal effects with microclima? T (TRUE) or F (FALSE) (can take a while and may have high memory requirements depending on DEM size)
 #' @param hourlydata user input of the hourlydata matrix
 #' @param dailyprecip user input of daily rainfall
+#' @param weather.elev optional value indicating the elevation of values in `hourlydata`. Either a numeric value, corresponding to the elevation in (m) of the location from which `hourlydata` were obtained, or `ncep` (default, data derive from NOAA-NCEP reanalysis) project.
+#' @param cad.effects optional logical indicating whether to calculate cold air drainage effects (TRUE = Yes, slower. FALSE =  No, quicker)
 #' @param ... Additional arguments, see Details
 #' @return metout The above ground micrometeorological conditions under the minimum specified shade
 #' @return shadmet The above ground micrometeorological conditions under the maximum specified shade
@@ -32,44 +36,55 @@
 #' @return shadplant Hourly predictions of plant transpiration, leaf water potential and root water potential under the maximum specified shade
 #' @return sunsnow Hourly predictions of snow temperature under the minimum specified shade
 #' @return shadsnow Hourly predictions snow temperature under the maximum specified shade
-#' @usage micro_clima(loc = 'Galapagos', dstart = "01/01/2017", dfinish = "31/12/2017",
+#' @return tcond Hourly predictions of the soil thermal conductivity under the minimum specified shade
+#' @return shadtcond Hourly predictions of the soil thermal conductivity under the maximum specified shade
+#' @return specheat Hourly predictions of the soil specific heat capacity under the minimum specified shade
+#' @return shadspecheat Hourly predictions of soil specific heat capacity under the maximum specified shade
+#' @return densit Hourly predictions of the soil density under the minimum specified shade
+#' @return shaddensit Hourly predictions of the soil density under the maximum specified shade
+#' @usage micro_ncep(loc = c(-91.415669, -0.287145), dstart = "01/01/2019", dfinish = "31/07/2019",
 #' REFL = 0.15, slope = 0, aspect = 0, DEP = c(0, 2.5,  5,  10,  15,  20,  30,  50,  100,  200), minshade = 0, maxshade = 90,
 #' Usrhyt = 0.01, ...)
 #' @export
 #' @details
 #' \strong{ Parameters controlling how the model runs:}\cr\cr
 #' \code{runshade}{ = 1, Run the microclimate model twice, once for each shade level (1) or just once for the minimum shade (0)?}\cr\cr
-#' \code{run.gads}{ = 1, Use the Global Aerosol Database? 1=yes, 0=no}\cr\cr
-#' \code{IR}{ = 0, Clear-sky longwave radiation computed using Campbell and Norman (1998) eq. 10.10 (includes humidity) (0) or Swinbank formula (1)}\cr\cr
+#' \code{run.gads}{ = 1, Use the Global Aerosol Database? 1=yes (Fortran version), 2=yes (R version), 0=no}\cr\cr
+#' \code{IR}{ = 0, Clear-sky longwave radiation computed using Campbell and Norman (1998) eq. 10.10 (includes humidity) (0) or Swinbank formula (1) or from NCEP data (2)}\cr\cr
 #' \code{solonly}{ = 0, Only run SOLRAD to get solar radiation? 1=yes, 0=no}\cr\cr
 #' \code{lamb}{ = 0, Return wavelength-specific solar radiation output?}\cr\cr
 #' \code{IUV}{ = 0, Use gamma function for scattered solar radiation? (computationally intensive)}\cr\cr
+#' \code{Soil_Init}{ = NA, initial soil temperature at each soil node, °C (if NA, will use the mean air temperature to initialise)}\cr\cr
 #' \code{write_input}{ = 0, Write csv files of final input to folder 'csv input' in working directory? 1=yes, 0=no}\cr\cr
 #' \code{writecsv}{ = 0, Make Fortran code write output as csv files? 1=yes, 0=no}\cr\cr
 #' \code{reanalysis}{ = TRUE, Use reanalysis2 NCEP data? TRUE/FALSE}\cr\cr
 #' \code{windfac}{ = 1, factor to multiply wind speed by e.g. to simulate forest}\cr\cr
-#' \code{warm}{ = 0, uniform warming, °C}\cr\cr
+#' \code{warm}{ = 0, warming offset vector, °C (negative values mean cooling). Can supply a single value or a vector the length of the number of days to be simulated.}\cr\cr
 #' \code{soilgrids}{ = 0, query soilgrids.org database for soil hydraulic properties?}\cr\cr
 #' \code{message}{ = 0, allow the Fortran integrator to output warnings? (1) or not (0)}\cr\cr
 #' \code{fail}{ = nyears x 24 x 365, how many restarts of the integrator before the Fortran program quits (avoids endless loops when solutions can't be found)}\cr\cr
 #' \code{spatial}{ = NA, specify folder with local NCEP data (no trailing forward slash), goes to the web if NA }\cr\cr
+#' \code{scenario}{ = 0, climate change scenario from terraclimate (0 is historical, 2 is plus 2 deg C, 4 is plus 4 deg C }\cr\cr
+#' \code{terra_source}{ = "http://thredds.northwestknowledge.net:8080/thredds/dodsC/TERRACLIMATE_ALL/data", specify location of terraclimate data, goes to the web by default}\cr\cr
 #' \code{save}{ = 0, don't save forcing data (0), save the forcing data (1) or read previously saved data (2)}\cr\cr
 #'
 #' \strong{ General additional parameters:}\cr\cr
 #' \code{ERR}{ = 1.5, Integrator error tolerance for soil temperature calculations}\cr\cr
 #' \code{Refhyt}{ = 2, Reference height (m), reference height at which air temperature, wind speed and relative humidity input data are measured}\cr\cr
 #' \code{RUF}{ = 0.004, Roughness height (m), e.g. smooth desert is 0.0003, closely mowed grass may be 0.001, bare tilled soil 0.002-0.006, current allowed range: 0.00001 (snow) - 0.02 m.}\cr\cr
+#' \code{ZH}{ = 0, heat transfer roughness height (m) for Campbell and Norman air temperature/wind speed profile (invoked if greater than 0, 0.02 * canopy height in m if unknown)}\cr\cr
+#' \code{D0}{ = 0, zero plane displacement correction factor (m) for Campbell and Norman air temperature/wind speed profile (0.6 * canopy height in m if unknown)}\cr\cr
 #' \code{Z01}{ = 0, Top (1st) segment roughness height(m) - IF NO EXPERIMENTAL WIND PROFILE DATA SET THIS TO ZERO! (then RUF and Refhyt used)}\cr\cr
 #' \code{Z02}{ = 0, 2nd segment roughness height(m) - IF NO EXPERIMENTAL WIND PROFILE DATA SET THIS TO ZERO! (then RUF and Refhyt used).}\cr\cr
 #' \code{ZH1}{ = 0, Top of (1st) segment, height above surface(m) - IF NO EXPERIMENTAL WIND PROFILE DATA SET THIS TO ZERO! (then RUF and Refhyt used).}\cr\cr
 #' \code{ZH2}{ = 0, 2nd segment, height above surface(m) - IF NO EXPERIMENTAL WIND PROFILE DATA SET THIS TO ZERO! (then RUF and Refhyt used).}\cr\cr
 #' \code{EC}{ = 0.0167238, Eccenricity of the earth's orbit (current value 0.0167238, ranges between 0.0034 to 0.058)}\cr\cr
 #' \code{SLE}{ = 0.95, Substrate longwave IR emissivity (decimal \%), typically close to 1}\cr\cr
-#' \code{Thcond}{ = 2.5, Soil minerals thermal conductivity (W/mK)}\cr\cr
-#' \code{Density}{ = 2.56, Soil minerals density (Mg/m3)}\cr\cr
-#' \code{SpecHeat}{ = 870, Soil minerals specific heat (J/kg-K)}\cr\cr
-#' \code{BulkDensity}{ = 1.3, Soil bulk density (Mg/m3)}\cr\cr
-#' \code{PCTWET}{ = 0, \% of ground surface area acting as a free water surface}\cr\cr
+#' \code{Thcond}{ = 2.5, Soil minerals thermal conductivity, single value or vector of 10 specific to each depth (W/mK)}\cr\cr
+#' \code{Density}{ = 2.56, Soil minerals density, single value or vector of 10 specific to each depth (Mg/m3)}\cr\cr
+#' \code{SpecHeat}{ = 870, Soil minerals specific heat, single value or vector of 10 specific to each depth (J/kg-K)}\cr\cr
+#' \code{BulkDensity}{ = 1.3, Soil bulk density (Mg/m3), single value or vector of 10 specific to each depth}\cr\cr
+#' \code{PCTWET}{ = 0, \% of ground surface area acting as a free water surface (overridden if soil moisture model is running)}\cr\cr
 #' \code{rainwet}{ = 1.5, mm of rainfall causing the ground to be 90\% wet for the day}\cr\cr
 #' \code{cap}{ = 1, organic cap present on soil surface? (cap has lower conductivity - 0.2 W/mC - and higher specific heat 1920 J/kg-K)}\cr\cr
 #' \code{CMH2O}{ = 1, Precipitable cm H2O in air column, 0.1 = very dry; 1.0 = moist air conditions; 2.0 = humid, tropical conditions (note this is for the whole atmospheric profile, not just near the ground)}\cr\cr
@@ -97,7 +112,7 @@
 #' \code{rainhourly}{ = 0, Is hourly rain input being supplied (1 = yes, 0 = no)?}\cr\cr
 #' \code{rainhour}{ = 0, Vector of hourly rainfall values - overrides daily NCEP rain if rainhourly = 1}\cr\cr
 #' \code{rainmult}{ = 1, Rain multiplier for surface soil moisture (-), used to induce runon}\cr\cr
-#' \code{rainoff}{ = 0, Rain offset (mm), used to induce constant extra input}\cr\cr
+#' \code{rainoff}{ = 0, Rain offset (mm), used to induce changes in rainfall from NCEP values. Can be a single value or a vector matching the number of days to simulate. If negative values are used, rainfall will be prevented from becomming negative.}\cr\cr
 #' \code{evenrain}{ = 0, Spread daily rainfall evenly across 24hrs (1) or one event at midnight (0)}\cr\cr
 #' \code{SoilMoist_Init}{ = c(0.1,0.12,0.15,0.2,0.25,0.3,0.3,0.3,0.3,0.3), initial soil water content at each soil node, m3/m3}\cr\cr
 #' \code{L}{ = c(0,0,8.2,8.0,7.8,7.4,7.1,6.4,5.8,4.8,4.0,1.8,0.9,0.6,0.8,0.4,0.4,0,0)*10000, root density (m/m3), (19 values descending through soil for specified soil nodes in parameter}\cr\cr
@@ -108,7 +123,7 @@
 #' \code{SP}{ = 10, stability parameter for stomatal closure equation, -}\cr\cr
 #' \code{IM}{ = 1e-06, maximum allowable mass balance error, kg}\cr\cr
 #' \code{MAXCOUNT}{ = 500, maximum iterations for mass balance, -}\cr\cr
-#' \code{LAI}{ = 0.1, leaf area index, used to partition traspiration/evaporation from PET in soil moisture model}\cr\cr
+#' \code{LAI}{ = 0.1, leaf area index (can be a single value or a vector of daily values), used to partition traspiration/evaporation from PET in soil moisture model}\cr\cr
 #' \code{microclima.LAI}{ = 0, leaf area index, used by package microclima for radiation calcs}\cr\cr
 #' \code{LOR}{ = 1, leaf orientation for package microclima radiation calcs}\cr\cr
 #'
@@ -122,14 +137,14 @@
 #' \code{undercatch}{ = 1, undercatch multipier for converting rainfall to snow}\cr\cr
 #' \code{rainmelt}{ = 0.0125, paramter in equation that melts snow with rainfall as a function of air temp}\cr\cr
 #' \code{snowcond}{ = 0, effective snow thermal conductivity W/mC (if zero, uses inbuilt function of density)}\cr\cr
-#' \code{intercept}{ = maxshade / 100 * 0.3, snow interception fraction for when there's shade (0-1)}\cr\cr
+#' \code{intercept}{ = max(maxshade) / 100 * 0.3, snow interception fraction for when there's shade (0-1)}\cr\cr
 #' \code{grasshade}{ = 0, if 1, means shade is removed when snow is present, because shade is cast by grass/low shrubs}\cr\cr
 #'
 #' \strong{ Intertidal mode parameters:}
 #'
 #' \code{shore}{ Include tide effects? If 1, the matrix}
 #' \code{tides}{ is used to specify tide presence, sea water temperature and presence of wavesplash}\cr\cr
-#' \code{tides}{ = matrix(data = 0, nrow = length(seq(as.POSIXct(dstart, format = "%d/%m/%Y"), as.POSIXct(dfinish, format = "%d/%m/%Y"), by = "days")) * 24, ncol = 3), matrix for each how of the simulation of 1. tide state (0=out, 1=in), 2. Water temperature (°C) and 3. Wave splash (0=yes, 1=no)}\cr\cr
+#' \code{tides}{ = matrix(data = 0, nrow = length(seq(as.POSIXct(dstart, format = '%d/%m/%Y'), as.POSIXct(dfinish, format = '%d/%m/%Y'), by = 'days')) * 24, ncol = 3), matrix of 1. tide state (0=out, 1=in), 2. Water temperature (°C) and 3. Wave splash (0=yes, 1=no)}\cr\cr
 #' }
 #'
 #' \strong{Outputs:}
@@ -140,9 +155,8 @@
 #' \code{nyears}{ - number of years for which predictions are made}\cr\cr
 #' \code{RAINFALL}{ - vector of daily rainfall (mm)}\cr\cr
 #' \code{elev}{ - elevation at point of simulation (m)}\cr\cr
-#' \code{minshade}{ - minimum shade for simulation (\%)}\cr\cr
-#' \code{maxshade}{ - maximum shade for simulation (single value - if time varying, in 'MAXSHADES') (\%)}\cr\cr
-#' \code{MAXSHADES}{ - vector of maximum shades used (\%)}\cr\cr
+#' \code{minshade}{ - minimum shade for each day of simulation (\%)}\cr\cr
+#' \code{maxshade}{ - maximum shade for each day of simulation (\%)}\cr\cr
 #' \code{dem}{ - digital elevation model obtained via 'get_dev' using package 'elevatr' (m)}\cr\cr
 #' \code{DEP}{ - vector of depths used (cm)}\cr\cr
 #' \code{SLOPE}{ - slope at point of simulation (\%)}\cr\cr
@@ -163,9 +177,9 @@
 #' \item 10 POOLDEP - water pooling on surface (mm)
 #' \item 11 PCTWET - soil surface wetness (\%)
 #' \item 12 ZEN - zenith angle of sun (degrees - 90 = below the horizon)
-#' \item 13 SOLR - solar radiation (W/m2)
+#' \item 13 SOLR - solar radiation (W/m2) (unshaded, adjusted for slope, aspect and horizon angle)
 #' \item 14 TSKYC - sky radiant temperature (°C)
-#' \item 15 DEW - dew presence (0 or 1)
+#' \item 15 DEW - dew fall (mm / h)
 #' \item 16 FROST - frost presence (0 or 1)
 #' \item 17 SNOWFALL - snow predicted to have fallen (cm)
 #' \item 18 SNOWDEP - predicted snow depth (cm)
@@ -184,13 +198,13 @@
 #' \itemize{
 #' \item 1 DOY - day-of-year
 #' \item 2 TIME - time of day (mins)
-#' \item 3-12 WC0cm ... - soil moisuture (m3/m3) at each of the 10 specified depths
+#' \item 3-12 WC0cm ... - soil moisture (m3/m3) at each of the 10 specified depths
 #' }
 #' soilpot and shadpot variables:
 #' \itemize{
 #' \item 1 DOY - day-of-year
 #' \item 2 TIME - time of day (mins)
-#' \item 3-12 PT0cm ... - soil water potential (J/kg = kpa = bar/100) at each of the 10 specified depths
+#' \item 3-12 PT0cm ... - soil water potential (J/kg = kPa = bar/100) at each of the 10 specified depths
 #' }
 #' humid and shadhumid variables:
 #' \itemize{
@@ -202,9 +216,27 @@
 #' \itemize{
 #' \item  1 DOY - day-of-year
 #' \item  2 TIME - time of day (mins)
-#' \item  3 TRANS - plant transpiration rate (kg/m2/s)
-#' \item  4 LEAFPOT - leaf water potential (J/kg)
-#' \item  5-14 RPOT0cm ... - root water potential (J/kg), at each of the 10 specified depths
+#' \item  3 TRANS - plant transpiration rate (g/m2/h)
+#' \item  4 LEAFPOT - leaf water potential (J/kg = kPa = bar/100)
+#' \item  5-14 RPOT0cm ... - root water potential (J/kg = kPa = bar/100), at each of the 10 specified depths
+#' }
+#' tcond and shadtcond variables:
+#' \itemize{
+#' \item  1 DOY - day-of-year
+#' \item  2 TIME - time of day (mins)
+#' \item  3-12 TC0cm ... - soil thermal conductivity (W/m-K), at each of the 10 specified depths
+#' }
+#' specheat and shadspecheat variables:
+#' \itemize{
+#' \item  1 DOY - day-of-year
+#' \item  2 TIME - time of day (mins)
+#' \item  3-12 SP0cm ... - soil specific heat capacity (J/kg-K), at each of the 10 specified depths
+#' }
+#' densit and shaddensit variables:
+#' \itemize{
+#' \item  1 DOY - day-of-year
+#' \item  2 TIME - time of day (mins)
+#' \item  3-12 DE0cm ... - soil density (Mg/m3), at each of the 10 specified depths
 #' }
 #'
 #' if snow model is run i.e. parameter lamb = 1\cr
@@ -227,7 +259,7 @@
 #' library(NicheMapR)
 #' dstart <- "02/01/2017"
 #' dfinish <- "30/12/2017"
-#' loc <- c(-5.3, 50.13) # Galapagos
+#' loc <- c(-91.415669, -0.287145) # Isla Fernandina Galapagos
 #' micro<-micro_ncep(loc = loc, dstart = dstart, dfinish = dfinish)
 #'
 #' metout<-as.data.frame(micro$metout) # above ground microclimatic conditions, min shade
@@ -289,6 +321,8 @@ micro_ncep <- function(
   dfinish = "31/12/2017",
   dem = NA,
   dem2 = dem,
+  dem.res = 30,
+  pixels = 100,
   nyears = as.numeric(substr(dfinish, 7, 10)) - as.numeric(substr(dstart, 7, 10)) + 1,
   REFL = 0.15,
   slope = NA,
@@ -296,8 +330,6 @@ micro_ncep <- function(
   DEP = c(0, 2.5,  5,  10,  15,  20,  30,  50,  100,  200),
   minshade = 0,
   maxshade = 90,
-  MINSHADES = NA,
-  MAXSHADES = NA,
   Refhyt = 2,
   Usrhyt = 0.01,
   Z01 = 0,
@@ -307,6 +339,7 @@ micro_ncep <- function(
   runshade = 1,
   run.gads = 1,
   solonly = 0,
+  Soil_Init = NA,
   write_input = 0,
   writecsv = 0,
   reanalysis = TRUE,
@@ -314,6 +347,8 @@ micro_ncep <- function(
   warm = 0,
   ERR = 1.5,
   RUF = 0.004,
+  ZH = 0,
+  D0 = 0,
   EC = 0.0167238,
   SLE = 0.95,
   Thcond = 2.5,
@@ -366,24 +401,27 @@ micro_ncep <- function(
   message = 0,
   fail = nyears * 24 * 365,
   spatial = NA,
+  scenario = 0,
+  terra_source = "http://thredds.northwestknowledge.net:8080/thredds/dodsC/TERRACLIMATE_ALL/data",
   save = 0,
   snowcond = 0,
-  intercept = 0 / 100 * 0.3,
+  intercept = max(maxshade) / 100 * 0.3,
   grasshade = 0,
   coastal = F,
   hourlydata = NA,
-  dailyprecip = NA){ # end function parameters
-
+  dailyprecip = NA,
+  weather.elev = 'ncep',
+  cad.effects = TRUE){ # end function parameters
   # error trapping - originally inside the Fortran code, but now checking before executing Fortran
   errors<-0
-  if(as.POSIXct(dfinish, format = "%d/%m/%Y", origin = "01/01/1900") > Sys.time() | as.POSIXct(dstart, format = "%d/%m/%Y", origin = "01/01/1900") > Sys.time()){
-    cat("sorry, no NCEP data for these times - please choose a different date range \n")
-  }
   if(DEP[2]-DEP[1]>3 | DEP[3]-DEP[2]>3){
     cat("warning, nodes might be too far apart near the surface, try a different spacing if the program is crashing \n")
   }
   if(DEP[2]-DEP[1]<2){
     cat("warning, nodes might be too close near the surface, try a different spacing if the program is crashing \n")
+  }
+  if(DEP[10] != 200){
+    cat("warning, last depth in soil should not be changed from 200 without good reason \n")
   }
   if(is.numeric(loc[1])){
     if(loc[1]>180 | loc[2] > 90){
@@ -392,8 +430,11 @@ micro_ncep <- function(
       errors<-1
     }
   }
-  if(run.gads%in%c(0,1)==FALSE){
-    cat("ERROR: the variable 'run.gads' be either 0 or 1.
+  if(run.gads == 1){
+    message("If program is crashing, try run.gads = 2.", '\n')
+  }
+  if(run.gads%in%c(0, 1, 2)==FALSE){
+    cat("ERROR: the variable 'run.gads' be either 0, 1 or 2.
         Please correct.", '\n')
     errors<-1
   }
@@ -436,17 +477,17 @@ micro_ncep <- function(
     cat("ERROR: Deepest soil depth (DEP array) is too large (<=500 cm)", '\n')
     errors<-1
   }
-  if(Thcond<0){
+  if(min(Thcond)<0){
     cat("ERROR: Thermal variable conductivity (THCOND) is negative.
         Please input a positive value.", '\n')
     errors<-1
   }
-  if(Density<0){
+  if(min(Density)<0){
     cat("ERROR: Density variable (Density) is negative.
         Please input a positive value.", '\n')
     errors<-1
   }
-  if(SpecHeat<0){
+  if(min(SpecHeat)<0){
     cat("ERROR: Specific heat variable (SpecHeat) is negative.
         Please input a positive value.", '\n')
     errors<-1
@@ -480,7 +521,7 @@ micro_ncep <- function(
     cat("ERROR: You must enter 24 horizon angle values.", '\n')
     errors<-1
   }
-  if(SLE<0.5 | SLE > 1){
+  if(SLE<0.05 | SLE > 1){
     cat("ERROR: Emissivity (SLE) is out of bounds.
         Please enter a correct value (0.05 - 1.00).", '\n')
     errors<-1
@@ -505,25 +546,34 @@ micro_ncep <- function(
         Please enter a correct value (0.1 - 2cm).", '\n')
     errors<-1
   }
-  if(minshade>maxshade | minshade==maxshade){
-    message("ERROR: Your value for minimum shade (minshade) is greater than or equal to the maximum shade (maxshade).
-            Please correct this.", '\n')
+  if(max(minshade-maxshade) >= 0){
+    cat("ERROR: Your value(s) for minimum shade (minshade) is greater than or equal to the maximum shade (maxshade).
+        Please correct this.", '\n')
     errors<-1
   }
-  if(minshade>100 | minshade<0){
-    message("ERROR: Your value for minimum shade (minshade) is out of bounds.
-            Please input a value between 0 and 100.", '\n')
+  if(max(minshade)>100 | min(minshade)<0){
+    cat("ERROR: Your value(s) for minimum shade (minshade) is out of bounds.
+        Please input a value between 0 and 100.", '\n')
     errors<-1
   }
-  if(maxshade>100 | maxshade<0){
-    message("ERROR: Your value for maximum shade (maxshade) is out of bounds.
-            Please input a value between 0 and 100.", '\n')
+  if(max(maxshade)>100 | min(maxshade)<0){
+    cat("ERROR: Your value(s) for maximum shade (maxshade) is out of bounds.
+        Please input a value between 0 and 100.", '\n')
+    errors<-1
+  }
+  if(!(scenario %in% c(0, 2, 4))){
+    message('ERROR: scenario must be either 0 (historical), 2 (plus 2) or 4 (plus 4) \n')
     errors<-1
   }
   # end error trapping
 
   if(errors==0){ # continue
-
+    max.date <- as.POSIXct(paste0("01/", format(Sys.time(), "%m/%Y")), format = "%d/%m/%Y", tz = "UTC") - 54 * 3600
+    if(as.Date(dfinish, format = "%d/%m/%Y") > max.date){
+      message(paste0("Cannot simulate past ", max.date, "; reducing timespan accordingly \n"))
+      dfinish <- as.character(as.Date(max.date, format = "%Y/%m/%d"))
+      dfinish <- paste(substr(dfinish, 9, 10), substr(dfinish, 6, 7), substr(dfinish, 1, 4), sep = "/")
+    }
     ystart <- as.numeric(substr(dstart, 7, 10))
     yfinish <- as.numeric(substr(dfinish, 7, 10))
     yearlist <- seq(ystart, (ystart + (nyears - 1)), 1)
@@ -541,19 +591,18 @@ micro_ncep <- function(
 
     doy <- as.numeric(strftime(tme, format = "%j"))
     ndays<-length(doy)
-    doynum<-ndays
     ida<-ndays
     microdaily<-1 # run microclimate model where one iteration of each day occurs and last day gives initial conditions for present day with an initial 3 day burn in
     daystart<-1
-    if(is.na(MAXSHADES)){
-      maxshades <- rep(maxshade,ndays)
+    if(length(minshade) != ndays){
+      MINSHADES <- rep(0, ndays) + minshade[1] # daily min shade (%)
     }else{
-      maxshades <- MAXSHADES
+      MINSHADES <- rep(0, ndays) + minshade # daily min shade (%)
     }
-    if(is.na(MINSHADES)){
-      minshades <- rep(minshade,ndays)
+    if(length(maxshade) != ndays){
+      MAXSHADES <- rep(0, ndays) + maxshade[1] # daily max shade (%)
     }else{
-      minshades <- MINSHADES
+      MAXSHADES <- rep(0, ndays) + maxshade # daily max shade (%)
     }
     idayst <- 1 # start day
 
@@ -598,7 +647,7 @@ micro_ncep <- function(
     }
     if(save != 2 & class(dem)[1] != "RasterLayer"){
       cat('downloading DEM via package elevatr \n')
-      dem <- microclima::get_dem(lat = lat, long = long) # mercator equal area projection
+      dem <- microclima::get_dem(lat = lat, long = long, resolution = dem.res, xdims = pixels, ydims = pixels) # mercator equal area projection
     }
     if(save == 1){
       save(dem, file = 'dem.Rda')
@@ -613,9 +662,13 @@ micro_ncep <- function(
           stop("package 'jsonlite' is needed to extract data from SoilGrids, please install it.",
                call. = FALSE)
         }
-        ov <- jsonlite::fromJSON(paste0('https://rest.soilgrids.org/query?lon=',x[1],'&lat=',x[2],',&attributes=BLDFIE,SLTPPT,SNDPPT,CLYPPT'), flatten = TRUE)
+        #ov <- fromJSON(paste0('https://rest.isric.org/query?lon=',x[1],'&lat=',x[2],',&attributes=BLDFIE,SLTPPT,SNDPPT,CLYPPT'), flatten = TRUE)
+        ov <- jsonlite::fromJSON(paste0('https://rest.isric.org/soilgrids/v2.0/properties/query?lon=',x[1],'&lat=',x[2],'&property=bdod&property=silt&property=clay&property=sand'), flatten = TRUE)
         if(length(ov) > 3){
-          soilpro <- cbind(c(0,5,15,30,60,100,200), unlist(ov$properties$BLDFIE$M)/1000, unlist(ov$properties$SLTPPT$M), unlist(ov$properties$SNDPPT$M), unlist(ov$properties$CLYPPT$M) )
+          soilpro <- cbind(c(0, 5, 15, 30, 60, 100), unlist(ov$properties$layers$depths[[1]]$values.mean) / 100, unlist(ov$properties$layers$depths[[2]]$values.mean) / 10, unlist(ov$properties$layers$depths[[4]]$values.mean) / 10, unlist(ov$properties$layers$depths[[3]]$values.mean) / 10)
+          soilpro <- rbind(soilpro, soilpro[6, ])
+          soilpro[7, 1] <- 200
+          #soilpro <- cbind(c(0,5,15,30,60,100,200), unlist(ov$properties$BLDFIE$M)/1000, unlist(ov$properties$CLYPPT$M), unlist(ov$properties$SLTPPT$M), unlist(ov$properties$SNDPPT$M) )
           colnames(soilpro) <- c('depth', 'blkdens', 'clay', 'silt', 'sand')
           #Now get hydraulic properties for this soil using Cosby et al. 1984 pedotransfer functions.
           soil.hydro<-pedotransfer(soilpro = as.data.frame(soilpro), DEP = DEP)
@@ -655,7 +708,6 @@ micro_ncep <- function(
       HORIZON[HORIZON < 0] <- 0
       HORIZON[HORIZON > 90] <- 90
     }
-    # setting up for temperature correction using lapse rate given difference between 9sec DEM value and 0.05 deg value
     days <- seq(as.POSIXct(dstart, format = "%d/%m/%Y", origin = "01/01/1900", tz = 'UTC'), as.POSIXct(dfinish, format = "%d/%m/%Y", origin = "01/01/1900", tz = 'UTC'), by = 'days')
     alldays <- seq(as.POSIXct("01/01/1900", format = "%d/%m/%Y", origin = "01/01/1900", tz = 'UTC'), Sys.time()-60*60*24, by = 'days')
     startday <- which(as.character(format(alldays, "%d/%m/%Y")) == format(as.POSIXct(dstart, format = "%d/%m/%Y", origin = "01/01/1900", tz = 'UTC'), "%d/%m/%Y"))
@@ -678,44 +730,23 @@ micro_ncep <- function(
           stop("package 'ncdf4' is needed. Please install it.",
                call. = FALSE)
         }
-        nc <- ncdf4::nc_open(paste(spatial, "/",filename,year,".nc", sep = ""))
+        if(!file.exists(paste(spatial, "/",filename,year,"_time.nc", sep = ""))){
+          stop("looks like you need to generate the reordered version of your locally-stored NCEP data, see instructions on the NicheMapR Google Group under the heading 'speeding up reading of NCEP data'")
+        }
+        nc <- ncdf4::nc_open(paste(spatial, "/",filename,year,"_time.nc", sep = ""))
+        if(nc$ndims == 3){
+          start <- start[c(1,3:4)]
+          count <- count[c(1,3:4)]
+        }
         out <- as.numeric(ncdf4::ncvar_get(nc, varid = var, start = start, count = count))
         ncdf4::nc_close(nc)
         out
       }
       if(is.na(spatial) == FALSE){
-        sorttimes <- function(tme) {
-          # creates a vector of 6-hourly dates for a given date vector as well as
-          # one year either side, as well as a vector to select just one day before and
-          # after the date vector
-          tme2 <- as.POSIXct(tme)
-          tme2 <- c((tme2 - 24 * 3600), tme2, (tme2 + 24 * 3600), (tme2 + 48 * 3600))
-          tme2 <- as.POSIXlt(tme2)
-          yrs <- unique(tme2$year + 1900)
-          mths <- unique(tme2$mon + 1)
-          yrs <-yrs[order(yrs)]
-          mths <-mths[order(mths)]
-          tma <- 0
-          dm <- c(31,28,31,30,31,30,31,31,30,31,30,31) * 4 - 1
-          for (yr in 1:length(yrs)) {
-            dm[2] <- ifelse(yrs[yr]%%4 == 0, 115, 111)
-            for (mth in 1:length(mths)) {
-              tmym <- as.POSIXct(c(0:dm[mth]) * 3600 * 6, origin = paste0(yrs[yr],"-",mths[mth],"-01 00:00"), tz = 'GMT')
-              tma <- c(tma, tmym)
-            }
-          }
-          tma <- as.POSIXlt(tma[-1], origin = '1970-01-01', tz = 'GMT')
-          sel <- which(tma >= min(tme2) & tma <= max(tme2))
-          sel <- sel[-length(sel)]
-          return(list(tme = tma, sel = sel))
-        }
-        tme2 <- sorttimes(tme)$tme # time vector one year either side of specified years
-        sel <- sorttimes(tme)$sel # selection vector to get one day either side of specified years
+        # now getting starting point and count for reading netcdf files
         cat(paste0("extracting weather data locally from ", spatial, " \n"))
         years <- as.numeric(unique(format(tme, "%Y")))
-        nyears <- length(years)
-        # now getting starting point and count for reading netcdf files
-        nc <- RNetCDF::open.nc(paste(spatial, "/air.2m.gauss.", years[1], ".nc", sep = ""))
+        nc <- RNetCDF::open.nc(paste(spatial, "/air.2m.gauss.", years[1], "_time.nc", sep = ""))
         lon2 <- matrix(RNetCDF::var.get.nc(nc, "lon", unpack = TRUE))
         lat2 <- matrix(RNetCDF::var.get.nc(nc, "lat", unpack = TRUE))
         lon_1 <- long
@@ -727,73 +758,146 @@ micro_ncep <- function(
         dist2 <- abs(lat2 - lat_1)
         index2 <- which.min(dist2)
         lat3 <- lat2[index2]
-        start <- c(index1, index2, 1, 1) # for chosen years
-        count <- c(1, 1, 1, -1) # for chosen years
-        start2 <- c(index1, index2, 1, 1460-3) # for year prior to chosen years (getting the last day)
-        count2 <- c(1, 1, 1, 4) # for year prior/year after chosen years (getting the last four or first four values, i.e. hours 0, 6, 12, 18)
         RNetCDF::close.nc(nc)
         if(lon3 > 180){lon3 <- lon3 - 180} # ensure longitude is -180 to 180
+
         if(class(hourlydata) == "logical"){
-          for (j in 1:(nyears+2)) {
-            if (j == 1) {
-              Tkmin <- ncquery("tmin.2m.gauss.", "tmin", start2, count2, years[j]-1)
-              Tkmax <- ncquery("tmax.2m.gauss.", "tmax", start2, count2, years[j]-1)
-              Tk <- ncquery("air.2m.gauss.", "air", start2, count2, years[j]-1)
-              sh <- ncquery("shum.2m.gauss.", "shum", start2, count2, years[j]-1)
-              pr <- ncquery("pres.sfc.gauss.", "pres", start2[c(1,2,4)], count2[c(1,2,4)], years[j]-1) # only three dimensions, hence c(1,2,4)
-              tcdc <- ncquery("tcdc.eatm.gauss.", "tcdc", start2[c(1,2,4)], count2[c(1,2,4)], years[j]-1)
-              dsw <- ncquery("dswrf.sfc.gauss.", "dswrf", start2[c(1,2,4)], count2[c(1,2,4)], years[j]-1)
-              dlw <- ncquery("dlwrf.sfc.gauss.", "dlwrf", start2[c(1,2,4)], count2[c(1,2,4)], years[j]-1)
-              ulw <- ncquery("ulwrf.sfc.gauss.", "ulwrf", start2[c(1,2,4)], count2[c(1,2,4)], years[j]-1)
-              wu <- ncquery("uwnd.10m.gauss.", "uwnd", start2, count2, years[j]-1)
-              wv <- ncquery("vwnd.10m.gauss.", "vwnd", start2, count2, years[j]-1)
-              prate <- ncquery("prate.sfc.gauss.", "prate", start2[c(1,2,4)], count2[c(1,2,4)], years[j]-1)
-            }else{
-              if(j <= nyears+1){
-                cat(paste("reading weather input for ", years[j-1]," \n", sep = ""))
-                Tkmin <- c(Tkmin, ncquery("tmin.2m.gauss.", "tmin", start, count, years[j-1]))
-                Tkmax <- c(Tkmax, ncquery("tmax.2m.gauss.", "tmax", start, count, years[j-1]))
-                Tk <- c(Tk, ncquery("air.2m.gauss.", "air", start, count, years[j-1]))
-                sh <- c(sh, ncquery("shum.2m.gauss.", "shum", start, count, years[j-1]))
-                pr <- c(pr, ncquery("pres.sfc.gauss.", "pres", start[c(1,2,4)], count[c(1,2,4)], years[j-1]))
-                tcdc <- c(tcdc, ncquery("tcdc.eatm.gauss.", "tcdc", start[c(1,2,4)], count[c(1,2,4)], years[j-1]))
-                dsw <- c(dsw, ncquery("dswrf.sfc.gauss.", "dswrf", start[c(1,2,4)], count[c(1,2,4)], years[j-1]))
-                dlw <- c(dlw, ncquery("dlwrf.sfc.gauss.", "dlwrf", start[c(1,2,4)], count[c(1,2,4)], years[j-1]))
-                ulw <- c(ulw, ncquery("ulwrf.sfc.gauss.", "ulwrf", start[c(1,2,4)], count[c(1,2,4)], years[j-1]))
-                wu <- c(wu, ncquery("uwnd.10m.gauss.", "uwnd", start, count, years[j-1]))
-                wv <- c(wv, ncquery("vwnd.10m.gauss.", "vwnd", start, count, years[j-1]))
-                prate <- c(prate, ncquery("prate.sfc.gauss.", "prate", start[c(1,2,4)], count[c(1,2,4)], years[j-1]))
-              } else {
-                Tkmin <- c(Tkmin, ncquery("tmin.2m.gauss.", "tmin", start, count2, years[j-2]+1))
-                Tkmax <- c(Tkmax, ncquery("tmax.2m.gauss.", "tmax", start, count2, years[j-2]+1))
-                Tk <- c(Tk, ncquery("air.2m.gauss.", "air", start, count2, years[j-2]+1))
-                sh <- c(sh, ncquery("shum.2m.gauss.", "shum", start, count2, years[j-2]+1))
-                pr <- c(pr, ncquery("pres.sfc.gauss.", "pres", start[c(1,2,4)], count2[c(1,2,4)], years[j-2]+1))
-                tcdc <- c(tcdc, ncquery("tcdc.eatm.gauss.", "tcdc", start[c(1,2,4)], count2[c(1,2,4)], years[j-2]+1))
-                dsw <- c(dsw, ncquery("dswrf.sfc.gauss.", "dswrf", start[c(1,2,4)], count2[c(1,2,4)], years[j-2]+1))
-                dlw <- c(dlw, ncquery("dlwrf.sfc.gauss.", "dlwrf", start[c(1,2,4)], count2[c(1,2,4)], years[j-2]+1))
-                ulw <- c(ulw, ncquery("ulwrf.sfc.gauss.", "ulwrf", start[c(1,2,4)], count2[c(1,2,4)], years[j-2]+1))
-                wu <- c(wu, ncquery("uwnd.10m.gauss.", "uwnd", start, count2, years[j-2]+1))
-                wv <- c(wv, ncquery("vwnd.10m.gauss.", "vwnd", start, count2, years[j-2]+1))
-                prate <- c(prate, ncquery("prate.sfc.gauss.", "prate", start[c(1,2,4)], count2[c(1,2,4)], years[j-2]+1))
+          prev.year <- 0
+          if(format(tme[1], "%d/%m") == "01/01"){ # starting at beginning of year, need to start at end of previous year
+            cat(paste("reading weather input for ", years[1]-1," (need a bit of the previous year) \n", sep = ""))
+            prev.year <- 1
+            start <- c(1460-3, 1, index2, index1) # for year prior to chosen years (getting the last day)
+            count <- c(4, 1, 1, 1) # for year prior/year after chosen years (getting the last four or first four values, i.e. hours 0, 6, 12, 18)
+            Tkmin1 <- ncquery("tmin.2m.gauss.", "tmin", start, count, years[1]-1)
+            Tkmax1 <- ncquery("tmax.2m.gauss.", "tmax", start, count, years[1]-1)
+            Tk1 <- ncquery("air.2m.gauss.", "air", start, count, years[1]-1)
+            sh1 <- ncquery("shum.2m.gauss.", "shum", start, count, years[1]-1)
+            pr1 <- ncquery("pres.sfc.gauss.", "pres", start, count, years[1]-1) # only three dimensions, hence
+            tcdc1 <- ncquery("tcdc.eatm.gauss.", "tcdc", start, count, years[1]-1)
+            dsw1 <- ncquery("dswrf.sfc.gauss.", "dswrf", start, count, years[1]-1)
+            dlw1 <- ncquery("dlwrf.sfc.gauss.", "dlwrf", start, count, years[1]-1)
+            ulw1 <- ncquery("ulwrf.sfc.gauss.", "ulwrf", start, count, years[1]-1)
+            wu1 <- ncquery("uwnd.10m.gauss.", "uwnd", start, count, years[1]-1)
+            wv1 <- ncquery("vwnd.10m.gauss.", "vwnd", start, count, years[1]-1)
+            prate1 <- ncquery("prate.sfc.gauss.", "prate", start, count, years[1]-1)
+          }
+
+          for(j in 1:length(years)){
+            tme3 <- seq(as.POSIXct(paste0("01/01/", years[j]), format = "%d/%m/%Y", tz = "UCT"), as.POSIXct(paste0("31/12/", years[j]), format = "%d/%m/%Y", tz = "UCT") + 18 * 3600, 6 * 3600)
+            if(j == 1){
+              if(format(tme[1], "%d/%m") == "01/01"){
+                start <- c(1, 1, index2, index1) # for chosen years
+                count <- c(-1, 1, 1, 1)# for chosen years
+              }else{
+                strt <- which(format(tme3, '%Y-%m-%d') == tme[1])[1]
+                start <- c(strt - 4, 1, index2, index1) # for chosen years
+                count <- c(-1, 1, 1, 1)# for chosen years
               }
+              if(format(tme[length(tme)], "%d/%m") != "31/12" & length(years) == 1){
+                cnt <- which(format(tme3, '%Y-%m-%d') == tme[length(tme)] + 1)[1] - 1
+                count <- c(cnt + 5 - start[1], 1, 1, 1)# for chosen years
+              }
+              cat(paste("reading weather input for ", years[j]," \n", sep = ""))
+              Tkmin <- ncquery("tmin.2m.gauss.", "tmin", start, count, years[j])
+              Tkmax <- ncquery("tmax.2m.gauss.", "tmax", start, count, years[j])
+              Tk <- ncquery("air.2m.gauss.", "air", start, count, years[j])
+              sh <- ncquery("shum.2m.gauss.", "shum", start, count, years[j])
+              pr <- ncquery("pres.sfc.gauss.", "pres", start, count, years[j]) # only three dimensions, hence
+              tcdc <- ncquery("tcdc.eatm.gauss.", "tcdc", start, count, years[j])
+              dsw <- ncquery("dswrf.sfc.gauss.", "dswrf", start, count, years[j])
+              dlw <- ncquery("dlwrf.sfc.gauss.", "dlwrf", start, count, years[j])
+              ulw <- ncquery("ulwrf.sfc.gauss.", "ulwrf", start, count, years[j])
+              wu <- ncquery("uwnd.10m.gauss.", "uwnd", start, count, years[j])
+              wv <- ncquery("vwnd.10m.gauss.", "vwnd", start, count, years[j])
+              prate <- ncquery("prate.sfc.gauss.", "prate", start, count, years[j])
+            }else{
+              start <- c(1, 1, index2, index1) # for chosen years
+              if(format(tme[length(tme)], "%d/%m") == "31/12" | j != length(years)){
+                count <- c(-1, 1, 1, 1)# for chosen years
+              }else{
+                cnt <- which(format(tme3, '%Y-%m-%d') == tme[length(tme)] + 1)[1] - 1
+                count <- c(cnt + 5 - start[1], 1, 1, 1)# for chosen years
+              }
+              cat(paste("reading weather input for ", years[j]," \n", sep = ""))
+              Tkmin <- c(Tkmin, ncquery("tmin.2m.gauss.", "tmin", start, count, years[j]))
+              Tkmax <- c(Tkmax, ncquery("tmax.2m.gauss.", "tmax", start, count, years[j]))
+              Tk <- c(Tk, ncquery("air.2m.gauss.", "air", start, count, years[j]))
+              sh <- c(sh, ncquery("shum.2m.gauss.", "shum", start, count, years[j]))
+              pr <- c(pr, ncquery("pres.sfc.gauss.", "pres", start, count, years[j]))
+              tcdc <- c(tcdc, ncquery("tcdc.eatm.gauss.", "tcdc", start, count, years[j]))
+              dsw <- c(dsw, ncquery("dswrf.sfc.gauss.", "dswrf", start, count, years[j]))
+              dlw <- c(dlw, ncquery("dlwrf.sfc.gauss.", "dlwrf", start, count, years[j]))
+              ulw <- c(ulw, ncquery("ulwrf.sfc.gauss.", "ulwrf", start, count, years[j]))
+              wu <- c(wu, ncquery("uwnd.10m.gauss.", "uwnd", start, count, years[j]))
+              wv <- c(wv, ncquery("vwnd.10m.gauss.", "vwnd", start, count, years[j]))
+              prate <- c(prate, ncquery("prate.sfc.gauss.", "prate", start, count, years[j]))
             }
+          }
+
+          next.year <- 0
+          if(format(tme[length(tme)], "%d/%m") == "31/12"){ # starting at beginning of year, need to start at end of previous year
+            cat(paste("reading weather input for ", years[length(years)]+1," (need a bit of the next year) \n", sep = ""))
+            next.year <- 1
+            start <- c(1, 1, index2, index1) # for year prior to chosen years (getting the last day)
+            count <- c(4, 1, 1, 1) # for year prior/year after chosen years (getting the last four or first four values, i.e. hours 0, 6, 12, 18)
+            Tkmin2 <- ncquery("tmin.2m.gauss.", "tmin", start, count, years[length(years)]+1)
+            Tkmax2 <- ncquery("tmax.2m.gauss.", "tmax", start, count, years[length(years)]+1)
+            Tk2 <- ncquery("air.2m.gauss.", "air", start, count, years[length(years)]+1)
+            sh2 <- ncquery("shum.2m.gauss.", "shum", start, count, years[length(years)]+1)
+            pr2 <- ncquery("pres.sfc.gauss.", "pres", start, count, years[length(years)]+1) # only three dimensions, hence
+            tcdc2 <- ncquery("tcdc.eatm.gauss.", "tcdc", start, count, years[length(years)]+1)
+            dsw2 <- ncquery("dswrf.sfc.gauss.", "dswrf", start, count, years[length(years)]+1)
+            dlw2 <- ncquery("dlwrf.sfc.gauss.", "dlwrf", start, count, years[length(years)]+1)
+            ulw2 <- ncquery("ulwrf.sfc.gauss.", "ulwrf", start, count, years[length(years)]+1)
+            wu2 <- ncquery("uwnd.10m.gauss.", "uwnd", start, count, years[length(years)]+1)
+            wv2 <- ncquery("vwnd.10m.gauss.", "vwnd", start, count, years[length(years)]+1)
+            prate2 <- ncquery("prate.sfc.gauss.", "prate", start, count, years[length(years)]+1)
+          }
+
+          if(prev.year == 1){
+            Tkmin <- c(Tkmin1, Tkmin)
+            Tkmax <- c(Tkmax1, Tkmax)
+            Tk <- c(Tk1, Tk)
+            sh <- c(sh1, sh)
+            pr <- c(pr1, pr)
+            tcdc <- c(tcdc1, tcdc)
+            dsw <- c(dsw1, dsw)
+            dlw <- c(dlw1, dlw)
+            ulw <- c(ulw1, ulw)
+            wu <- c(wu1, wu)
+            wv <- c(wv1, wv)
+            prate <- c(prate1, prate)
+          }
+          if(next.year == 1){
+            Tkmin <- c(Tkmin, Tkmin2)
+            Tkmax <- c(Tkmax, Tkmax2)
+            Tk <- c(Tk, Tk2)
+            sh <- c(sh, sh2)
+            pr <- c(pr, pr2)
+            tcdc <- c(tcdc, tcdc2)
+            dsw <- c(dsw, dsw2)
+            dlw <- c(dlw, dlw2)
+            ulw <- c(ulw, ulw2)
+            wu <- c(wu, wu2)
+            wv <- c(wv, wv2)
+            prate <- c(prate, prate2)
           }
           dsw[dsw < 0] <- 0
           prate[prate < 0] <- 0
           prate <- prate * 3600 * 6 # mm in 6 hrs
-          ncepdata <- data.frame(obs_time = tme2[sel], Tk, Tkmin, Tkmax, sh, pr, wu, wv, dlw, ulw, dsw, tcdc) # 6-hourly ncep for chosen period plus a day added either side for interpolation
-          hourlydata <- hourlyNCEP(ncepdata = ncepdata, lat, long, tme, reanalysis) # interpolated to hourly
+          obs_time <- seq(as.POSIXct(dstart, format = "%d/%m/%Y", tz = "UCT") - 3600 * 24, as.POSIXct(dfinish, format = "%d/%m/%Y", tz = "UCT") + 18 * 3600 + 24 * 3600, 6 * 3600)
+          ncepdata <- data.frame(obs_time = obs_time, Tk, Tkmin, Tkmax, sh, pr, wu, wv, dlw, ulw, dsw, tcdc) # 6-hourly ncep for chosen period plus a day added either side for interpolation
+          hourlydata <- microclima::hourlyNCEP(ncepdata = ncepdata, lat, long, tme, reanalysis) # interpolated to hourly
           cat("computing radiation and elevation effects with package microclima \n")
-          microclima.out <- microclima::microclimaforNMR(lat = longlat[2], long = longlat[1], dstart = dstart, dfinish = dfinish, l = mean(microclima.LAI), x = LOR, coastal = coastal, hourlydata = hourlydata, dailyprecip = prate, dem = dem, demmeso = dem2, albr = 0, resolution = 30, zmin = 0, slope = slope, aspect = aspect, windthresh = 4.5, emthresh = 0.78, reanalysis2 = reanalysis, difani = FALSE)
+          microclima.out <- microclima::microclimaforNMR(lat = longlat[2], long = longlat[1], dstart = dstart, dfinish = dfinish, l = mean(microclima.LAI), x = LOR, coastal = coastal, hourlydata = hourlydata, dailyprecip = prate, dem = dem, demmeso = dem2, albr = 0, resolution = 30, zmin = 0, slope = slope, aspect = aspect, windthresh = 4.5, emthresh = 0.78, reanalysis2 = reanalysis, difani = FALSE, weather.elev = weather.elev, cad.effects = cad.effects)
         }else{
           cat("computing radiation and elevation effects with package microclima \n")
-          microclima.out <- microclima::microclimaforNMR(lat = longlat[2], long = longlat[1], dstart = dstart, dfinish = dfinish, l = mean(microclima.LAI), x = LOR, coastal = coastal, hourlydata = hourlydata, dailyprecip = NA, dem = dem, demmeso = dem2, albr = 0, resolution = 30, zmin = 0, slope = slope, aspect = aspect, windthresh = 4.5, emthresh = 0.78, reanalysis2 = reanalysis, difani = FALSE)
+          microclima.out <- microclima::microclimaforNMR(lat = longlat[2], long = longlat[1], dstart = dstart, dfinish = dfinish, l = mean(microclima.LAI), x = LOR, coastal = coastal, hourlydata = hourlydata, dailyprecip = NA, dem = dem, demmeso = dem2, albr = 0, resolution = 30, zmin = 0, slope = slope, aspect = aspect, windthresh = 4.5, emthresh = 0.78, reanalysis2 = reanalysis, difani = FALSE, weather.elev = weather.elev, cad.effects = cad.effects)
         }
-        if(class(dailyrain) == "logical"){
-          dailyrain <- microclima.out$dailyprecip[-c(1:4)] # remove extra 4 values from start
-          dailyrain <- dailyrain[1:(length(dailyrain) - 4)] # remove extra 5 values from end
-          dailyrain <- aggregate(dailyrain, by = list(format(hourlydata$obs_time[seq(1, nrow(hourlydata), 6)], "%Y-%m-%d")), sum)$x
+        if(class(dailyprecip) == "logical"){
+          dailyprecip <- microclima.out$dailyprecip[-c(1:4)] # remove extra 4 values from start
+          dailyprecip <- dailyprecip[1:(length(dailyprecip) - 4)] # remove extra 5 values from end
+          dailyprecip <- aggregate(dailyprecip, by = list(format(hourlydata$obs_time[seq(1, nrow(hourlydata), 6)], "%Y-%m-%d")), sum)$x
         }
       }else{
         if(class(hourlydata) == "logical"){
@@ -801,8 +905,8 @@ micro_ncep <- function(
           hourlydata <- microclima::hourlyNCEP(ncepdata = NA, lat, long, tme, reanalysis) # interpolated to hourly
         }
         cat("computing radiation and elevation effects with package microclima \n")
-        microclima.out <- microclima::microclimaforNMR(lat = longlat[2], long = longlat[1], dstart = dstart, dfinish = dfinish, l = mean(microclima.LAI), x = LOR, coastal = coastal, hourlydata = hourlydata, dailyprecip = dailyprecip, dem = dem, demmeso = dem2, albr = 0, resolution = 30, zmin = 0, slope = slope, aspect = aspect, windthresh = 4.5, emthresh = 0.78, reanalysis2 = reanalysis, difani = FALSE)
-        dailyrain <- microclima.out$dailyprecip
+        microclima.out <- microclima::microclimaforNMR(lat = longlat[2], long = longlat[1], dstart = dstart, dfinish = dfinish, l = mean(microclima.LAI), x = LOR, coastal = coastal, hourlydata = hourlydata, dailyprecip = dailyprecip, dem = dem, demmeso = dem2, albr = 0, resolution = 30, zmin = 0, slope = slope, aspect = aspect, windthresh = 4.5, emthresh = 0.78, reanalysis2 = reanalysis, difani = FALSE, weather.elev = weather.elev, cad.effects = cad.effects)
+        dailyprecip <- microclima.out$dailyprecip
       }
       hourlyradwind <- microclima.out$hourlyradwind
       SLOPE <- hourlyradwind$slope[1]
@@ -828,23 +932,203 @@ micro_ncep <- function(
       elev <- tref$elev[1] # m
       ALTT <- elev
       TAIRhr <- tref$telev + tref$tcad # reference Tair corrected for lapse rate and cold air drainage
+
+      if(scenario != 0){
+        TAIRhr_orig <- TAIRhr
+        yearstodo <- seq(ystart, yfinish)
+        nyears <- yfinish - ystart + 1
+        if(yfinish > 2015){
+          ystart_terra <- 2015 - nyears + 1
+          yfinish_terra <- 2015
+          message(paste0("terraclimate climate change scenarios are for 1985 to 2015 - using ", ystart, "-", yfinish), '\n')
+        }else{
+          ystart_terra <- ystart
+          yfinish_terra <- yfinish
+        }
+        leapyears <- seq(1900, 2060, 4)
+        message("generate climate change scenario", '\n')
+        # diff spline function
+        getdiff <- function(diffs){
+          diff1 <- (unlist(diffs[1]) + unlist(diffs[length(diffs)])) / 2
+          # generate list of days
+          leapcount <- 0
+          for(ys in 1:nyears){
+            if(ys == 1){
+              if(nyears == 1){
+                if(yearstodo[ys] %in% leapyears){
+                  day<-c(1, 15.5, 45.5, 75.5, 106, 136.5, 167, 197.5, 228.5, 259, 289.5, 320, 350.5, 366)
+                }else{
+                  day<-c(1, 15.5, 45, 74.5, 105, 135.5, 166, 196.5, 227.5, 258, 288.5, 319, 349.5, 365)
+                }
+              }else{
+                if(yearstodo[ys] %in% leapyears){
+                  day<-c(1, 15.5, 45.5, 75.5, 106, 136.5, 167, 197.5, 228.5, 259, 289.5, 320, 350.5)
+                }else{
+                  day<-c(1, 15.5, 45, 74.5, 105, 135.5, 166, 196.5, 227.5, 258, 288.5, 319, 349.5)
+                }
+              }
+            }else{
+              if(ys == nyears){
+                if(yearstodo[ys] %in% leapyears){
+                  day<-c(15.5, 45.5, 75.5, 106, 136.5, 167, 197.5, 228.5, 259, 289.5, 320, 350.5, 366)
+                }else{
+                  day<-c(15.5, 45, 74.5, 105, 135.5, 166, 196.5, 227.5, 258, 288.5, 319, 349.5, 365)
+                }
+              }else{
+                if(yearstodo[ys] %in% leapyears){
+                  day<-c(15.5, 45.5, 75.5, 106, 136.5, 167, 197.5, 228.5, 259, 289.5, 320, 350.5)
+                }else{
+                  day<-c(15.5, 45, 74.5, 105, 135.5, 166, 196.5, 227.5, 258, 288.5, 319, 349.5)
+                }
+              }
+            }
+            if(ys == 1){
+              days2 <- day
+              days <- day
+            }else{
+              if(yearstodo[ys] %in% leapyears){
+                leapcount <- leapcount + 1
+                days2 <- c(days2, (day + 366 * (ys - 1)) + leapcount)
+              }else{
+                days2 <- c(days2, (day + 365 * (ys - 1)) + leapcount)
+              }
+              days <- c(days, day)
+            }
+          }
+
+          diffs3 <- c(diff1, diffs, diff1)
+          days_diffs <- data.frame(matrix(NA, nrow = nyears * 12 + 2, ncol = 3))
+          days_diffs[, 1] <- days
+          days_diffs[, 3] <- days2
+          days_diffs[, 2] <- diffs3
+          colnames(days_diffs) <- c("days", "diffs", "new_day")
+
+          # interpolate monthly differences
+          f <- approxfun(x = days_diffs$new_day, y = days_diffs$diffs)
+          xx <- seq(1, max(days2), 1)
+          sp_diff <- f(xx)
+          return(sp_diff)
+        }
+
+        terra <- as.data.frame(get_terra(x = loc, ystart = ystart_terra, yfinish = yfinish_terra, source = terra_source))
+        if(is.infinite(max(terra))){
+          message("no TerraClimate data available", '\n')
+          stop()
+        }
+        if(scenario == 4){
+          terra_cc <- as.data.frame(get_terra(x = loc, ystart = ystart_terra, yfinish = yfinish_terra, scenario = 4, source = terra_source))
+        }
+        if(scenario == 2){
+          terra_cc <- as.data.frame(get_terra(x = loc, ystart = ystart_terra, yfinish = yfinish_terra, scenario = 2, source = terra_source))
+        }
+
+        tmin_diffs <- terra_cc$TMINN - terra$TMINN
+        tmax_diffs <- terra_cc$TMAXX - terra$TMAXX
+        precip_diffs <- terra_cc$RAINFALL / terra$RAINFALL
+        srad_diffs <- terra_cc$SRAD / terra$SRAD
+        vpd_diffs <- terra_cc$VPD / terra$VPD
+        srad_diffs[is.na(srad_diffs)] <- 1
+        vpd_diffs[is.na(vpd_diffs)] <- 1
+        precip_diffs[is.na(precip_diffs)] <- 1
+        srad_diffs[is.infinite(srad_diffs)] <- 1
+        vpd_diffs[is.infinite(vpd_diffs)] <- 1
+        precip_diffs[is.infinite(precip_diffs)] <- 1
+
+        TMINN_diff <- getdiff(tmin_diffs)
+        TMAXX_diff <- getdiff(tmax_diffs)
+        VPD_diff <- getdiff(vpd_diffs)
+        SOLAR_diff <- getdiff(srad_diffs)
+        RAIN_diff <- getdiff(precip_diffs)
+
+        TMINN_diff <- rep(TMINN_diff, each=24)[1:length(TAIRhr)]
+        TMAXX_diff <- rep(TMAXX_diff, each=24)[1:length(TAIRhr)]
+        VPD_diff <- rep(VPD_diff, each=24)[1:length(TAIRhr)]
+        SOLAR_diff <- rep(SOLAR_diff, each=24)[1:length(TAIRhr)]
+
+
+        # code to apply changes in min and max air temperature to hourly air temperature data
+
+        # find times of maxima and minima
+        mins <- aggregate(TAIRhr, by = list(format(tt, "%Y-%m-%d")), FUN = min)$x
+        maxs <- aggregate(TAIRhr, by = list(format(tt, "%Y-%m-%d")), FUN = max)$x
+        mins <- rep(mins, each=24)
+        maxs <- rep(maxs, each=24)
+        mins2 <- TAIRhr / mins[1:length(TAIRhr)]
+        maxs2 <- TAIRhr / maxs
+        mins2[mins2 != 1] <- 0
+        maxs2[maxs2 != 1] <- 0
+
+        # construct weightings so that changes in min and max air temp can be applied
+        minweight <- rep(NA, length(mins2))
+        maxweight <- minweight
+        minweight[mins2 == 1] <- 1
+        minweight[maxs2 == 1] <- 0
+        maxweight[mins2 == 1] <- 0
+        maxweight[maxs2 == 1] <- 1
+        minweight <- zoo::na.approx(minweight, na.rm = FALSE)
+        maxweight <- zoo::na.approx(maxweight, na.rm = FALSE)
+        minweight[is.na(minweight)] <- 0.5
+        maxweight[is.na(maxweight)] <- 0.5
+        minweight[minweight > 1] <- 1
+        minweight[minweight < 0] <- 0
+        maxweight[maxweight > 1] <- 1
+        maxweight[maxweight < 0] <- 0
+
+        # construct final weighted correction factor and apply
+        diff <- TMINN_diff * minweight + TMAXX_diff * maxweight
+        TAIRhr <- TAIRhr + diff
+      }
       SOLRhr <- hourlyradwind$swrad / 0.0036
+      if(scenario != 0){
+       SOLRhr <- SOLRhr * SOLAR_diff
+      }
       SOLRhr[SOLRhr < 0] <- 0
       SOLRhr <- zoo::na.approx(SOLRhr)
-      cloudhr <- hourlydata$cloudcover
       IRDhr <- hourlydata$downlong / 0.0036
+      if(IR != 2){
+        IRDhr <- IRDhr * 0 + -1 # make negative so computed internally in the microclimate model
+      }
       CLDhr <- hourlydata$cloudcover
+      if(scenario != 0){
+        CLDhr <- CLDhr * (1 + 1 - SOLAR_diff)
+      }
       CLDhr[CLDhr < 0] <- 0
       CLDhr[CLDhr > 100] <- 100
       RHhr <- suppressWarnings(humidityconvert(h = hourlydata$humidity, intype = 'specific', p = hourlydata$pressure, tc = TAIRhr)$relative)
       RHhr[RHhr > 100] <- 100
       RHhr[RHhr < 0] <- 0
+      if(scenario != 0){
+       VPDhr <- WETAIR(db = TAIRhr_orig, rh = 100)$e - WETAIR(db = TAIRhr_orig, rh = RHhr)$e
+       VPDhr <- VPDhr - mean(VPD_diff) # note using mean here because otherwise can lead to unrealistically low RH which then stronly affects TSKY
+       e <- WETAIR(db = TAIRhr, rh = 100)$e - VPDhr
+       es <- WETAIR(db = TAIRhr, rh = 100)$esat
+       RHhr <- (e / es) * 100
+       RHhr[RHhr > 100] <- 100
+       RHhr[RHhr < 0] <- 0
+      }
       WNhr <- hourlyradwind$windspeed
       WNhr[is.na(WNhr)] <- 0.1
-      RAINhr <- WNhr * 0 # using daily rain for now
+      if(rainhourly == 0){
+        RAINhr <- rep(0, 24 * ndays)
+      }else{
+        RAINhr <- rainhour
+      }
       PRESShr <- hourlydata$pressure
-      RAINFALL <- dailyrain
+      RAINFALL <- dailyprecip
+      if(scenario != 0){
+        RAINFALL <- RAINFALL * RAIN_diff
+      }
       RAINFALL[RAINFALL < 0.1] <- 0
+      if(rainhourly == 0){ # putting daily rainfall on midnight (account for local solar time)
+        midnight <- which(microclima.out$hourlydata$szenith[1:24] == max(microclima.out$hourlydata$szenith[1:24]))
+        if(midnight < 24){
+         midnights <- seq(midnight, length(RAINhr / 24) - 1, 24)
+        }else{
+         midnights <- seq(midnight, length(RAINhr / 24), 24)
+        }
+        RAINhr[midnights] <- RAINFALL
+        rainhourly <- 1
+      }
       ZENhr2 <- ZENhr
       ZENhr2[ZENhr2!=90] <- 0
       dmaxmin <- function(x, fun) {
@@ -908,178 +1192,169 @@ micro_ncep <- function(
     slope <- 0 # already corrected for by microclima
     azmuth <- 0 # already corrected for by microclima
 
-    if(run.gads==1){
+    if(run.gads > 0){
       ####### get solar attenuation due to aerosols with program GADS #####################
-      relhum<-1.
-      optdep.summer<-as.data.frame(rungads(longlat[2],longlat[1],relhum,0))
-      optdep.winter<-as.data.frame(rungads(longlat[2],longlat[1],relhum,1))
-      optdep<-cbind(optdep.winter[,1],rowMeans(cbind(optdep.summer[,2],optdep.winter[,2])))
+      relhum <- 1
+      if(run.gads == 1){ # fortran version
+        optdep.summer <- as.data.frame(rungads(longlat[2], longlat[1], relhum, 0))
+        optdep.winter <- as.data.frame(rungads(longlat[2], longlat[1], relhum, 1))
+      }else{ # r version
+        optdep.summer <- as.data.frame(gads.r(longlat[2], longlat[1], relhum, 0))
+        optdep.winter <- as.data.frame(gads.r(longlat[2], longlat[1], relhum, 1))
+      }
+      optdep<-cbind(optdep.winter[, 1], rowMeans(cbind(optdep.summer[, 2], optdep.winter[, 2])))
       optdep<-as.data.frame(optdep)
-      colnames(optdep)<-c("LAMBDA","OPTDEPTH")
-      a<-lm(OPTDEPTH~poly(LAMBDA, 6, raw=TRUE),data=optdep)
-      LAMBDA<-c(290,295,300,305,310,315,320,330,340,350,360,370,380,390,400,420,440,460,480,500,520,540,560,580,600,620,640,660,680,700,720,740,760,780,800,820,840,860,880,900,920,940,960,980,1000,1020,1080,1100,1120,1140,1160,1180,1200,1220,1240,1260,1280,1300,1320,1380,1400,1420,1440,1460,1480,1500,1540,1580,1600,1620,1640,1660,1700,1720,1780,1800,1860,1900,1950,2000,2020,2050,2100,2120,2150,2200,2260,2300,2320,2350,2380,2400,2420,2450,2490,2500,2600,2700,2800,2900,3000,3100,3200,3300,3400,3500,3600,3700,3800,3900,4000)
-      TAI<-predict(a,data.frame(LAMBDA))
+      colnames(optdep) <- c("LAMBDA", "OPTDEPTH")
+      a <- lm(OPTDEPTH ~ poly(LAMBDA, 6, raw = TRUE), data = optdep)
+      LAMBDA <- c(290, 295, 300, 305, 310, 315, 320, 330, 340, 350, 360, 370, 380, 390, 400, 420, 440, 460, 480, 500, 520, 540, 560, 580, 600, 620, 640, 660, 680, 700, 720, 740, 760, 780, 800, 820, 840, 860, 880, 900, 920, 940, 960, 980, 1000, 1020, 1080, 1100, 1120, 1140, 1160, 1180, 1200, 1220, 1240, 1260, 1280, 1300, 1320, 1380, 1400, 1420, 1440, 1460, 1480, 1500, 1540, 1580, 1600, 1620, 1640, 1660, 1700, 1720, 1780, 1800, 1860, 1900, 1950, 2000, 2020, 2050, 2100, 2120, 2150, 2200, 2260, 2300, 2320, 2350, 2380, 2400, 2420, 2450, 2490, 2500, 2600, 2700, 2800, 2900, 3000, 3100, 3200, 3300, 3400, 3500, 3600, 3700, 3800, 3900, 4000)
+      TAI <- predict(a, data.frame(LAMBDA))
       ################ end GADS ##################################################
     }else{ # use a suitable one for Australia (same as around Adelaide/Melbourne)
-      TAI<-c(0.0670358341290886,0.0662612704779235,0.065497075238002,0.0647431301168489,0.0639993178022531,0.0632655219571553,0.0625416272145492,0.0611230843885423,0.0597427855962549,0.0583998423063099,0.0570933810229656,0.0558225431259535,0.0545864847111214,0.0533843764318805,0.0522154033414562,0.0499736739981675,0.047855059159556,0.0458535417401334,0.0439633201842001,0.0421788036108921,0.0404946070106968,0.0389055464934382,0.0374066345877315,0.0359930755919066,0.0346602609764008,0.0334037648376212,0.0322193394032758,0.0311029105891739,0.0300505736074963,0.0290585886265337,0.0281233764818952,0.0272415144391857,0.0264097320081524,0.0256249068083005,0.0248840604859789,0.0241843546829336,0.0235230870563317,0.0228976873502544,0.0223057135186581,0.0217448478998064,0.0212128934421699,0.0207077699817964,0.0202275105711489,0.0197702578594144,0.0193342605242809,0.0189178697551836,0.0177713140039894,0.0174187914242432,0.0170790495503944,0.0167509836728154,0.0164335684174899,0.0161258546410128,0.0158269663770596,0.0155360978343254,0.0152525104459325,0.0149755299703076,0.0147045436435285,0.0144389973831391,0.0141783930434343,0.0134220329447663,0.0131772403830191,0.0129356456025128,0.0126970313213065,0.0124612184223418,0.0122280636204822,0.01199745718102,0.0115436048739351,0.0110993711778668,0.0108808815754663,0.0106648652077878,0.0104513876347606,0.0102405315676965,0.00982708969547694,0.00962473896278535,0.00903679230300494,0.00884767454432418,0.0083031278398166,0.00796072474935954,0.00755817587626185,0.00718610751850881,0.00704629977586921,0.00684663903049612,0.00654155580333479,0.00642947339729728,0.00627223096874308,0.00603955966866779,0.00580920937536261,0.00568506186880564,0.00563167068287251,0.00556222005081865,0.00550522989971023,0.00547395763028062,0.0054478983436216,0.00541823364504573,0.00539532163908382,0.00539239864119488,0.00541690124712384,0.00551525885358836,0.00564825853509463,0.00577220185074264,0.00584222986640171,0.00581645238345584,0.00566088137411449,0.00535516862329704,0.00489914757707667,0.00432017939770409,0.0036813032251836,0.00309019064543606,0.00270890436501562,0.00276446109239711,0.00356019862584603)
+      TAI<-c(0.0670358341290886, 0.0662612704779235, 0.065497075238002, 0.0647431301168489, 0.0639993178022531, 0.0632655219571553, 0.0625416272145492, 0.0611230843885423, 0.0597427855962549, 0.0583998423063099, 0.0570933810229656, 0.0558225431259535, 0.0545864847111214, 0.0533843764318805, 0.0522154033414562, 0.0499736739981675, 0.047855059159556, 0.0458535417401334, 0.0439633201842001, 0.0421788036108921, 0.0404946070106968, 0.0389055464934382, 0.0374066345877315, 0.0359930755919066, 0.0346602609764008, 0.0334037648376212, 0.0322193394032758, 0.0311029105891739, 0.0300505736074963, 0.0290585886265337, 0.0281233764818952, 0.0272415144391857, 0.0264097320081524, 0.0256249068083005, 0.0248840604859789, 0.0241843546829336, 0.0235230870563317, 0.0228976873502544, 0.0223057135186581, 0.0217448478998064, 0.0212128934421699, 0.0207077699817964, 0.0202275105711489, 0.0197702578594144, 0.0193342605242809, 0.0189178697551836, 0.0177713140039894, 0.0174187914242432, 0.0170790495503944, 0.0167509836728154, 0.0164335684174899, 0.0161258546410128, 0.0158269663770596, 0.0155360978343254, 0.0152525104459325, 0.0149755299703076, 0.0147045436435285, 0.0144389973831391, 0.0141783930434343, 0.0134220329447663, 0.0131772403830191, 0.0129356456025128, 0.0126970313213065, 0.0124612184223418, 0.0122280636204822, 0.01199745718102, 0.0115436048739351, 0.0110993711778668, 0.0108808815754663, 0.0106648652077878, 0.0104513876347606, 0.0102405315676965, 0.00982708969547694, 0.00962473896278535, 0.00903679230300494, 0.00884767454432418, 0.0083031278398166, 0.00796072474935954, 0.00755817587626185, 0.00718610751850881, 0.00704629977586921, 0.00684663903049612, 0.00654155580333479, 0.00642947339729728, 0.00627223096874308, 0.00603955966866779, 0.00580920937536261, 0.00568506186880564, 0.00563167068287251, 0.00556222005081865, 0.00550522989971023, 0.00547395763028062, 0.0054478983436216, 0.00541823364504573, 0.00539532163908382, 0.00539239864119488, 0.00541690124712384, 0.00551525885358836, 0.00564825853509463, 0.00577220185074264, 0.00584222986640171, 0.00581645238345584, 0.00566088137411449, 0.00535516862329704, 0.00489914757707667, 0.00432017939770409, 0.0036813032251836, 0.00309019064543606, 0.00270890436501562, 0.00276446109239711, 0.00356019862584603)
     } #end check if running gads
 
-    if(warm != 0){
+    if(max(abs(warm)) != 0){
       # impose uniform temperature change
       TMAXX <- TMAXX + warm
       TMINN <- TMINN + warm
-      TAIRhr <- TAIRhr + warm
+      if(length(warm) == length(TMAXX)){
+        warm.hr <- rep(warm, each = 24)
+      }else{
+        warm.hr <- warm
+      }
+      TAIRhr <- TAIRhr + warm.hr
       sigma <- 5.67e-8 #Stefan-Boltzman, W/(m.K)
-      IRDhr <- sigma * ((IRDhr / sigma) ^ (1 / 4) + warm) ^ 4 # adjust downward radiation for altered 'sky temperature'
+      if(IR == 2){
+        IRDhr <- sigma * ((IRDhr / sigma) ^ (1 / 4) + warm.hr) ^ 4 # adjust downward radiation for altered 'sky temperature'
+      }
     }
-    RAINFALL<-RAINFALL+rainoff
-    RAINhr<-RAINhr+rainoff
-    ALLMINTEMPS<-TMINN
-    ALLMAXTEMPS<-TMAXX
-    ALLTEMPS <- cbind(ALLMAXTEMPS,ALLMINTEMPS)
+    RAINFALL <- RAINFALL + rainoff
+    RAINFALL[RAINFALL < 0] <- 0
+    if(length(rainoff) == length(RAINFALL)){
+      rainoff.hr <- rep(rainoff, each = 24)
+    }else{
+      rainoff.hr <- rainoff
+    }
+    RAINhr <- RAINhr + rainoff.hr
+    RAINhr[RAINhr < 0] <- 0
+    ALLMINTEMPS <- TMINN
+    ALLMAXTEMPS <- TMAXX
+    ALLTEMPS <- cbind(ALLMAXTEMPS, ALLMINTEMPS)
 
     WNMAXX <- WNMAXX * windfac
     WNMINN <- WNMINN * windfac
     WNhr <- WNhr * windfac
 
-    MAXSHADES<-maxshades
-    MINSHADES<-minshades
-
     REFLS <- rep(REFL, ndays)
     PCTWET <- rep(PCTWET, ndays)
-    soilwet<-RAINFALL
-    soilwet[soilwet<=rainwet] = 0
-    soilwet[soilwet>0] = 90
-    PCTWET<-pmax(soilwet,PCTWET)
+    soilwet <- RAINFALL
+    soilwet[soilwet <= rainwet] <- 0
+    soilwet[soilwet > 0] <- 90
+    if(ndays < 1){
+      PCTWET <- pmax(soilwet, PCTWET)
+    }
 
-    Intrvls<-rep(0,ndays)
+    Intrvls<-rep(0, ndays)
     Intrvls[1] <- 1 # user-supplied last day-of-year in each time interval sequence
     Numtyps <- 10 # number of substrate types
     Nodes <- matrix(data = 0, nrow = 10, ncol = ndays) # deepest nodes for each substrate type
     Nodes[1:10,] <- c(1:10) # deepest nodes for each substrate type
     ALREF <- abs(trunc(x[1]))
 
-    HEMIS <- ifelse(x[2]<0, 2, 1)
+    HEMIS <- ifelse(x[2] < 0, 2, 1)
     ALAT <- abs(trunc(x[2]))
-    AMINUT <- (abs(x[2])-ALAT)*60
+    AMINUT <- (abs(x[2]) - ALAT) * 60
     ALONG <- abs(trunc(x[1]))
-    ALMINT <- (abs(x[1])-ALONG)*60
+    ALMINT <- (abs(x[1]) - ALONG) * 60
 
-    avetemp<-(sum(TMAXX)+sum(TMINN))/(length(TMAXX)*2)
-    soilinit<-rep(avetemp,20)
-    tannul<-mean(unlist(ALLTEMPS))
+    avetemp <- (sum(TMAXX) + sum(TMINN)) / (length(TMAXX) * 2)
+    if(is.na(Soil_Init[1])){
+      soilinit <- rep(avetemp, 20)
+      spinup <- 1
+    }else{
+      if(snowmodel == 0){
+        soilinit <- c(Soil_Init, rep(avetemp, 10))
+      }else{
+        soilinit <- c(rep(avetemp, 8), Soil_Init[1:10], rep(avetemp, 2))
+      }
+      spinup <- 0
+    }
+    tannul <- mean(unlist(ALLTEMPS))
 
     if(is.na(deepsoil)){
-      if(nyears==1){
-        avetemp<-(sum(TMAXX)+sum(TMINN))/(length(TMAXX)*2)
-        deepsoil<-rep(avetemp,ndays)
+      if(nyears == 1){
+        avetemp <- (sum(TMAXX) + sum(TMINN)) / (length(TMAXX)*2)
+        deepsoil <-rep(avetemp, ndays)
       }else{
-        avetemp<-rowMeans(cbind(TMAXX, TMINN), na.rm=TRUE)
-        if(length(TMAXX)<365){
-          deepsoil<-rep((sum(TMAXX)+sum(TMINN))/(length(TMAXX)*2),length(TMAXX))
+        avetemp <- rowMeans(cbind(TMAXX, TMINN), na.rm=TRUE)
+        if(length(TMAXX) < 365){
+          deepsoil <- rep((sum(TMAXX) + sum(TMINN)) / (length(TMAXX) * 2), length(TMAXX))
         }else{
-          deepsoil<-raster::movingFun(avetemp,n=365,fun=mean,type='to')
-          yearone<-rep((sum(TMAXX[1:365])+sum(TMINN[1:365]))/(365*2),365)
-          deepsoil[1:365]<-yearone
+          deepsoil <- raster::movingFun(avetemp, n = 365, fun = mean, type = 'to')
+          yearone <- rep((sum(TMAXX[1:365]) + sum(TMINN[1:365])) / (365 * 2), 365)
+          deepsoil[1:365] <- yearone
         }
       }
     }else{
       tannul <- mean(deepsoil)
     }
 
-    SLES<-matrix(nrow = ndays, data = 0)
-    SLES<-SLES+SLE
+    SLES <- matrix(nrow = ndays, data = 0)
+    SLES <- SLES + SLE
 
-    moists2<-matrix(nrow=10, ncol = ndays, data=0)
-    moists2[1,ndays]<-0.2
-    moists<-moists2
+    moists2 <- matrix(nrow = 10, ncol = ndays, data = 0)
+    moists2[1, ndays] <- 0.2
+    moists <- moists2
 
-    if(runmoist==1){
-      moists2<-matrix(nrow=10, ncol = ndays, data=0) # set up an empty vector for soil moisture values through time
-      moists2[1:10,]<-SoilMoist_Init
-      moists<-moists2
+    if(runmoist == 1){
+      moists2 <- matrix(nrow = 10, ncol = ndays, data = 0) # set up an empty vector for soil moisture values through time
+      moists2[1:10, ] <- SoilMoist_Init
+      moists <- moists2
     }
-    soilprops<-matrix(data = 0, nrow = 10, ncol = 5)
-    soilprops[,1]<-BulkDensity
-    soilprops[,2]<-min(0.26, 1 - BulkDensity / Density) # not used if soil moisture computed
-    soilprops[,3]<-Thcond
-    soilprops[,4]<-SpecHeat
-    soilprops[,5]<-Density
-    if(cap==1){
-      soilprops[1:2,3]<-0.2
-      soilprops[1:2,4]<-1920
+    soilprops <- matrix(data = 0, nrow = 10, ncol = 5)
+    soilprops[,1] <- BulkDensity
+    soilprops[,2] <- 1 - BulkDensity / Density # not used if soil moisture computed
+    soilprops[soilprops[,2] < 0.26, 2] <- 0.26
+    soilprops[,3] <- Thcond
+    soilprops[,4] <- SpecHeat
+    soilprops[,5] <- Density
+    if(cap == 1){
+      soilprops[1:2, 3] <- 0.2
+      soilprops[1:2, 4] <- 1920
     }
     if(cap==2){
-      soilprops[1:2,3]<-0.1
-      soilprops[3:4,3]<-0.25
-      soilprops[1:4,4]<-1920
-      soilprops[1:4,5]<-1.3
-      soilprops[1:4,1]<-0.7
+      soilprops[1:2, 3] <- 0.1
+      soilprops[3:4, 3] <- 0.25
+      soilprops[1:4, 4] <- 1920
+      soilprops[1:4, 5] <- 1.3
+      soilprops[1:4, 1] <- 0.7
     }
 
-    ALTT<-as.numeric(ALTT)
-    ALREF<-as.numeric(ALREF)
-    ALMINT<-as.numeric(ALMINT)
-    ALONG<-as.numeric(ALONG)
-    AMINUT<-as.numeric(AMINUT)
-    ALAT<-as.numeric(ALAT)
+    ALTT <- as.numeric(ALTT)
+    ALREF <- as.numeric(ALREF)
+    ALMINT <- as.numeric(ALMINT)
+    ALONG <- as.numeric(ALONG)
+    AMINUT <- as.numeric(AMINUT)
+    ALAT <-as.numeric(ALAT)
     hourly <- 1
-    if(rainhourly==0){
-      RAINhr=rep(0,24*ndays)
-    }else{
-      RAINhr = rainhour
-    }
-    # microclimate input parameters list
-    microinput<-c(ndays,RUF,ERR,Usrhyt,Refhyt,Numtyps,Z01,Z02,ZH1,ZH2,idayst,ida,HEMIS,ALAT,AMINUT,ALONG,ALMINT,ALREF,slope,azmuth,ALTT,CMH2O,microdaily,tannul,EC,VIEWF,snowtemp,snowdens,snowmelt,undercatch,rainmult,runshade,runmoist,maxpool,evenrain,snowmodel,rainmelt,writecsv,densfun,hourly,rainhourly,lamb,IUV,RW,PC,RL,SP,R1,IM,MAXCOUNT,IR,message,fail,snowcond,intercept,grasshade,solonly)
 
-    doy1=matrix(data = 0., nrow = ndays, ncol = 1)
-    SLES1=matrix(data = 0., nrow = ndays, ncol = 1)
-    MAXSHADES1=matrix(data = 0., nrow = ndays, ncol = 1)
-    MINSHADES1=matrix(data = 0., nrow = ndays, ncol = 1)
-    TMAXX1=matrix(data = 0., nrow = ndays, ncol = 1)
-    TMINN1=matrix(data = 0., nrow = ndays, ncol = 1)
-    CCMAXX1=matrix(data = 0., nrow = ndays, ncol = 1)
-    CCMINN1=matrix(data = 0., nrow = ndays, ncol = 1)
-    RHMAXX1=matrix(data = 0., nrow = ndays, ncol = 1)
-    RHMINN1=matrix(data = 0., nrow = ndays, ncol = 1)
-    WNMAXX1=matrix(data = 0., nrow = ndays, ncol = 1)
-    WNMINN1=matrix(data = 0., nrow = ndays, ncol = 1)
-    REFLS1=matrix(data = 0., nrow = ndays, ncol = 1)
-    PCTWET1=matrix(data = 0., nrow = ndays, ncol = 1)
-    RAINFALL1=matrix(data = 0, nrow = ndays, ncol = 1)
-    tannul1=matrix(data = 0, nrow = ndays, ncol = 1)
-    moists1=matrix(data = 0., nrow = 10, ncol = ndays)
-    doy1[1:ndays]<-doy
-    SLES1[1:ndays]<-SLES
-    MAXSHADES1[1:ndays]<-MAXSHADES
-    MINSHADES1[1:ndays]<-MINSHADES
-    TMAXX1[1:ndays]<-TMAXX
-    TMINN1[1:ndays]<-TMINN
-    CCMAXX1[1:ndays]<-CCMAXX
-    CCMINN1[1:ndays]<-CCMINN
-    RHMAXX1[1:ndays]<-RHMAXX
-    RHMINN1[1:ndays]<-RHMINN
-    WNMAXX1[1:ndays]<-WNMAXX
-    WNMINN1[1:ndays]<-WNMINN
-    REFLS1[1:ndays]<-REFLS
-    PCTWET1[1:ndays]<-PCTWET
-    RAINFALL1[1:ndays]<-RAINFALL
-    tannul1[1:ndays]<-tannul
-    moists1[1:10,1:ndays]<-moists
-    if(length(LAI)<ndays){
-      LAI<-rep(LAI[1],ndays)
-    }
-    LAI1 <- LAI
-    if(shore==0){
-      tides<-matrix(data = 0, nrow = 24*ndays, ncol = 3) # make an empty matrix
-    }
     TIMAXS <- c(1, 1, 0, 0)
     TIMINS <- c(0, 0, 1, 1)
+    # microclimate input parameters list
+    microinput<-c(ndays, RUF, ERR, Usrhyt, Refhyt, Numtyps, Z01, Z02, ZH1, ZH2, idayst, ida, HEMIS, ALAT, AMINUT, ALONG, ALMINT, ALREF, slope, azmuth, ALTT, CMH2O, microdaily, tannul, EC, VIEWF, snowtemp, snowdens, snowmelt, undercatch, rainmult, runshade, runmoist, maxpool, evenrain, snowmodel, rainmelt, writecsv, densfun, hourly, rainhourly, lamb, IUV, RW, PC, RL, SP, R1, IM, MAXCOUNT, IR, message, fail, snowcond, intercept, grasshade, solonly, ZH, D0, TIMAXS, TIMINS, spinup)
+
+    if(length(LAI) < ndays){
+      LAI<-rep(LAI[1], ndays)
+    }
+    if(shore == 0){
+      tides <- matrix(data = 0, nrow = 24 * ndays, ncol = 3) # make an empty matrix
+    }
+
     # all microclimate data input list - all these variables are expected by the input argument of the fortran micro2014 subroutine
-    micro<-list(tides=tides,microinput=microinput,doy=doy,SLES=SLES1,DEP=DEP,Nodes=Nodes,MAXSHADES=MAXSHADES,MINSHADES=MINSHADES,TIMAXS=TIMAXS,TIMINS=TIMINS,TMAXX=TMAXX1,TMINN=TMINN1,RHMAXX=RHMAXX1,RHMINN=RHMINN1,CCMAXX=CCMAXX1,CCMINN=CCMINN1,WNMAXX=WNMAXX1,WNMINN=WNMINN1,TAIRhr=TAIRhr,RHhr=RHhr,WNhr=WNhr,CLDhr=CLDhr,SOLRhr=SOLRhr,RAINhr=RAINhr,ZENhr=ZENhr,IRDhr=IRDhr,REFLS=REFLS1,PCTWET=PCTWET1,soilinit=soilinit,hori=hori,TAI=TAI,soilprops=soilprops,moists=moists1,RAINFALL=RAINFALL1,tannulrun=deepsoil,PE=PE,KS=KS,BB=BB,BD=BD,DD=DD,L=L,LAI=LAI1)
+    micro <- list(tides = tides, microinput = microinput, doy = doy, SLES = SLES, DEP = DEP, Nodes = Nodes, MAXSHADES = MAXSHADES, MINSHADES = MINSHADES, TMAXX = TMAXX, TMINN = TMINN, RHMAXX = RHMAXX, RHMINN = RHMINN, CCMAXX = CCMAXX, CCMINN = CCMINN, WNMAXX = WNMAXX, WNMINN = WNMINN, TAIRhr = TAIRhr, RHhr = RHhr, WNhr = WNhr, CLDhr = CLDhr, SOLRhr = SOLRhr, RAINhr = RAINhr, ZENhr = ZENhr, IRDhr = IRDhr, REFLS = REFLS, PCTWET = PCTWET, soilinit = soilinit, hori = hori, TAI = TAI, soilprops = soilprops, moists = moists, RAINFALL = RAINFALL, tannulrun = deepsoil, PE = PE, KS = KS, BB = BB, BD = BD, DD = DD, L = L, LAI = LAI)
     # write all input to csv files in their own folder
-    if(write_input==1){
-      if(dir.exists("micro csv input")==FALSE){
+    if(write_input == 1){
+      if(dir.exists("micro csv input") == FALSE){
         dir.create("micro csv input")
       }
       write.table(as.matrix(microinput), file = "micro csv input/microinput.csv", sep = ",", col.names = NA, qmethod = "double")
@@ -1089,8 +1364,6 @@ micro_ncep <- function(
       write.table(Nodes, file = "micro csv input/Nodes.csv", sep = ",", col.names = NA, qmethod = "double")
       write.table(MAXSHADES, file = "micro csv input/Maxshades.csv", sep = ",", col.names = NA, qmethod = "double")
       write.table(MINSHADES, file = "micro csv input/Minshades.csv", sep = ",", col.names = NA, qmethod = "double")
-      write.table(TIMAXS, file = "micro csv input/TIMAXS.csv", sep = ",", col.names = NA, qmethod = "double")
-      write.table(TIMINS, file = "micro csv input/TIMINS.csv", sep = ",", col.names = NA, qmethod = "double")
       write.table(TMAXX, file = "micro csv input/TMAXX.csv", sep = ",", col.names = NA, qmethod = "double")
       write.table(TMINN, file = "micro csv input/TMINN.csv", sep = ",", col.names = NA, qmethod = "double")
       write.table(RHMAXX, file = "micro csv input/RHMAXX.csv", sep = ",", col.names = NA, qmethod = "double")
@@ -1126,45 +1399,52 @@ micro_ncep <- function(
       write.table(IRDhr,file="micro csv input/IRDhr.csv", sep = ",", col.names = NA, qmethod = "double")
     }
     if(is.numeric(loc[1])){
-      location<-paste("long",loc[1],"lat",loc[2])
+      location <- paste("long", loc[1], "lat", loc[2])
     }else{
-      location<-loc
+      location <- loc
     }
-    cat(paste('running microclimate model for ',ndays,' days from ',tt[1],' to ', tt[length(tt)], ' at site ',location,'\n'))
+    cat(paste('running microclimate model for ', ndays, ' days from ', tt[1], ' to ', tt[length(tt)], ' at site ', location, '\n'))
+    cat('Note: the output column `SOLR` in metout and shadmet is for unshaded solar radiation adjusted for slope, aspect and horizon angle \n')
     ptm <- proc.time() # Start timing
     microut<-microclimate(micro)
     print(proc.time() - ptm) # Stop the clock
 
-    metout<-microut$metout # retrieve above ground microclimatic conditions, min shade
-    shadmet<-microut$shadmet # retrieve above ground microclimatic conditions, max shade
-    soil<-microut$soil # retrieve soil temperatures, minimum shade
-    shadsoil<-microut$shadsoil # retrieve soil temperatures, maximum shade
+    metout <- microut$metout # retrieve above ground microclimatic conditions, min shade
+    shadmet <- microut$shadmet # retrieve above ground microclimatic conditions, max shade
+    soil <- microut$soil # retrieve soil temperatures, minimum shade
+    shadsoil <- microut$shadsoil # retrieve soil temperatures, maximum shade
+    tcond <- microut$tcond
+    shadtcond <- microut$shadtcond
+    specheat <- microut$specheat
+    shadspecheat <- microut$shadspecheat
+    densit <- microut$densit
+    shaddensit <- microut$shaddensit
     if(runmoist==1){
-      soilmoist<-microut$soilmoist # retrieve soil moisture, minimum shade
-      shadmoist<-microut$shadmoist # retrieve soil moisture, maximum shade
-      humid<-microut$humid # retrieve soil humidity, minimum shade
-      shadhumid<-microut$shadhumid # retrieve soil humidity, maximum shade
-      soilpot<-microut$soilpot # retrieve soil water potential, minimum shade
-      shadpot<-microut$shadpot # retrieve soil water potential, maximum shade
-      plant<-microut$plant # retrieve plant output, minimum shade
-      shadplant<-microut$shadplant # retrieve plant output, maximum shade
+      soilmoist <- microut$soilmoist # retrieve soil moisture, minimum shade
+      shadmoist <- microut$shadmoist # retrieve soil moisture, maximum shade
+      humid <- microut$humid # retrieve soil humidity, minimum shade
+      shadhumid <- microut$shadhumid # retrieve soil humidity, maximum shade
+      soilpot <- microut$soilpot # retrieve soil water potential, minimum shade
+      shadpot <- microut$shadpot # retrieve soil water potential, maximum shade
+      plant <- microut$plant # retrieve plant output, minimum shade
+      shadplant <- microut$shadplant # retrieve plant output, maximum shade
     }else{
-      soilpot<-soil
-      soilmoist<-soil
-      shadpot<-soil
-      shadmoist<-soil
-      humid<-soil
-      shadhumid<-soil
-      plant<-cbind(soil,soil[,3:4])
-      shadplant<-cbind(soil,soil[,3:4])
-      soilpot[,3:12]<-0
-      soilmoist[,3:12]<-0.5
-      shadpot[,3:12]<-0
-      shadmoist[,3:12]<-0.5
-      humid[,3:12]<-0.99
-      shadhumid[,3:12]<-0.99
-      plant[,3:14]<-0
-      shadplant[,3:14]<-0
+      soilpot <- soil
+      soilmoist <- soil
+      shadpot <- soil
+      shadmoist <- soil
+      humid <- soil
+      shadhumid <- soil
+      plant <- cbind(soil, soil[, 3:4])
+      shadplant <- cbind(soil, soil[, 3:4])
+      soilpot[, 3:12] <- 0
+      soilmoist[, 3:12] <- 0.5
+      shadpot[, 3:12] <- 0
+      shadmoist[, 3:12] <- 0.5
+      humid[, 3:12] <- 0.99
+      shadhumid[, 3:12] <- 0.99
+      plant[, 3:14] <- 0
+      shadplant[, 3:14] <- 0
     }
     if(snowmodel == 1){
       sunsnow <- microut$sunsnow
@@ -1174,19 +1454,19 @@ micro_ncep <- function(
       cat("ERROR: the model crashed - try a different error tolerance (ERR) or a different spacing in DEP", '\n')
     }
     if(lamb == 1){
-      drlam<-as.data.frame(microut$drlam) # retrieve direct solar irradiance
-      drrlam<-as.data.frame(microut$drrlam) # retrieve direct Rayleigh component solar irradiance
-      srlam<-as.data.frame(microut$srlam) # retrieve scattered solar irradiance
+      drlam <- as.data.frame(microut$drlam) # retrieve direct solar irradiance
+      drrlam <- as.data.frame(microut$drrlam) # retrieve direct Rayleigh component solar irradiance
+      srlam <- as.data.frame(microut$srlam) # retrieve scattered solar irradiance
       if(snowmodel == 1){
-        return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,humid=humid,shadhumid=shadhumid,soilpot=soilpot,shadpot=shadpot,sunsnow=sunsnow,shdsnow=shdsnow,plant=plant,shadplant=shadplant,RAINFALL=RAINFALL,ndays=ndays,elev=ALTT,REFL=REFL[1],MAXSHADES=MAXSHADES,longlat=longlat,nyears=nyears,minshade=minshade,maxshade=maxshade,DEP=DEP,drlam=drlam,drrlam=drrlam,srlam=srlam, SLOPE = SLOPE, ASPECT = ASPECT, HORIZON = HORIZON, dates=tt, dem = dem, dates2 = dates2, microclima.out = microclima.out))
+        return(list(soil = soil, shadsoil = shadsoil, metout = metout, shadmet = shadmet, soilmoist = soilmoist, shadmoist = shadmoist, humid = humid, shadhumid = shadhumid, soilpot = soilpot, shadpot = shadpot, sunsnow = sunsnow, shdsnow = shdsnow, plant = plant, shadplant = shadplant, tcond = tcond, shadtcond = shadtcond, specheat = specheat, shadspecheat = shadspecheat, densit = densit, shaddensit = shaddensit, RAINFALL = RAINFALL, ndays = ndays, elev = ALTT, REFL = REFL[1], longlat = longlat, nyears = nyears, minshade = MINSHADES, maxshade = MAXSHADES, DEP = DEP, drlam = drlam, drrlam = drrlam, srlam = srlam, SLOPE = SLOPE, ASPECT = ASPECT, HORIZON = HORIZON, dates = tt, dem = dem, dates2 = dates2, microclima.out = microclima.out,PE=PE,BD=BD,DD=DD,BB=BB,KS=KS))
       }else{
-        return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,humid=humid,shadhumid=shadhumid,soilpot=soilpot,shadpot=shadpot,plant=plant,shadplant=shadplant,RAINFALL=RAINFALL,ndays=ndays,elev=ALTT,REFL=REFL[1],MAXSHADES=MAXSHADES,longlat=longlat,nyears=nyears,minshade=minshade,maxshade=maxshade,DEP=DEP,drlam=drlam,drrlam=drrlam,srlam=srlam, SLOPE = SLOPE, ASPECT = ASPECT, HORIZON = HORIZON, dates=tt, dem = dem, dates2 = dates2, microclima.out = microclima.out))
+        return(list(soil = soil, shadsoil = shadsoil, metout = metout, shadmet = shadmet, soilmoist = soilmoist, shadmoist = shadmoist, humid = humid, shadhumid = shadhumid, soilpot = soilpot, shadpot = shadpot, plant = plant, shadplant = shadplant, tcond = tcond, shadtcond = shadtcond, specheat = specheat, shadspecheat = shadspecheat, densit = densit, shaddensit = shaddensit, RAINFALL = RAINFALL, ndays = ndays, elev = ALTT, REFL = REFL[1], longlat = longlat, nyears = nyears, minshade = MINSHADES, maxshade = MAXSHADES, DEP = DEP, drlam = drlam, drrlam = drrlam, srlam = srlam, SLOPE = SLOPE, ASPECT = ASPECT, HORIZON = HORIZON, dates = tt, dem = dem, dates2 = dates2, microclima.out = microclima.out,PE=PE,BD=BD,DD=DD,BB=BB,KS=KS))
       }
     }else{
       if(snowmodel == 1){
-        return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,humid=humid,shadhumid=shadhumid,soilpot=soilpot,shadpot=shadpot,sunsnow=sunsnow,shdsnow=shdsnow,plant=plant,shadplant=shadplant,RAINFALL=RAINFALL,ndays=ndays,elev=ALTT,REFL=REFL[1],MAXSHADES=MAXSHADES,longlat=longlat,nyears=nyears,minshade=minshade,maxshade=maxshade,DEP=DEP, SLOPE = SLOPE, ASPECT = ASPECT, HORIZON = HORIZON, dates=tt, dem = dem, dates2 = dates2, microclima.out = microclima.out))
+        return(list(soil = soil, shadsoil = shadsoil, metout = metout, shadmet = shadmet, soilmoist = soilmoist, shadmoist = shadmoist, humid = humid, shadhumid = shadhumid, soilpot = soilpot, shadpot = shadpot, sunsnow = sunsnow, shdsnow = shdsnow, plant = plant, shadplant = shadplant, tcond = tcond, shadtcond = shadtcond, specheat = specheat, shadspecheat = shadspecheat, densit = densit, shaddensit = shaddensit, RAINFALL = RAINFALL, ndays = ndays, elev = ALTT, REFL = REFL[1], longlat = longlat, nyears = nyears, minshade = MINSHADES, maxshade = MAXSHADES, DEP = DEP, SLOPE = SLOPE, ASPECT = ASPECT, HORIZON = HORIZON, dates = tt, dem = dem, dates2 = dates2, microclima.out = microclima.out,PE=PE,BD=BD,DD=DD,BB=BB,KS=KS))
       }else{
-        return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,humid=humid,shadhumid=shadhumid,soilpot=soilpot,shadpot=shadpot,plant=plant,shadplant=shadplant,RAINFALL=RAINFALL,ndays=ndays,elev=ALTT,REFL=REFL[1],MAXSHADES=MAXSHADES,longlat=longlat,nyears=nyears,minshade=minshade,maxshade=maxshade,DEP=DEP, SLOPE = SLOPE, ASPECT = ASPECT, HORIZON = HORIZON, dates=tt, dem = dem, dates2 = dates2, microclima.out = microclima.out))
+        return(list(soil = soil, shadsoil = shadsoil, metout = metout, shadmet = shadmet, soilmoist = soilmoist, shadmoist = shadmoist, humid = humid, shadhumid = shadhumid, soilpot = soilpot, shadpot = shadpot, plant = plant, shadplant = shadplant, tcond = tcond, shadtcond = shadtcond, specheat = specheat, shadspecheat = shadspecheat, densit = densit, shaddensit = shaddensit, RAINFALL = RAINFALL, ndays = ndays, elev = ALTT, REFL = REFL[1], longlat = longlat, nyears = nyears, minshade = MINSHADES, maxshade = MAXSHADES, DEP = DEP, SLOPE = SLOPE, ASPECT = ASPECT, HORIZON = HORIZON, dates = tt, dem = dem, dates2 = dates2, microclima.out = microclima.out,PE=PE,BD=BD,DD=DD,BB=BB,KS=KS))
       }
     }
   } # end error trapping

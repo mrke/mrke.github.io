@@ -2,33 +2,18 @@
 #'
 #' R wrapper for Fortran binary of SIMULSOL (endotherm model)
 #' @encoding UTF-8
-#' @param DIFTOL A
-#' @param IPT A
-#' @param FURVARS A
-#' @param GEOMVARS A
-#' @param ENVVARS A
-#' @param TRAITS A
-#' @param TFA A
-#' @param SKINW A
-#' @param TSKIN A
+#' @param DIFTOL error tolerance for SIMULSOL
+#' @param IPT geometry for SIMULSOL, 1 = cylinder, 2 = sphere, 3 = ellipsoid
+#' @param FURVARS fur input variable vector
+#' @param GEOMVARS shape and size input variable vector
+#' @param ENVVARS environmental input vector
+#' @param TRAITS other trait inputs vector
+#' @param TFA current guess of fur/air-interface temperature (°C)
+#' @param SKINW part of the skin surface that is wet (\%)
+#' @param TSKIN current guess of skin temperature (°C)
 #' @export
 SIMULSOL <- function(DIFTOL, IPT, FURVARS, GEOMVARS, ENVVARS, TRAITS, TFA,
                      SKINW, TSKIN, results){
-  os = Sys.info()['sysname']
-  if (os == "Windows") {
-    if (R.Version()$arch=="x86_64") {
-      libpath='/NicheMapR/libs/win/x64/SIMULSOL.dll'
-    } else {
-      libpath='/NicheMapR/libs/win/i386/SIMULSOL.dll'
-    }
-  } else if (os == "Linux") {
-    libpath='/NicheMapR/libs/linux/SIMULSOL.so'
-  } else if (os == "Darwin") {
-    libpath='/NicheMapR/libs/mac/SIMULSOL.so'
-  }
-  if (!is.loaded('SIMULSOL')) {
-    dyn.load(paste0(lib.loc = .libPaths()[1],libpath))
-  }
   a <- .Fortran("SIMULSOL",
     as.double(DIFTOL),
     as.double(IPT),
@@ -39,11 +24,10 @@ SIMULSOL <- function(DIFTOL, IPT, FURVARS, GEOMVARS, ENVVARS, TRAITS, TFA,
     as.double(TFA),
     as.double(SKINW),
     as.double(TSKIN),
-    results=matrix(data = 0., nrow = 1, ncol = 14),
-    PACKAGE = "SIMULSOL")
-  #dyn.unload("SIMULSOL.dll")
+    results=matrix(data = 0., nrow = 1, ncol = 16),
+    PACKAGE = "NicheMapR")
 
-  results <- matrix(data = 0., nrow = 1, ncol = 14)
+  results <- matrix(data = 0., nrow = 1, ncol = 16)
 
   storage.mode(results)<-"double"
   results <- a$results

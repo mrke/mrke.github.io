@@ -15,7 +15,6 @@
 #' summary statistics about the length of basking and foraging bouts, activity time, time spent
 #' above high temperature thresholds (T_F_max and CT_max), and the extremes of body temperature.
 #' @encoding UTF-8
-#' @param t time intervals (s) at which output is required
 #' @param Tc_init = Tairf(1), initial temperature (°C) Organism shape, 0-5, Determines whether standard or custom shapes/surface area/volume relationships are used: 0=plate, 1=cyl, 2=ellips, 3=lizard (desert iguana), 4=frog (leopard frog), 5=custom (see details)
 #' @param Ts_init = Tc_init + 0.1, initial shell temperature (°C)
 #' @param To_init = Tc_init + 0.2, initial surface temperature (°C)
@@ -83,42 +82,41 @@
 #'
 #' sum_stats variables:
 #' \itemize{
-#' \item 1 loc - location of simulation (longitude, latitude, decimal degrees)
-#' \item 2 Ww_g - wet weight of animal (g)
-#' \item 3 T_F_min - minimum foraging temperature (°C)
-#' \item 4 T_F_max - maximum foraging temperature (°C)
-#' \item 5 max_bout_sun - longest foraging bout in sun (minutes)
-#' \item 6 max_bout_shd - longest foraging bout in shade (minutes)
-#' \item 7 sum_activity_sun - total activity in sun (minutes)
-#' \item 8 sum_activity_shd - total activity in shade (minutes)
-#' \item 9 bouts_sun - total number of foraging bouts in sun (#)
-#' \item 10 bouts_shd - total number of foraging bouts in shade (#)
-#' \item 11 morning_bask - morning basking time (minutes)
-#' \item 12 morning_forage_sun - first foraging bout length in sun (minutes)
-#' \item 13 morning_forage_shd - first foraging bout length in shade (minutes)
-#' \item 14 first_midday_bout_sun - second foraging bout length in sun (minutes)
-#' \item 15 first_midday_bout_shd - second foraging bout length in shade (minutes)
-#' \item 16 mean_midday_bout_shd - average length of foraging bouts between the first and last foraging bouts in sun (mins)
-#' \item 17 mean_midday_bout_sun - average length of foraging bouts between the first and last foraging bouts in shade (mins)
-#' \item 18 afternoon_forage_sun - last foraging bout length in sun (minutes)
-#' \item 19 afternoon_forage_shd - last foraging bout length in shade (minutes)
-#' \item 20 mrate_sum - cumulative metabolic rate (kJ)
-#' \item 21 mrate_sum_inactive_sun - cumulative metabolic rate while inactive, sun forager (kJ)
-#' \item 22 mrate_sum_inactive_shd - cumulative metabolic rate while inactive, shade forager (kJ)
-#' \item 23 mrate_sum_active_sun - cumulative metabolic rate while active in sun (kJ)
-#' \item 24 mrate_sum_active_shd - cumulative metabolic rate while active in shade (kJ)
-#' \item 25 T_F_max_time_Te - time operative temperature in open spent above maximum foraging temperature (minutes)
-#' \item 26 CT_max_time_Te - time operative temperature in open spent above critical thermal maximum (minutes)
-#' \item 27 T_F_max_time_Tb_open - time body temperature in open spent above maximum foraging temperature (minutes)
-#' \item 28 CT_max_time_Tb_open - time body temperature in open spent above critical thermal maximum (minutes)
-#' \item 29 T_F_maxtime - time body temperature of thermoregulating animal spent above maximum foraging temperature (minutes)
-#' \item 30 CT_max_time - time body temperature of thermoregulating animal spent above critical thermal maximum (minutes)
-#' \item 31 max_Tb_open - maximum body temperature in open (°C)
-#' \item 32 min_Tb_open - minimum body temperature in open (°C)
-#' \item 33 max_Te - maximum operative temperature in open (°C)
-#' \item 34 min_Te - minimum operative temperature in open (°C)
-#' \item 35 max_Tb - maximum body temperature of thermoregulating animal (°C)
-#' \item 36 min_Tb - minimum body temperature of thermoregulating animal (°C)
+#' \item 1 Ww_g - wet weight of animal (g)
+#' \item 2 T_F_min - minimum foraging temperature (°C)
+#' \item 3 T_F_max - maximum foraging temperature (°C)
+#' \item 4 max_bout_sun - longest foraging bout in sun (minutes)
+#' \item 5 max_bout_shd - longest foraging bout in shade (minutes)
+#' \item 6 sum_activity_sun - total activity in sun (minutes)
+#' \item 7 sum_activity_shd - total activity in shade (minutes)
+#' \item 8 bouts_sun - total number of foraging bouts in sun (#)
+#' \item 9 bouts_shd - total number of foraging bouts in shade (#)
+#' \item 10 morning_bask - morning basking time (minutes)
+#' \item 11 morning_forage_sun - first foraging bout length in sun (minutes)
+#' \item 12 morning_forage_shd - first foraging bout length in shade (minutes)
+#' \item 13 first_midday_bout_sun - second foraging bout length in sun (minutes)
+#' \item 14 first_midday_bout_shd - second foraging bout length in shade (minutes)
+#' \item 15 mean_midday_bout_shd - average length of foraging bouts between the first and last foraging bouts in sun (mins)
+#' \item 16 mean_midday_bout_sun - average length of foraging bouts between the first and last foraging bouts in shade (mins)
+#' \item 17 afternoon_forage_sun - last foraging bout length in sun (minutes)
+#' \item 18 afternoon_forage_shd - last foraging bout length in shade (minutes)
+#' \item 19 mrate_sum - cumulative metabolic rate (kJ)
+#' \item 20 mrate_sum_inactive_sun - cumulative metabolic rate while inactive, sun forager (kJ)
+#' \item 21 mrate_sum_inactive_shd - cumulative metabolic rate while inactive, shade forager (kJ)
+#' \item 22 mrate_sum_active_sun - cumulative metabolic rate while active in sun (kJ)
+#' \item 23 mrate_sum_active_shd - cumulative metabolic rate while active in shade (kJ)
+#' \item 24 T_F_max_time_Te - time operative temperature in open spent above maximum foraging temperature (minutes)
+#' \item 25 CT_max_time_Te - time operative temperature in open spent above critical thermal maximum (minutes)
+#' \item 26 T_F_max_time_Tb_open - time body temperature in open spent above maximum foraging temperature (minutes)
+#' \item 27 CT_max_time_Tb_open - time body temperature in open spent above critical thermal maximum (minutes)
+#' \item 28 T_F_maxtime - time body temperature of thermoregulating animal spent above maximum foraging temperature (minutes)
+#' \item 29 CT_max_time - time body temperature of thermoregulating animal spent above critical thermal maximum (minutes)
+#' \item 30 max_Tb_open - maximum body temperature in open (°C)
+#' \item 31 min_Tb_open - minimum body temperature in open (°C)
+#' \item 32 max_Te - maximum operative temperature in open (°C)
+#' \item 33 min_Te - minimum operative temperature in open (°C)
+#' \item 34 max_Tb - maximum body temperature of thermoregulating animal (°C)
+#' \item 35 min_Tb - minimum body temperature of thermoregulating animal (°C)
 #' }
 #'
 #' @examples
@@ -165,7 +163,7 @@
 #'   shadsoil_in <- subset(shadmet, DOY == DOYs[i])
 #'
 #'   # run transient behavioural simulation
-#'   trans <- trans_behav(t = time, Ww_g = Ww_g, alpha = alpha, T_F_min = T_F_min, T_F_max = T_F_max,
+#'   trans <- trans_behav(Ww_g = Ww_g, alpha = alpha, T_F_min = T_F_min, T_F_max = T_F_max,
 #'                        CT_max = CT_max, T_B_min = T_B_min, geom = geom, shape_b = shape_b, shape_c = shape_c,
 #'                        rho_body = rho_body, k_flesh = k_flesh, q = q, lump = 1,
 #'                        metout = metout_in, shadmet = shadmet_in, soil = soil_in, shadsoil = shadsoil_in,
@@ -211,8 +209,7 @@
 #'
 #' mtext(text =  paste0('Seasonal Activity Plot, ', if(length(loc) == 2){paste("lon", loc[1], "lat", loc[2])}else{loc}, " ", Ww_g," g"), outer = TRUE, side = 3, line = 0)
 #' @export
-trans_behav <- function(t = seq(1, 60),
-                        Tc_init = rep(20, 60),
+trans_behav <- function(Tc_init = rep(20, 60),
                         Ts_init = Tc_init + 0.1,
                         To_init = Tc_init + 0.2,
                         Ww_g = 500,
@@ -817,10 +814,10 @@ trans_behav <- function(t = seq(1, 60),
   active_shd <- active
 
   # table of summary statistics
-  sum_stats <- as.data.frame(cbind(loc[1], loc[2], Ww_g, T_F_min, T_F_max, max_foraging_bout, max_foraging_bout_shd, sum_activity, sum_activity_shd, total.bouts, total.bouts_shd, morning.bask, morning.bout, morning.bout_shd, midday.bout1, midday.bout1_shd, mean.midday.bout, mean.midday.bout_shd, afternoon.bout, afternoon.bout_shd, mrate_sum, mrate_sum_inactive, mrate_sum_inactive_shd, mrate_sum_active, mrate_sum_active_shd, T_F_max_time_Te, CT_max_time_Te, T_F_max_time_Tb_open, CT_max_time_Tb_open, T_F_maxtime, CT_max_time, max_Tb_open, min_Tb_open, max_Te, min_Te, max_Tb, min_Tb))
+  sum_stats <- as.data.frame(cbind(Ww_g, T_F_min, T_F_max, max_foraging_bout, max_foraging_bout_shd, sum_activity, sum_activity_shd, total.bouts, total.bouts_shd, morning.bask, morning.bout, morning.bout_shd, midday.bout1, midday.bout1_shd, mean.midday.bout, mean.midday.bout_shd, afternoon.bout, afternoon.bout_shd, mrate_sum, mrate_sum_inactive, mrate_sum_inactive_shd, mrate_sum_active, mrate_sum_active_shd, T_F_max_time_Te, CT_max_time_Te, T_F_max_time_Tb_open, CT_max_time_Tb_open, T_F_maxtime, CT_max_time, max_Tb_open, min_Tb_open, max_Te, min_Te, max_Tb, min_Tb))
 
 
-  colnames(sum_stats) <- c("lon", "lat", "Ww_g", "T_F_min", "T_F_max", "max_bout_sun", "max_bout_shd", "sum_activity_sun", "sum_activity_shd", "bouts_sun", "bouts_shd", "morning_bask", "morning_forage_sun", "morning_forage_shd",
+  colnames(sum_stats) <- c("Ww_g", "T_F_min", "T_F_max", "max_bout_sun", "max_bout_shd", "sum_activity_sun", "sum_activity_shd", "bouts_sun", "bouts_shd", "morning_bask", "morning_forage_sun", "morning_forage_shd",
                            "midday_bout1_sun", "midday_bout1_shd", "mean_midday_bout_sun", "mean_midday_bout_shd", "afternoon_forage_sun", "afternoon_forage_shd", "mrate_sum", "mrate_sum_inactive_sun", "mrate_sum_inactive_shd", "mrate_sum_active_sun", "mrate_sum_active_shd", "T_F_max_time_Te", "CT_max_time_Te",
                            "T_F_max_time_Tb_open", "CT_max_time_Tb_open", "T_F_maxtime", "CT_max_time", "max_Tb_open", "min_Tb_open", "max_Te", "min_Te",
                            "max_Tb", "min_Tb")

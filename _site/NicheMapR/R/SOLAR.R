@@ -1,54 +1,37 @@
-#' SOLAR
+#' SOLAR_ENDO
 #'
-#' R wrapper for Fortran binary of SOLAR (endotherm model)
-#' @param AREATOTL A
-#' @param ABSAND A
-#' @param ABSANV A
-#' @param ABSSB A
-#' @param ASILN A
-#' @param PCTDIF A
-#' @param QNORM A
-#' @param SHADE A
-#' @param QSOLR A
-#' @param FASKY A
-#' @param FATOBJ A
-#' @param FAVEG A
+#' R wrapper for Fortran binary of SOLAR_ENDO (endotherm model)
+#' @encoding UTF-8
+#' @param AREATOTL surface area for solar exchange, m2
+#' @param ABSAND solar absorptivity of dorsal fur (fractional, 0-1)
+#' @param ABSANV solar absorptivity of ventral fur (fractional, 0-1)
+#' @param ABSSB  solar absorptivity of substrate (fractional, 0-1)
+#' @param ASIL silhouette area to sun, m2
+#' @param PCTDIF proportion of solar radiation that is diffuse (fractional, 0-1)
+#' @param QNORM compute solar radiation on a surface normal to the direct rays of the sun (W/m2)
+#' @param SHADE shade (fractional, 0-1)
+#' @param QSOLR solar radiation, horizontal plane (W/m2)
+#' @param FASKY configuration factor to sky (-)
+#' @param FAVEG configuration factor to vegetation (-)
 #' @export
-SOLAR <- function(AREATOTL, ABSAND, ABSANV, ABSSB, ASILN, PCTDIF, QNORM, SHADE,
-  QSOLR, FASKY, FATOBJ, FAVEG){
-  os = Sys.info()['sysname']
-  if (os == "Windows") {
-    if (R.Version()$arch=="x86_64") {
-      libpath='/NicheMapR/libs/win/x64/SOLAR.dll'
-    } else {
-      libpath='/NicheMapR/libs/win/i386/SOLAR.dll'
-    }
-  } else if (os == "Linux") {
-    libpath='/NicheMapR/libs/linux/SOLAR.so'
-  } else if (os == "Darwin") {
-    libpath='/NicheMapR/libs/mac/SOLAR.so'
-  }
-  if (!is.loaded('SOLAR')) {
-    dyn.load(paste0(lib.loc = .libPaths()[1],libpath))
-  }
-  a <- .Fortran("SOLAR",
+SOLAR_ENDO <- function(AREATOTL, ABSAND, ABSANV, ABSSB, ASIL, PCTDIF, QNORM, SHADE,
+  QSOLR, FASKY, FAVEG){
+  a <- .Fortran("SOLAR_ENDO",
     as.double(AREATOTL),
     as.double(ABSAND),
     as.double(ABSANV),
     as.double(ABSSB),
-    as.double(ASILN),
+    as.double(ASIL),
     as.double(PCTDIF),
     as.double(QNORM),
     as.double(SHADE),
     as.double(QSOLR),
     as.double(FASKY),
-    as.double(FATOBJ),
     as.double(FAVEG),
-    results=matrix(data = 0., nrow = 1, ncol = 8),
-    PACKAGE = "SOLAR")
-  #dyn.unload("SOLAR.dll")
+    results=matrix(data = 0., nrow = 1, ncol = 7),
+    PACKAGE = "NicheMapR")
 
-  results <- matrix(data = 0., nrow = 1, ncol = 8)
+  results <- matrix(data = 0., nrow = 1, ncol = 7)
 
   storage.mode(results)<-"double"
   results <- a$results

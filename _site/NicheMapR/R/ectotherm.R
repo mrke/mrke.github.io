@@ -29,13 +29,13 @@
 #' @param mindepth = 2, Minimum depth (soil node #) to which animal can retreat if burrowing
 #' @param maxdepth = 10, Maximum depth (soil node #) to which animal can retreat if burrowing
 #' @param aestdepth = 10, Depth (soil node #) to which animal retreats if burrowing and aestivating due to desiccation
-#' @param M_1 = 0.013, Metabolic rate parameter 1 V_O2=M_1*M^M_2*10^(M_3*Tb), default parameters for lizards based on Eq. 2 from Andrews & Pough 1985. Physiol. Zool. 58:214-231
+#' @param M_1 = 0.013, Metabolic rate parameter 1 V_O2=M_1*M^M_2*10^(M_3*Tb), in ml O2 / h, default parameters for lizards based on Eq. 2 from Andrews & Pough 1985. Physiol. Zool. 58:214-231
 #' @param M_2 = 0.800, Metabolic rate parameter 2
 #' @param M_3 = 0.038, Metabolic rate parameter 3
 #' @param pct_wet = 0.2, \% of surface area acting as a free-water exchanger, for computing cutaneous water loss
 #' @param pct_eyes = 0.03, \% of surface area taken up by open eyes, for computing ocular water loss (only when active)
 #' @param pct_mouth = 5, \% of surface area taken up by open mouth, for computing panting water loss
-#' @param pantmax = 5, maximum multiplier on breathing rate, for respiratory water loss via panting
+#' @param pantmax = 5, maximum multiplier on breathing rate, for respiratory water loss via panting (value of 1 prevents panting)
 #' @param F_O2 = 20, \% oxygen extraction efficiency, for respiratory water loss
 #' @param delta_air = 0.1, Temperature difference (°C) between expired and inspired air, for computing respiratory water loss
 #' @usage ectotherm(Ww_g, shape, alpha_max, alpha_min, T_F_min, T_F_max, T_B_min, T_RB_min, CT_max, CT_min,
@@ -45,7 +45,7 @@
 #' \strong{ Parameters controling how the model runs:}
 #' \itemize{
 #' \item{\code{nyears}{ = micro$nyears, Number of years the simulation runs for - must be consistent with dimensions of environmental input data}\cr}
-#' \item{\code{enberr}{ = 0.0002, Factor by which the mass is multiplied to obtain a tolerance level for the heat budget solution}\cr}
+#' \item{\code{enberr}{ = 0.01, Factor by which the mass is multiplied to obtain a tolerance level for the heat budget solution}\cr}
 #' \item{\code{live}{ = 1, Live (metabolism/behaviour) or dead animal?}\cr}
 #' \item{\code{transient}{ = 0, Run a transient (i.e. include heat storage) simulation (1=yes, 0=no)? No behaviour yet - assums full sun}\cr}
 #' \item{\code{delta_shade}{ = 3, Percent shade increment step, 0-100\%, allowing different thermoregulatory precision (smaller values increase run time)}\cr}
@@ -56,13 +56,20 @@
 #' \strong{ Environmental inputs:}
 #'
 #' \itemize{
-#' \item{\code{minshade}{ = 0, Minimum shade (\%) available to the animal}\cr}
-#' \item{\code{minshades}{ = rep(minshade,length(micro$MAXSHADES), Vector of daily minimum shade values (\%)}\cr}
-#' \item{\code{maxshades}{ = micro$MAXSHADES, Vector of daily maximum shade values (\%)}\cr}
+#' \item{\code{minshades}{ = micro$minshade, Vector of daily minimum shade values - can be different to value used in microclimate model (e.g. to simulate sunspot tracking on a forest floor) (\%)}\cr}
+#' \item{\code{maxshades}{ = micro$maxshade, Vector of daily maximum shade values - can be different to value used in microclimate model (e.g. to simulate use of fine-scale shade in a generally unshaded habitat) (\%)}\cr}
 #' \item{\code{fluid}{ = 0, Fluid type 0=air, 1=water }\cr}
-#' \item{\code{k_sub}{ = 2.79, Substrate thermal conductivity (W/mC)}\cr}
+#' \item{\code{O2gas}{ = 20.95, oxygen concentration of air, to account for non-atmospheric concentrations e.g. in burrows (\%)}\cr}
+#' \item{\code{N2gas}{ = 79.02, nitrogen concetration of air, to account for non-atmospheric concentrations e.g. in burrows (\%)}\cr}
+#' \item{\code{CO2gas}{ = 0.0412, carbon dioxide concentration of air, to account for non-atmospheric concentrations e.g. in burrows (\%)}\cr}
 #' \item{\code{alpha_sub}{ = 1 - micro$REFL, Vector of daily substrate reflectances (0-1)}\cr}
+#' \item{\code{epsilon_sub}{ = 1, Emissivity of substrate (0-1)}\cr}
+#' \item{\code{epsilon_sky}{ = 1, Emissivity of sky (0-1)}\cr}
+#' \item{\code{PDIF}{ = 0.1, Fraction of total solar radiation that is diffuse (0-1), will ultimately be made an optionally hourly vector}\cr}
 #' \item{\code{DEP}{ = micro$DEP, Depths available from the microclimate model simulation}\cr}
+#' \item{\code{KS}{ = micro$KS[seq(1, 19, 2)], Depth-specific saturated hydraulic conductivity (kg s/m3) from the microclimate model simulation, for modelling liquid exchange with substrate}\cr}
+#' \item{\code{b}{ = micro$BB[seq(1, 19, 2)], Depth-specific Campbell's b parameter (-) from the microclimate model simulation, for modelling liquid exchange with substrate}\cr}
+#' \item{\code{PE}{ = micro$PE[seq(1, 19, 2)], Depth-specific air-entry water potential (J / kg) from the microclimate model simulation, for modelling liquid exchange with substrate}\cr}
 #' \item{\code{metout}{ = micro$metout, Microclimate model output for above ground, minimum shade conditions}\cr}
 #' \item{\code{shadmet}{ = micro$shadmet, Microclimate model output for above ground, maximum shade conditions}\cr}
 #' \item{\code{soil}{ = micro$soil, Microclimate model output for soil temperature, minimum shade conditions}\cr}
@@ -73,8 +80,11 @@
 #' \item{\code{shadhumid}{ = micro$shadhumid, Microclimate model output for soil humidity, maximum shade conditions}\cr}
 #' \item{\code{soilpot}{ = micro$soilpot, Microclimate model output for soil water potential, minimum shade conditions}\cr}
 #' \item{\code{shadpot}{ = micro$shadpot, Microclimate model output for soil water potential, maximum shade conditions}\cr}
+#' \item{\code{tcond}{ = micro$tcond, Microclimate model output for soil thermal conductivity, minimum shade conditions}\cr}
+#' \item{\code{shadtcond}{ = micro$shadtcond, Microclimate model output for soil thermal conductivity, maximum shade conditions}\cr}
 #' \item{\code{rainfall}{ = micro$RAINFALL, Vector of daily rainfall (mm)}\cr}
 #' \item{\code{rainhr}{ = rep(-1,nrow(metout)), Vector of hourly rainfall (mm), overwrites rainfall if not negative}\cr}
+#' \item{\code{preshr}{ = rep(101325 * ((1 - (0.0065 * as.numeric(micro$elev) / 288)) ^ (1/0.190284)), nrow(metout)), Vector of hourly atmospheric pressure (Pa), defaulting to elevation-adjusted values}\cr}
 #' \item{\code{elev}{ = as.numeric(micro$elev), Elevation of simulation (m), obtained from microclimate model output by default}\cr}
 #' \item{\code{longitude}{ = micro$longlat[1], Longitude (decimal degrees), obtained from microclimate model output by default}\cr}
 #' \item{\code{latitude}{ = micro$longlat[2], Latitude (decimal degrees), obtained from microclimate model output by default}\cr}
@@ -88,18 +98,24 @@
 #' \item{\code{shape_c}{ = 0.6666666667, Proportionality factor (-) for going from volume to area, represents ratio of length:height for a plate, c axis:a axis for ellipsoid}\cr}
 #' \item{\code{fatosk}{ = 0.4, Configuration factor to sky (-) for infrared calculations}\cr}
 #' \item{\code{fatosb}{ = 0.4, Configuration factor to subsrate for infrared calculations}\cr}
-#' \item{\code{rinsul}{ = 0, Insulative fat layer thickness (m)}\cr}
-#' \item{\code{pct_cond}{ = 10, Percentage of surface contacting the substrate (\%)}\cr}
+#' \item{\code{rinsul}{ = 0, Insulative fat layer thickness (not yet functional) (m)}\cr}
+#' \item{\code{pct_cond}{ = 10, Percentage of animal surface contacting the substrate (\%)}\cr}
+#' \item{\code{pct_touch}{ = 0, Percentage of animal surface area contacting another animal of same temperature (\%)}\cr}
 #' \item{\code{c_body}{ = 3073, Specific heat of flesh J/(kg-K)}\cr}
 #' \item{\code{k_flesh}{ = 0.5, Thermal conductivity of flesh (W/mC, range: 0.412-2.8)}\cr}
 #' \item{\code{rho_body}{ = 1000, Density of flesh (kg/m3)}\cr}
 #' \item{\code{epsilon}{ = 0.95, Emissivity of animal (0-1)}\cr}
+#' \item{\code{eggshape_a}{ = 1, Proportionality factor (-) for going from volume to area, keep this 1 (redundant parameter that should be removed)}\cr}
+#' \item{\code{eggshape_b}{ = 0.6666666667, Proportionality factor (-) for going from volume to area, represents ratio of width:height for a plate, length:diameter for cylinder, b axis:a axis for ellipsoid }\cr}
+#' \item{\code{eggshape_c}{ = 0.6666666667, Proportionality factor (-) for going from volume to area, represents ratio of length:height for a plate, c axis:a axis for ellipsoid}\cr}
+#' \item{\code{eggmult }{ = 1 # multiply egg mass by clutch size for heat and water exchange calculations?}\cr}
+#' \item{\code{pct_cond_egg}{ = 50, Percentage of egg surface contacting the substrate (\%)}\cr}
 #'}
 #' \strong{ Behavioural parameters:}
 #'
 #' \itemize{
 #' \item{\code{postur}{ = 1, postural orientation to sun, 1 = perpendicular, 2 = parallel, 0 = half way between, relevant if live = 0}\cr}
-#' \item{\code{warmsig}{ = 0, Warming signal for emergence? 1=yes, 0=no (if in burrow deeper than node 2, 0.1 degree sensitivity)}\cr}
+#' \item{\code{warmsig}{ = 0, Warming signal for emergence? °C/h (if in burrow deeper than node 2, change in burrow temp must be exceed warmsig)}\cr}
 #' \item{\code{fossorial}{ = 0, Fossorial activity? 1=yes, 0=no (this option hasn't been properly implemented)}\cr}
 #' \item{\code{rainact}{ = 0, Activity is limited by rainfall? 1=yes, 0=no, threshold rainfall for activity set by \code{actrainthresh}}\cr}
 #' \item{\code{actrainthresh}{ = 0.1, Threshold (mm) of rain causing activity if \code{rainact}=1}\cr}
@@ -113,7 +129,7 @@
 #' \item{\code{CT_minthresh}{ = 12, Number of consecutive hours below CT_min that leads to death - simulation will terminate beyond this threshold if \code{CT_kill}=1}\cr}
 #' \item{\code{CT_kill}{ = 0, Animal dies when it hits critical thermal limits? 1=yes, 0=no}\cr}
 #'}
-#' \strong{ Water and food budget parameters (only relevant if \code{DEB}=1):}
+#' \strong{ Water and food budget parameters (first eight only relevant if \code{DEB}=1):}
 #'
 #' \itemize{
 #' \item{\code{pct_H_P}{ = 73, Water in faeces (product) (\%)}\cr}
@@ -124,6 +140,13 @@
 #' \item{\code{gutfill}{ = 75, Gut fill (\%) at which satiation occurs - if greater than 100\%, animal always tries to forage}\cr}
 #' \item{\code{raindrink}{ = 0, Rainfall level at which rehydration from drinking occurs - if 0 animal can always drink}\cr}
 #' \item{\code{foodlim}{ = 1, Is the animal food limited - if 0 animal can always find food (useful for making different life stages dependent on soil moisture-based food estimates}\cr}
+#' \item{\code{RQ}{ = 0.8, respiratory quotient (0-1), computed from first principles if DEB model running}\cr}
+#' \item{\code{K_skin}{ = 2.8e-09, - Hydraulic conductivity of skin (kg/(m s (J/kg)) - drives liquid water exchange with substrate}\cr}
+#' \item{\code{spec_hyd_body}{ = 0.000304, Specific hydration of body (m3 / (m3 (J/kg))) - drives liquid water exchange with substrate if K_skin > 0 }\cr}
+#' \item{\code{psi_body}{ = -707, Water potential of body (J/kg) - drives liquid water exchange with substrate if K_skin > 0 and will also affect skin humidity for water vapour exchange}\cr}
+#' \item{\code{K_egg}{ = 2.8e-09, Hydraulic conductivity of egg shell (kg/(m s (J/kg)) - drives liquid water exchange with substrate}\cr}
+#' \item{\code{spec_hyd_egg}{ = 0.000304, Specific hydration of egg (m3 / (m3 (J/kg))) - drives liquid water exchange with substrate if K_skin > 0 }\cr}
+#' \item{\code{psi_egg}{ = -707, Water potential of egg (J/kg) - drives liquid water exchange with substrate if K_skin > 0}\cr}
 #' }
 #' \strong{ Dynamic Energy Budget (DEB) model parameters:}
 #' \itemize{
@@ -136,7 +159,7 @@
 #' \itemize{
 #' \item{\code{z}{ = 2.825*z_mult, Zoom factor (cm)}\cr}
 #' \item{\code{del_M}{ =  0.2144, Shape coefficient (-)}\cr}
-#' \item{\code{F_m}{ = 12420, Surface area-specific maximum feeding rate J/cm2/h}\cr}
+#' \item{\code{p_Xm}{ = 12420, Surface area-specific maximum feeding rate J/cm2/h}\cr}
 #' \item{\code{kap_X}{ = 0.85, Digestive efficiency (0-1)}\cr}
 #' \item{\code{v}{ = 0.02795/24, Energy conductance (cm/h)}\cr}
 #' \item{\code{kap}{ = 0.8206, Fraction of mobilised reserve allocated to soma}\cr}
@@ -154,12 +177,18 @@
 #'}
 #' \strong{ Thermal DEB parameters:}
 #' \itemize{
+#' \item{\code{arrhen_mode}{ = 1, equation used for Arrhenius rate correction - 0 is original Sharpe-Schoolfield formulation, 1 is version used in DEB tempcorr function from AmPtool}\cr}
 #' \item{\code{T_REF}{ = 20 + 273.15, Reference temperature for rate correction (°C)}\cr}
 #' \item{\code{T_A}{ = 8817 Arhhenius temperature}\cr}
 #' \item{\code{T_AL}{ = 50000, Arrhenius temperature for decrease below lower boundary of tolerance range \code{T_L}}\cr}
 #' \item{\code{T_AH}{ = 90000, Arrhenius temperature for decrease above upper boundary of tolerance range \code{T_H}}\cr}
 #' \item{\code{T_L}{ = 6 + 273.15, Lower boundary (K) of temperature tolerance range for Arrhenius thermal response}\cr}
 #' \item{\code{T_H}{ = 33 + 273.15, Upper boundary (K) of temperature tolerance range for Arrhenius thermal response}\cr}
+#' \item{\code{T_A2}{ = 8817 Arhhenius temperature}\cr} for maturity maintenance (causes 'Temperature Size Rule' effect)
+#' \item{\code{T_AL2}{ = 50000, Arrhenius temperature for decrease below lower boundary of tolerance range \code{T_L}}\cr} for maturity maintenance (causes 'Temperature Size Rule' effect)
+#' \item{\code{T_AH2}{ = 90000, Arrhenius temperature for decrease above upper boundary of tolerance range \code{T_H}}\cr} for maturity maintenance (causes 'Temperature Size Rule' effect)
+#' \item{\code{T_2L}{ = 6 + 273.15, Lower boundary (K) of temperature tolerance range for Arrhenius thermal response}\cr} for maturity maintenance (causes 'Temperature Size Rule' effect)
+#' \item{\code{T_H2}{ = 33 + 273.15, Upper boundary (K) of temperature tolerance range for Arrhenius thermal response}\cr} for maturity maintenance (causes 'Temperature Size Rule' effect)
 #'}
 #' \strong{ Compound/derived DEB parameters:}
 #' \itemize{
@@ -178,21 +207,26 @@
 #' \item{\code{d_V}{ = 0.3, Dry mass fraction of structure (0-1)}\cr}
 #' \item{\code{d_E}{ = 0.3, Dry mass fraction of reserve (0-1)}\cr}
 #' \item{\code{d_Egg}{ = 0.3, Dry mass fraction of egg (0-1)}\cr}
+#' \item{\code{stoich_mode}{ = 0, adjust chemical indices to chemical potentials (0) or vice versa (1) or leave as is (2)}\cr}
 #' \item{\code{mu_X}{ = 525000, Molar Gibbs energy (chemical potential) of food (J/mol)}\cr}
 #' \item{\code{mu_E}{ = 585000, Molar Gibbs energy (chemical potential) of reserve (J/mol)}\cr}
 #' \item{\code{mu_V}{ = 500000, Molar Gibbs energy (chemical potential) of structure (J/mol)}\cr}
 #' \item{\code{mu_P}{ = 480000, Molar Gibbs energy (chemical potential) of faeces (J/mol)}\cr}
+#' \item{\code{mu_N}{ = 244e3/5, Molar Gibbs energy (chemical potential) of nitrogenous waste (J/mol), synthesis from NH3, Withers page 119}\cr}
 #' \item{\code{kap_X_P}{ = 0.1, Faecation efficiency of food to faeces (-)}\cr}
 #' \item{\code{n_X}{ = c(1, 1.8, 0.5, 0.15), chem. indices of C, O, H and N in food}\cr}
 #' \item{\code{n_E}{ = c(1, 1.8, 0.5, 0.15), chem. indices of C, O, H and N in reserve}\cr}
 #' \item{\code{n_V}{ = c(1, 1.8, 0.5, 0.15), chem. indices of C, O, H and N in structure}\cr}
 #' \item{\code{n_P}{ = c(1, 1.8, 0.5, 0.15), chem. indices of C, O, H and N in faeces}\cr}
 #' \item{\code{n_M_nitro}{ = c(1, 4/5, 3/5, 4/5), chem. indices of C, O, H and N in nitrogenous waste}\cr}
+#' \item{\code{h_N}{ = 384238, molar enthalpy of nitrogenous waste (combustion frame of reference) (J/mol), overridden if n_M_nitro specified as urea, uric acid or ammonia}\cr}
 #'}
 #' \strong{ Holometabolous insect DEB model parameters:}
 #' \itemize{
 #' \item{\code{stages}{ = 8, number of stages = number of instars plus 1 for egg + 1 for pupa + 1 for imago}\cr}
-#' \item{\code{y_EV_l}{ = 0.6, yield of imago reserve on larval structure (mol/mol)}\cr}
+#' \item{\code{kap_V}{ = 0.8, conversion efficient E -> V -> E (-)}\cr}
+#' \item{\code{k_Ee}{ = 0.06293 / 24, reproduction buffer turnover of imago (1/h)}\cr}
+#' \item{\code{k_EV}{ = 0.03111 / 24, spec decay rate of larval structure in pupa (1/h)}\cr}
 #' \item{\code{S_instar}{ = rep(2.049137, stages), stress at instar n: L_n^2/ L_n-1^2 (-)}\cr}
 #' \item{\code{s_j}{ = 0.9985855, Reprod buffer/structure ratio at pupation as fraction of max}\cr}
 #' \item{\code{L_b}{ = 0.0734, Structural length at birth (cm)}\cr}
@@ -259,11 +293,12 @@
 #'}
 #' \strong{ Life stage-specific parameter allocation:}
 #' \itemize{
-#' \item{\code{thermal_stages}{ = matrix(data = c(rep(CT_min,stages),rep(CT_max,stages),rep(T_F_min,stages),rep(T_F_max,stages),rep(T_B_min,stages),rep(T_pref,stages)), nrow = stages, ncol = 6), Stage specific thermal thresholds (CT_min,CT_max,T_F_min,T_F_max,T_B_min,T_pref)}\cr}
-#' \item{\code{behav_stages}{ = matrix(data = c(rep(diurn,stages),rep(nocturn,stages),rep(crepus,stages),rep(burrow,stages),rep(shdburrow,stages),rep(mindepth,stages),rep(maxdepth,stages),rep(shade_seek,stages),rep(climb,stages),rep(fossorial,stages),rep(rainact,stages),rep(actrainthresh,stages),rep(act_breed,stages),rep(flyer,stages),rep(aquabask,stages)), nrow = stages, ncol = 15), Stage specific behaviour diurn,nocturn,crepus,burrow,shdburrow,mindepth,maxdepth,shade_seek,climb,fossorial,rainact,actrainthresh,act_breed,flyer,aquabask)}\cr}
-#' \item{\code{water_stages}{ = matrix(data = c(rep(pct_wet,stages),rep(F_O2,stages),rep(pct_H_P,stages),rep(pct_H_N,stages),rep(pct_H_X,stages),rep(pct_H_R,stages),rep(raindrink,stages),rep(gutfill,stages)), nrow = stages, ncol = 8), Stage-specific water budget parameters (pct_wet,F_O2,pct_H_P,pct_H_N,pct_H_X,pct_H_R,raindrink,gutfill)}\cr}
-#' \item{\code{nutri_stages}{ = matrix(data = c(rep(foodlim,stages),rep(0,stages)), nrow = stages, ncol = 1), Stage-specific nutritional parameters (foodlim)}\cr}
-#' \item{\code{arrhenius}{ = matrix(data = matrix(data = c(rep(T_A,stages),rep(T_AL,stages),rep(T_AH,stages),rep(T_L,stages),rep(T_H,stages)), nrow = stages, ncol = 5), nrow = stages, ncol = 5), Stage-specific 5-parameter Arrhenius thermal response for DEB model (T_A,T_AL,T_AH,T_L,T_H)}\cr}
+#' \item{\code{thermal_stages}{ = matrix(data = c(rep(CT_min, stages), rep(CT_max, stages), rep(T_F_min, stages), rep(T_F_max, stages), rep(T_B_min, stages), rep(T_pref, stages)),  nrow = stages,  ncol = 6), Stage specific thermal thresholds (CT_min, CT_max, T_F_min, T_F_max, T_B_min, T_pref)}\cr}
+#' \item{\code{behav_stages}{ = matrix(data = c(rep(diurn, stages), rep(nocturn, stages), rep(crepus, stages), rep(burrow, stages), rep(shdburrow, stages), rep(mindepth, stages), rep(maxdepth, stages), rep(shade_seek, stages), rep(climb, stages), rep(fossorial, stages), rep(rainact, stages), rep(actrainthresh, stages), rep(act_breed, stages), rep(flyer, stages), rep(aquabask, stages)), nrow = stages, ncol = 15), Stage specific behaviour diurn, nocturn, crepus, burrow, shdburrow, mindepth, maxdepth, shade_seek, climb, fossorial, rainact, actrainthresh, act_breed, flyer, aquabask)}\cr}
+#' \item{\code{water_stages}{ = matrix(data = c(rep(pct_wet, stages), rep(F_O2, stages), rep(pct_H_P, stages), rep(pct_H_N, stages), rep(pct_H_X, stages), rep(pct_H_R, stages), rep(raindrink, stages), rep(gutfill, stages)),  nrow = stages,  ncol = 8), Stage-specific water budget parameters (pct_wet, F_O2, pct_H_P, pct_H_N, pct_H_X, pct_H_R, raindrink, gutfill)}\cr}
+#' \item{\code{nutri_stages}{ = matrix(data = c(rep(foodlim, stages), rep(0, stages)),  nrow = stages,  ncol = 1),  Stage-specific nutritional parameters (foodlim)}\cr}
+#' \item{\code{arrhenius}{ = matrix(data = matrix(data = c(rep(T_A, stages), rep(T_AL, stages), rep(T_AH, stages), rep(T_L, stages), rep(T_H, stages)),  nrow = stages,  ncol = 5),  nrow = stages,  ncol = 5), Stage-specific 5-parameter Arrhenius thermal response for DEB model (T_A, T_AL, T_AH, T_L, T_H)}\cr}
+#' \item{\code{arrhenius2}{ = matrix(data = matrix(data = c(rep(T_A2, stages), rep(T_AL2, stages), rep(T_AH2, stages), rep(T_L2, stages), rep(T_H2, stages)),  nrow = stages,  ncol = 5),  nrow = stages,  ncol = 5), Stage-specific 5-parameter Arrhenius thermal response for DEB model (T_A, T_AL, T_AH, T_L, T_H) for maturity maintenance (causes 'Temperature Size Rule' effect)}\cr}
 #'}
 #' \strong{ Butterfly model parameters (not yet tested):}
 #' \itemize{
@@ -349,6 +384,8 @@
 #' \item 17 H2OEye_g - Ocular water loss (g/h)
 #' \item 18 H2OBal_g - Instantaneous water balance (g/h)
 #' \item 19 H2OCumBal_g - Cumulative water balance (g)
+#' \item 20 H2OLiq_g - Change in liquid water exchange with substrate (g)
+#' \item 21 PSI_kPa - Organism water potential (J/kg = kPa)
 #'}
 #' debout variables:
 #' \itemize{
@@ -360,7 +397,7 @@
 #' \item 6 V - Structural volume (cm3)
 #' \item 7 E - Reserve density (J/cm3)
 #' \item 8 E_H - Maturity state (J)
-#' \item 9 LENGTH - Physical length (mm) (what this represents depends on choice of length measure for DEB paramter fitting, e.g. snout-vent length, head length, etc.)
+#' \item 9 L_W - Physical length (mm) (what this represents depends on choice of length measure for DEB paramter fitting, e.g. snout-vent length, head length, etc.)
 #' \item 10 WETMASS - Wet mass total (reserve, structure, reproduction buffer, stomach contents) (g)
 #' \item 11 WETGONAD - Wet mass of gonad (batch and reproduction buffers) (g)
 #' \item 12 WETGUT - Wet mass of food in gut (g)
@@ -373,6 +410,14 @@
 #' \item 19 E_BABY - Reserve density of baby (J/cm3) (only if viviparous and pregnant)
 #' \item 20 H_S - Hazard rate (1/h)
 #' \item 21 P_SURV - Survival probability due to joint influence of ageing and mortality rates
+#' \item 22 P_A - assimilation flux, J/h
+#' \item 23 P_C - mobilisation flux, J/h
+#' \item 24 P_M - maintenance flux, J/h
+#' \item 25 P_G - growth flux, J/h
+#' \item 26 P_D - dissipation flux, J/h
+#' \item 27 P_J - maturity maintenance flux, J/h
+#' \item 28 P_R - reproduction/maturation flux, J/h
+#' \item 29 P_D - egg flux, J/h
 #'}
 #' yearout variables:
 #' \itemize{
@@ -491,220 +536,256 @@
 #'with(bask, points(TIME ~ DOY, pch = 15, cex = 2, col = 'light blue')) # basking Tbs
 #' @export
 ectotherm <- function(
-  Ww_g=40,
-  shape=3,
-  alpha_max=0.85,
-  alpha_min=0.85,
-  T_F_min=24,
-  T_F_max=34,
-  T_B_min=17.5,
-  T_RB_min=17.5,
-  T_pref=30,
-  CT_max=40,
-  CT_min=6,
-  diurn=1,
-  nocturn=0,
-  crepus=0,
-  shade_seek=1,
-  burrow=1,
-  postur=1,
-  climb=0,
-  shdburrow=0,
-  mindepth=2,
-  maxdepth=10,
-  aquabask=0,
-  M_1=0.013,
-  M_2=0.8,
-  M_3=0.038,
-  pct_wet=0.1,
-  pct_eyes=0.03,
-  pct_mouth=5,
-  pantmax=1,
-  F_O2=20,
-  delta_air=0.1,
-  nyears=micro$nyears,
-  enberr=0.0002,
-  live=1,
-  write_input=0,
-  transient=0,
-  delta_shade=3,
-  startday=1,
-  minshade=0,
-  minshades=rep(minshade, length(micro$MAXSHADES)),
-  maxshades=micro$MAXSHADES,
-  fluid=0,
-  k_sub=2.79,
-  alpha_sub=(1 - micro$REFL),
-  DEP=micro$DEP,
-  metout=micro$metout,
-  shadmet=micro$shadmet,
-  soil=micro$soil,
-  shadsoil=micro$shadsoil,
-  soilmoist=micro$soilmoist,
-  shadmoist=micro$shadmoist,
-  humid=micro$humid,
-  shadhumid=micro$shadhumid,
-  soilpot=micro$soilpot,
-  shadpot=micro$shadpot,
-  rainfall=micro$RAINFALL,
-  rainhr=rep(-1,nrow(metout)),
-  elev=as.numeric(micro$elev),
-  longitude=as.numeric(micro$longlat[1]),
-  latitude=as.numeric(micro$longlat[2]),
-  custom_shape=c(10.4713,0.688,0.425,0.85,3.798,0.683,0.694,0.743),
-  shape_a=1,
-  shape_b=3,
-  shape_c=2/3,
-  fatosk=0.4,
-  fatosb=0.4,
-  rinsul=0,
-  pct_cond=10,
-  c_body=3073,
-  k_flesh=0.5,
-  rho_body=1000,
-  epsilon=0.95,
-  warmsig=0,
-  fossorial=0,
-  rainact=0,
-  actrainthresh=0.1,
-  soilnode=4,
-  eggshade=0,
-  pO2thresh=10,
-  CT_minthresh=12,
-  CT_kill=0,
-  pct_H_P=73,
-  pct_H_N=0,
-  pct_H_X=82,
-  pct_H_R=15,
-  gutfill=75,
-  raindrink=0,
-  foodlim=1,
-  DEB=0,
-  intmethod=1,
-  z.mult=1,
-  z=2.825*z.mult,
-  del_M=0.2144,
-  F_m=12420,
-  kap_X=0.85,
-  v=0.02795/24,
-  kap=0.8206,
-  p_M=48.81/24,
-  E_G=7512,
-  kap_R=0.95,
-  k_J=0.00628/24,
-  E_Hb=866.6*z.mult^3,
-  E_Hj=E_Hb*z.mult^3,
-  E_Hp=1.019e+04*z.mult^3,
-  E_He=1.019e+04*z.mult^3,
-  h_a=1.051e-08/(24^2),
-  s_G=0.01,
-  T_REF=20 + 273.15,
-  T_A=8817,
-  T_AL=5.0e+04,
-  T_AH=9.0+04,
-  T_L=6+273.15,
-  T_H=33+273.15,
-  E_0=9220*z.mult^4,
-  f=1,
-  E_sm=350,
-  K=1,
-  X=10,
-  rho_body_deb=rho_body/1000,
-  d_V=0.3,
-  d_E=0.3,
-  d_Egg=0.3,
-  mu_X=525000,
-  mu_E=585000,
-  mu_V=500000,
-  mu_P=480000,
-  kap_X_P=0.1,
-  n_X=c(1,1.8,0.5,0.15),
-  n_E=c(1,1.8,0.5,0.15),
-  n_V=c(1,1.8,0.5,0.15),
-  n_P=c(1,1.8,0.5,0.15),
-  n_M_nitro=c(1,4/5,3/5,4/5),
-  metab_mode=0,
-  stages=8,
-  y_EV_l=0.95,
-  S_instar=rep(2.660,stages),
-  s_j=0.999,
-  L_b=0.06148,
-  V_init=3e-9,
-  E_init=E_0/V_init,
-  E_H_init=0,
-  stage=0,
-  aestivate=0,
-  depress=1,
-  clutchsize=5,
-  clutch_ab=c(0,0),
-  viviparous=0,
-  minclutch=0,
-  batch=1,
-  photostart=3,
-  photofinish=1,
-  daylengthstart=12.5,
-  daylengthfinish=13,
-  photodirs=1,
-  photodirf=0,
-  amphibreed=0,
-  amphistage=0,
-  reset=0,
-  act_breed=0,
-  rain_breed=0,
-  Tb_breed=200,
-  Tb_breed_hrs=24*7,
-  m_a=1e-4,
-  m_i=0,
-  m_h=0.5,
-  container=0,
-  wetmod=0,
-  conth=100,
-  contw=1000,
-  contype=1,
-  rainmult=1,
-  continit=0,
-  conthole=0,
-  contonly=1,
-  contwet=80,
-  wetlandTemps=matrix(data = 0, nrow = 24 * ndays, ncol = 1),
-  wetlandDepths=matrix(data = 0, nrow = 24 * ndays, ncol = 1),
-  GLMtemps=matrix(data = 0, nrow = 24 * ndays, ncol = 20),
-  GLMO2s=matrix(data = 10, nrow = 24 * ndays, ncol = 20),
-  GLMsalts=matrix(data = 0, nrow = 24 * ndays, ncol = 20),
-  GLMpHs=matrix(data = 7, nrow = 24 * ndays, ncol = 20),
-  GLMfoods=matrix(data = 10, nrow = 24 * ndays, ncol = 20),
-  thermal_stages=matrix(data = c(rep(CT_min,stages),rep(CT_max,stages),rep(T_F_min,stages),rep(T_F_max,stages),rep(T_B_min,stages),
-                                 rep(T_pref,stages)), nrow = stages, ncol = 6),
-  behav_stages=matrix(data = c(rep(diurn,stages),rep(nocturn,stages),rep(crepus,stages),rep(burrow,stages),
-                               rep(shdburrow,stages),rep(mindepth,stages),rep(maxdepth,stages),rep(shade_seek,stages),rep(climb,stages),rep(fossorial,stages),
-                               rep(rainact,stages),rep(actrainthresh,stages),rep(act_breed,stages),rep(flyer,stages),rep(aquabask,stages)), nrow = stages, ncol = 15),
-  water_stages=matrix(data = c(rep(pct_wet,stages),rep(F_O2,stages),rep(pct_H_P,stages),rep(pct_H_N,stages),
-                               rep(pct_H_X[1],stages),rep(pct_H_R,stages),rep(raindrink,stages),rep(gutfill,stages)), nrow = stages, ncol = 8),
-  nutri_stages=matrix(data = c(rep(foodlim,stages)), nrow = stages, ncol = 1),
-  arrhenius=matrix(data = matrix(data = c(rep(T_A,stages),rep(T_AL,stages),rep(T_AH,stages),rep(T_L,stages),rep(T_H,stages)),
+  Ww_g = 40,
+  shape = 3,
+  alpha_max = 0.85,
+  alpha_min = 0.85,
+  T_F_min = 24,
+  T_F_max = 34,
+  T_B_min = 17.5,
+  T_RB_min = 17.5,
+  T_pref = 30,
+  CT_max = 40,
+  CT_min = 6,
+  diurn = 1,
+  nocturn = 0,
+  crepus = 0,
+  shade_seek = 1,
+  burrow = 1,
+  postur = 1,
+  climb = 0,
+  shdburrow = 0,
+  mindepth = 2,
+  maxdepth = 10,
+  aquabask = 0,
+  M_1 = 0.013,
+  M_2 = 0.8,
+  M_3 = 0.038,
+  pct_wet = 0.1,
+  pct_eyes = 0.03,
+  pct_mouth = 5,
+  pantmax = 1,
+  F_O2 = 20,
+  delta_air = 0.1,
+  RQ = 0.8,
+  K_skin = 2.8e-09,
+  psi_body = -707,
+  spec_hyd_body =0.000304,
+  K_egg = 2.8e-09,
+  psi_egg = -707,
+  spec_hyd_egg = 0.000304,
+  nyears = micro$nyears,
+  enberr = 0.01,
+  live = 1,
+  write_input = 0,
+  transient = 0,
+  delta_shade = 3,
+  startday = 1,
+  minshades = micro$minshade,
+  maxshades = micro$maxshade,
+  fluid = 0,
+  pct_touch = 0,
+  O2gas = 20.95,
+  CO2gas = 0.03,
+  N2gas = 79.02,
+  alpha_sub = (1 - micro$REFL),
+  PDIF = 0.1,
+  DEP = micro$DEP,
+  KS = micro$KS,
+  b = micro$BB,
+  PE = micro$PE,
+  metout = micro$metout,
+  shadmet = micro$shadmet,
+  soil = micro$soil,
+  shadsoil = micro$shadsoil,
+  soilmoist = micro$soilmoist,
+  shadmoist = micro$shadmoist,
+  humid = micro$humid,
+  shadhumid = micro$shadhumid,
+  soilpot = micro$soilpot,
+  shadpot = micro$shadpot,
+  tcond = micro$tcond,
+  shadtcond = micro$shadtcond,
+  rainfall = micro$RAINFALL,
+  rainhr = rep(-1,nrow(metout)),
+  preshr = rep(101325 * ((1 - (0.0065 * as.numeric(micro$elev) / 288)) ^ (1/0.190284)), nrow(metout)),
+  elev = as.numeric(micro$elev),
+  longitude = as.numeric(micro$longlat[1]),
+  latitude = as.numeric(micro$longlat[2]),
+  custom_shape = c(10.4713, 0.688, 0.425, 0.85, 3.798, 0.683, 0.694, 0.743),
+  shape_a = 1,
+  shape_b = 3,
+  shape_c = 2 / 3,
+  eggshape_a = 1,
+  eggshape_b = 2 / 3,
+  eggshape_c = 2 / 3,
+  fatosk = 0.4,
+  fatosb = 0.4,
+  rinsul = 0,
+  pct_cond = 10,
+  pct_cond_egg = 10,
+  c_body = 3073,
+  k_flesh = 0.5,
+  rho_body = 1000,
+  epsilon = 0.95,
+  epsilon_sub = 1,
+  epsilon_sky = 1,
+  warmsig = 0,
+  fossorial = 0,
+  rainact = 0,
+  actrainthresh = 0.1,
+  soilnode = 4,
+  eggshade = 0,
+  pO2thresh = 10,
+  CT_minthresh = 12,
+  CT_kill = 0,
+  pct_H_P = 73,
+  pct_H_N = 0,
+  pct_H_X = 82,
+  pct_H_R = 15,
+  gutfill = 75,
+  raindrink = 0,
+  foodlim = 1,
+  DEB = 0,
+  intmethod = 1,
+  z.mult = 1,
+  z = 2.825 * z.mult,
+  del_M = 0.2144,
+  p_Xm = 12420,
+  kap_X = 0.85,
+  v = 0.02795 / 24,
+  kap = 0.8206,
+  p_M = 48.81 / 24,
+  E_G = 7512,
+  kap_R = 0.95,
+  k_J = 0.00628 / 24,
+  E_Hb = 866.6 * z.mult ^ 3,
+  E_Hj = E_Hb * z.mult ^ 3,
+  E_Hp = 1.019e+04 * z.mult ^ 3,
+  E_He = 1.019e+04 * z.mult ^ 3,
+  h_a = 1.051e-08 / (24 ^ 2),
+  s_G = 0.01,
+  arrhen_mode = 1,
+  T_REF = 20 + 273.15,
+  T_A = 8817,
+  T_AL = 5.0e+04,
+  T_AH = 9.0e+04,
+  T_L = 6 + 273.15,
+  T_H = 33 + 273.15,
+  T_A2 = T_A,
+  T_AL2 = T_AL,
+  T_AH2 = T_AH,
+  T_L2 = T_L,
+  T_H2 = T_H,
+  E_0 = 9220 * z.mult ^ 4,
+  f = 1,
+  E_sm = 350,
+  K = 1,
+  X = 10,
+  rho_body_deb = rho_body / 1000,
+  d_V = 0.3,
+  d_E = 0.3,
+  d_Egg = 0.3,
+  stoich_mode=0,
+  mu_X = 525000,
+  mu_E = 585000,
+  mu_V = 500000,
+  mu_P = 480000,
+  mu_N = 244e3/5,
+  kap_X_P = 0.1,
+  n_X = c(1, 1.8,0.5,0.15),
+  n_E = c(1, 1.8,0.5,0.15),
+  n_V = c(1, 1.8,0.5,0.15),
+  n_P = c(1, 1.8,0.5,0.15),
+  n_M_nitro = c(1, 4 / 5, 3 / 5, 4 / 5),
+  h_N = 384238,
+  metab_mode = 0,
+  stages = 8,
+  S_instar = rep(2.660, stages),
+  s_j = 0.999,
+  L_b = 0.06148,
+  kap_V = 0.8,
+  k_Ee = 0.005832307 / 24,
+  k_EV = 0.07077021 / 24,
+  V_init = 3e-9,
+  E_init = E_0 / V_init,
+  E_H_init = 0,
+  stage = 0,
+  aestivate = 0,
+  depress = 1,
+  clutchsize = 5,
+  clutch_ab = c(0, 0),
+  eggmult = 0,
+  viviparous = 0,
+  minclutch = 0,
+  batch = 1,
+  photostart = 3,
+  photofinish = 1,
+  daylengthstart = 12.5,
+  daylengthfinish = 13,
+  photodirs = 1,
+  photodirf = 0,
+  amphibreed = 0,
+  amphistage = 0,
+  reset = 0,
+  act_breed = 0,
+  rain_breed = 0,
+  Tb_breed = 200,
+  Tb_breed_hrs = 24 * 7,
+  m_a = 1e-4,
+  m_i = 0,
+  m_h = 0.5,
+  container = 0,
+  wetmod = 0,
+  conth = 100,
+  contw = 1000,
+  contype = 1,
+  rainmult = 1,
+  continit = 0,
+  conthole = 0,
+  contonly = 1,
+  contwet = 80,
+  wetlandTemps = matrix(data = 0, nrow = 24 * ndays, ncol = 1),
+  wetlandDepths = matrix(data = 0, nrow = 24 * ndays, ncol = 1),
+  GLMtemps = matrix(data = 0, nrow = 24 * ndays, ncol = 20),
+  GLMO2s = matrix(data = 10, nrow = 24 * ndays, ncol = 20),
+  GLMsalts = matrix(data = 0, nrow = 24 * ndays, ncol = 20),
+  GLMpHs = matrix(data = 7, nrow = 24 * ndays, ncol = 20),
+  GLMfoods = matrix(data = 10, nrow = 24 * ndays, ncol = 20),
+  thermal_stages = matrix(data = c(rep(CT_min, stages), rep(CT_max, stages), rep(T_F_min, stages), rep(T_F_max, stages), rep(T_B_min, stages),
+                                 rep(T_pref, stages)), nrow = stages, ncol = 6),
+  behav_stages = matrix(data = c(rep(diurn, stages), rep(nocturn, stages), rep(crepus, stages), rep(burrow, stages),
+                               rep(shdburrow, stages), rep(mindepth, stages), rep(maxdepth, stages), rep(shade_seek, stages), rep(climb, stages), rep(fossorial, stages),
+                               rep(rainact, stages), rep(actrainthresh, stages), rep(act_breed, stages), rep(flyer, stages), rep(aquabask, stages)), nrow = stages, ncol = 15),
+  water_stages  =  matrix(data = c(rep(pct_wet, stages), rep(F_O2, stages), rep(pct_H_P, stages), rep(pct_H_N, stages),
+                               rep(pct_H_X[1], stages), rep(pct_H_R, stages), rep(raindrink, stages), rep(gutfill, stages)), nrow = stages, ncol = 8),
+  nutri_stages = matrix(data = c(rep(foodlim, stages)),  nrow = stages,  ncol = 1),
+  arrhenius = matrix(data = matrix(data = c(rep(T_A, stages), rep(T_AL, stages), rep(T_AH, stages), rep(T_L, stages), rep(T_H, stages)),
                                  nrow = stages, ncol = 5), nrow = stages, ncol = 5),
-  wings=0,
-  rho1_3=0.2,
-  trans1=0,
-  aref=0.26,
-  bref=2.04,
-  cref=1.47,
-  phi=179,
-  phimax=phi,
-  phimin=phi,
-  flyer=0,
-  flyspeed=5,
-  flymetab=0.1035,
-  pct_H_death=35,
-  write_csv=0,
-  aestdepth=7){ # end function parameters
+  arrhenius2 = matrix(data = matrix(data = c(rep(T_A2, stages), rep(T_AL2, stages), rep(T_AH2, stages), rep(T_L2, stages), rep(T_H2, stages)),
+                                   nrow = stages, ncol = 5), nrow = stages, ncol = 5),
+  wings = 0,
+  rho1_3 = 0.2,
+  trans1 = 0,
+  aref = 0.26,
+  bref = 2.04,
+  cref = 1.47,
+  phi = 179,
+  phimax = phi,
+  phimin = phi,
+  flyer = 0,
+  flyspeed = 5,
+  flymetab = 0.1035,
+  pct_H_death = 35,
+  write_csv = 0,
+  aestdepth = 7){ # end function parameters
 
-  errors<-0
+  errors <- 0
   ndays <- length(rainfall) # get number of days of simulation
 
   # error trapping
-  if(shape < 0 | shape > 5){
-    message("error: shape can only be from 0 to 5 \n")
+  if(shape < 0 | shape > 5  | shape%%1 != 0){
+    message("error: shape can only be an integer from 0 to 5 \n")
     errors<-1
   }
   if(alpha_max < 0 | alpha_max > 1){
@@ -791,8 +872,8 @@ ectotherm <- function(
     message("error: pct_mouth can only be from 0 to 100 \n")
     errors<-1
   }
-  if(pantmax < 1){
-    message("error: pantmax should be greater than or equal to 1 \n")
+  if((pantmax < 0) | (pantmax > 0 & pantmax < 1)){
+    message("error: pantmax should be greater than or equal to 1, or zero if you want to simluate the effect of no respiratory water loss\n")
     errors<-1
   }
   if(F_O2 < 0 | F_O2 > 100){
@@ -827,10 +908,6 @@ ectotherm <- function(
     message("error: startday must be greater than or equal to 1 \n")
     errors<-1
   }
-  if(minshade < 0 | minshade > 100){
-    message("error: minshade can only be from 0 to 100 \n")
-    errors<-1
-  }
   if(min(minshades) < 0 | max(minshades) > 100){
     message("error: minshades can only be from 0 to 100 \n")
     errors<-1
@@ -849,10 +926,6 @@ ectotherm <- function(
   }
   if(!fluid %in% c(0,1)){
     message("error: fluid must be 0 or 1 \n")
-    errors<-1
-  }
-  if(k_sub < 0){
-    message("error: k_sub can't be negative \n")
     errors<-1
   }
   if(alpha_sub < 0 | alpha_sub > 1){
@@ -903,6 +976,14 @@ ectotherm <- function(
     message("error: shadpot must have 12 columns \n")
     errors<-1
   }
+  if(ncol(tcond) < 12){
+    message("error: tcond must have 12 columns \n")
+    errors<-1
+  }
+  if(ncol(shadtcond) < 12){
+    message("error: shadtcond must have 12 columns \n")
+    errors<-1
+  }
   if(min(rainfall) < 0){
     message("error: rainfall contains some negative values \n")
     errors<-1
@@ -931,6 +1012,18 @@ ectotherm <- function(
     message("error: shape_c can't be negative \n")
     errors<-1
   }
+  if(eggshape_a < 0){
+    message("error: shape_a can't be negative \n")
+    errors<-1
+  }
+  if(eggshape_b < 0){
+    message("error: shape_b can't be negative \n")
+    errors<-1
+  }
+  if(eggshape_c < 0){
+    message("error: shape_c can't be negative \n")
+    errors<-1
+  }
   if(fatosk < 0 | fatosk > 1){
     message("error: fatosk can only be from 0 to 1 \n")
     errors<-1
@@ -951,6 +1044,10 @@ ectotherm <- function(
     message("error: pct_cond can only be from 0 to 100 \n")
     errors<-1
   }
+  if(pct_cond_egg < 0 | pct_cond_egg > 100){
+    message("error: pct_cond_egg can only be from 0 to 100 \n")
+    errors<-1
+  }
   if(c_body < 0){
     message("error: c_body can't be negative \n")
     errors<-1
@@ -969,11 +1066,7 @@ ectotherm <- function(
   }
   if(epsilon < 0.9){
     message("warning: epsilon is rarely below 0.9 for living things \n")
-    errors<-1
-  }
-  if(!warmsig %in% c(0,1)){
-    message("error: warmsig must be 0 or 1 \n")
-    errors<-1
+    errors<-0
   }
   if(!fossorial %in% c(0,1)){
     message("error: fossorial must be 0 or 1 \n")
@@ -1011,7 +1104,7 @@ ectotherm <- function(
     message("error: pct_H_N can only be from 0 to 100 \n")
     errors<-1
   }
-  if(pct_H_X < 0 | pct_H_X > 100){
+  if(min(pct_H_X) < 0 | max(pct_H_X) > 100){
     message("error: pct_H_X can only be from 0 to 100 \n")
     errors<-1
   }
@@ -1075,8 +1168,8 @@ ectotherm <- function(
     message("error: contype must be 0 or 1 \n")
     errors<-1
   }
-  if(!conthole %in% c(0,1)){
-    message("error: conthole must be 0 or 1 \n")
+  if(conthole < 0){
+    message("error: conthole must be >= 0 \n")
     errors<-1
   }
   if(!container %in% c(0,1)){
@@ -1151,50 +1244,38 @@ ectotherm <- function(
     container <- 0
   }
   if(errors == 0){
-    # container/pond initial conditons
+
+    #initializing
+
+    DOYstart <- metout[1, 2] # starting day of year
+    DOY <- 1 # day of year at start
+    iyear <- 0 # initializing year counter
+    countday <- 1 # initializing day counter
+    # container/pond initial conditions
     contlast <- 0 # last container depth, cm
     templast <- 7 # last container temperature, deg C
 
-    iyear <- 0 # initializing year counter
-    countday <- 1 # initializing day counter
+    tannul <- as.numeric(mean(soil[, 12])) # annual mean temperature, deg C
+    tcinit <- metout[1, "TALOC"] # initial temperature for transient heat budget
+
+    # parameter name translations
+
+    lat <- latitude # latitude
 
     # habitat
     ALT <- elev # altitude (m)
-    OBJDIS <- 1.0 # currently unused - distance (m) from nearby object of different temp to sky and ground (e.g. warm rock, fire)
-    OBJL <- 0.0001 # currently unused - diameter (m) of nearby object of different temp to sky and ground (e.g. warm rock, fire)
-    PDIF <- 0.1 # proportion of sunlight that is diffuse (0-1), ultimately will make this as an optional vector from microclima
-    EMISSK <- 1.0 # emissivity of the sky (0-1)
-    EMISSB <- 1.0 # emissivity of the substrate (0-1)
+    EMISSK <- epsilon_sky # emissivity of the sky (0-1)
+    EMISSB <- epsilon_sub # emissivity of the substrate (0-1)
     ABSSB <- alpha_sub # solar absorbtivity of the substrate (0-1)
-    shade <- minshade # shade (%)
 
     # animal properties
     Ww_kg <- Ww_g / 1000 # animal wet weight (kg)
     absan <- alpha_max # animal solar absorbtivity
-    RQ <- 0.8 # respiratory quotient
-
-    FATOBJ <- 0 # configuration factor to nearby object of different temp to sky and ground (e.g. warm rock, fire)
-    SPARE1 <- 1 # spare input
     SKINW <- pct_wet # skin wetness %
-    skint <- 0 # fraction of surface area touching object e.g. of another individual
-    O2gas <- 20.95 # % O2 in air
-    CO2gas <- 0.03 # % CO2 in air
-    N2gas <- 79.02 # % nitrogen in air
-    gas <- c(O2gas, CO2gas, N2gas) # gas vector
-    SPARE1 <- 1 # spare input
-    tcinit <- metout[1, "TALOC"] # initial temperature for transient heat budget
-    nodnum <- 10 # depth at which foraging occurs in fossorial species, probably not working properly, may not need it
-
-    SPARE4 <- 1 # spare input
-    SPARE2 <- 1 # spare input
-    SPARE3 <- 0 # spare input
     o2max <- F_O2 # O2 extraction efficiency
-    minshd <- minshades[1] # minimum shade available
-    maxshd <- maxshades[1] # maximum shade available
-    behav <- c(diurn, nocturn, crepus, rainact, burrow, shade_seek, climb, fossorial, SPARE3) # behaviour vector
-    DOY <- 1 # day of year at start
 
     # conversions from percent to proportion
+    skint <- pct_touch / 100
     PTUREA1 <- pct_H_N / 100
     PFEWAT1 <- pct_H_P / 100
     pct_H_X <- pct_H_X / 100
@@ -1204,8 +1285,44 @@ ectotherm <- function(
     water_stages[,4] <- water_stages[, 4] / 100
     water_stages[,5] <- water_stages[, 5] / 100
 
-    # DEB mass balance calculations
-    E_m <- (p_M * z / kap) / v # maximum reserve density, J/cm3
+    # DEB mass/stoichiometry and entropy/heat calculations
+    if(stoich_mode == 0){
+      # match H fraction in organics to stated chemical potentials (needed later for heat production)
+      n_X[2] <- ((mu_X / 10 ^ 5) - 4.3842 * n_X[1] - (-1.8176) * n_X[3] - (0.0593) * n_X[4]) / 0.9823
+      n_V[2] <- ((mu_V / 10 ^ 5) - 4.3842 * n_V[1] - (-1.8176) * n_V[3] - (0.0593) * n_V[4]) / 0.9823
+      n_E[2] <- ((mu_E / 10 ^ 5) - 4.3842 * n_E[1] - (-1.8176) * n_E[3] - (0.0593) * n_E[4]) / 0.9823
+      n_P[2] <- ((mu_P / 10 ^ 5) - 4.3842 * n_P[1] - (-1.8176) * n_P[3] - (0.0593) * n_P[4]) / 0.9823
+    }else{
+      if(stoich_mode == 1){
+        # match stated chemical potentials to H fraction in organics
+        mu_X <- (n_X[2] * 0.9823 + 4.3842 * n_X[1] + (-1.8176) * n_X[3] + (0.0593) * n_X[4]) * 10 ^ 5
+        mu_V <- (n_V[2] * 0.9823 + 4.3842 * n_V[1] + (-1.8176) * n_V[3] + (0.0593) * n_V[4]) * 10 ^ 5
+        mu_E <- (n_E[2] * 0.9823 + 4.3842 * n_E[1] + (-1.8176) * n_E[3] + (0.0593) * n_E[4]) * 10 ^ 5
+        mu_P <- (n_P[2] * 0.9823 + 4.3842 * n_P[1] + (-1.8176) * n_P[3] + (0.0593) * n_P[4]) * 10 ^ 5
+      }
+    }
+    # enthalpies (combustion frame)
+    h_X <- 10^5 * (4.3284 * n_X[1] + 1.0994 * n_X[2] + (-2.0915) * n_X[3] + (-0.1510) * n_X[4]) #J mol^(-1)
+    h_V <- 10^5 * (4.3284 * n_V[1] + 1.0994 * n_V[2] + (-2.0915) * n_V[3] + (-0.1510) * n_V[4]) #J mol^(-1)
+    h_E <- 10^5 * (4.3284 * n_E[1] + 1.0994 * n_E[2] + (-2.0915) * n_E[3] + (-0.1510) * n_E[4]) #J mol^(-1)
+    h_P <- 10^5 * (4.3284 * n_P[1] + 1.0994 * n_P[2] + (-2.0915) * n_P[3] + (-0.1510) * n_P[4]) #J mol^(-1)
+    h_CO2 <- 0 #J mol^(-1)
+    h_O2 <- 0 #J mol^(-1)
+    h_H2O <- 0 #J mol^(-1)
+    if(all(n_M_nitro == c(0, 3, 0, 1))){ # ammonia
+      h_N <- 382805
+      mu_N <- 0
+    }
+    if(all(n_M_nitro == c(1.0, 0.8, 0.6, 0.8))){ # uric acid
+      h_N <- 384238
+      mu_N <- 244e3/5
+    }
+    if(all(n_M_nitro == c(1, 2, 1, 2))){ # urea
+      h_N <- 631890
+      mu_N <- 122e3
+    }
+    h_O <- c(h_X, h_V, h_E, h_P)
+    h_M <- c(h_CO2, h_H2O, h_O2, h_N)
     n_O <- cbind(n_X, n_V, n_E, n_P) # matrix of C-mole composition of organics, i.e. food, structure, reserve and faeces
     CHON <- c(12, 1, 16, 14) # molar masses of carbon, hydrogen, oxygen and nitrogen, g/mol
     wO <- CHON %*% n_O # molar weight of organics, g/mol
@@ -1222,9 +1339,10 @@ ectotherm <- function(
     JM_JO <- -1 * n_M_inv %*% n_O
     eta_O <- matrix(c(y_XE / mu_E * -1, 0, 1 / mu_E, y_PE / mu_E, 0, 0, -1 / mu_E, 0, 0, y_VE / mu_E, -1 / mu_E, 0), nrow = 4)
     w_N <- CHON %*% n_M_nitro
+    E_m <- (p_M * z / kap) / v # maximum reserve density, J/cm3
 
     # DEB model initial conditions
-    V_init_baby <- 3e-9 # initial struture, cm3
+    V_init_baby <- 3e-9 # initial structure, cm3
     E_init_baby <- E_0 / V_init_baby # initial reserve density, J/cm3
     E_baby_init <- E_init_baby #
     V_baby_init <- V_init_baby
@@ -1246,17 +1364,26 @@ ectotherm <- function(
     }else{
       foodwaters <- pct_H_X
     }
-    lat <- latitude # latitude
-    DOYstart <- metout[1, 2] # starting day of year
-    tannul <- as.numeric(mean(soil[, 12])) # annual mean temperature, deg C
+
+    # unused /spare parameters
     tester <- 0 # unused
-    microyear <- 1 # extraneous
-    ectoinput <- as.matrix(c(ALT, fluid, OBJDIS, OBJL, PDIF, EMISSK, EMISSB, ABSSB, shade, enberr, Ww_kg, epsilon, absan, RQ, rinsul, shape, live, pantmax, k_flesh, c_body, rho_body, alpha_max, alpha_min, fatosk, fatosb, FATOBJ, T_F_max, T_F_min, delta_air, SKINW, pct_eyes, pct_mouth, F_O2, T_pref, pct_cond/100, skint, gas, transient, soilnode, o2max, SPARE4, tannul, nodnum, postur, maxshd, minshd, CT_max, CT_min, behav, DOY, actrainthresh, viviparous, pregnant, conth, contw, contlast, SPARE1, tcinit, nyears, lat, rainmult, DOYstart, delta_shade, custom_shape, M_1, M_2, M_3, DEB, tester, rho1_3, trans1, aref, bref, cref, phi, wings, phimax, phimin, shape_a, shape_b, shape_c, pct_H_R, microyear, container, flyer, flyspeed, ndays, maxdepth, CT_minthresh, CT_kill, gutfill, mindepth, T_B_min, T_RB_min, F_m, k_sub, flymetab, continit, wetmod, contonly, conthole, contype, shdburrow, Tb_breed, Tb_breed_hrs, contwet, warmsig, aquabask, pct_H_death, write_csv, aestdepth, eggshade, pO2thresh, intmethod))
-    debmod <- c(clutchsize, rho_body_deb, d_V, d_Egg, mu_X, mu_E, mu_V, mu_P, T_REF - 273.15, z, kap, kap_X, p_M, v, E_G, kap_R, E_sm, del_M, h_a, V_init_baby, E_init_baby, k_J, E_Hb, E_Hj, E_Hp, clutch_ab[2], batch, rain_breed, photostart, photofinish, daylengthstart, daylengthfinish, photodirs, photodirf, clutch_ab[1], amphibreed, amphistage, eta_O, JM_JO, E_0, kap_X_P, PTUREA1, PFEWAT1, wO, w_N, FoodWater1, f, s_G, K, X[1], metab_mode, stages, y_EV_l, s_j, startday, raindrink, reset, m_a, m_i, m_h, aestivate, depress, minclutch, L_b, E_He)
+    microyear <- 1 # extraneous, not used
+    nodnum <- 10 # depth at which foraging occurs in fossorial species, probably not working properly, may not need it
+    OBJDIS <- 1.0 # currently unused - distance (m) from nearby object of different temp to sky and ground (e.g. warm rock, fire)
+    OBJL <- 0.0001 # currently unused - diameter (m) of nearby object of different temp to sky and ground (e.g. warm rock, fire)
+    FATOBJ <- 0 # configuration factor to nearby object of different temp to sky and ground (e.g. warm rock, fire)
+    SPARE4 <- 1 # spare input
+    SPARE2 <- 1 # spare input
+    SPARE3 <- 0 # spare input
+
+    # collate parameters
+    gas <- c(O2gas, CO2gas, N2gas) # gas vector
+    behav <- c(diurn, nocturn, crepus, rainact, burrow, shade_seek, climb, fossorial, SPARE3) # behaviour vector
+    ectoinput <- as.matrix(c(ALT, fluid, OBJDIS, OBJL, PDIF, EMISSK, EMISSB, ABSSB, K_skin, enberr, Ww_kg, epsilon, absan, RQ, rinsul, shape, live, pantmax, k_flesh, c_body, rho_body, alpha_max, alpha_min, fatosk, fatosb, FATOBJ, T_F_max, T_F_min, delta_air, SKINW, pct_eyes, pct_mouth, F_O2, T_pref, pct_cond, skint, gas, transient, soilnode, o2max, SPARE4, tannul, nodnum, postur, psi_body, spec_hyd_body, CT_max, CT_min, behav, DOY, actrainthresh, viviparous, pregnant, conth, contw, contlast, arrhen_mode, tcinit, nyears, lat, rainmult, DOYstart, delta_shade, custom_shape, M_1, M_2, M_3, DEB, tester, rho1_3, trans1, aref, bref, cref, phi, wings, phimax, phimin, shape_a, shape_b, shape_c, pct_H_R, microyear, container, flyer, flyspeed, ndays, maxdepth, CT_minthresh, CT_kill, gutfill, mindepth, T_B_min, T_RB_min, p_Xm, eggmult, flymetab, continit, wetmod, contonly, conthole, contype, shdburrow, Tb_breed, Tb_breed_hrs, contwet, warmsig, aquabask, pct_H_death, write_csv, aestdepth, eggshade, pO2thresh, intmethod, eggshape_a, eggshape_b, eggshape_c, pct_cond_egg, K_egg, psi_egg, spec_hyd_egg, b, KS, PE))
+    debmod <- c(clutchsize, rho_body_deb, d_V, d_Egg, mu_X, mu_E, mu_V, mu_P, T_REF - 273.15, z, kap, kap_X, p_M, v, E_G, kap_R, E_sm, del_M, h_a, V_init_baby, E_init_baby, k_J, E_Hb, E_Hj, E_Hp, clutch_ab[2], batch, rain_breed, photostart, photofinish, daylengthstart, daylengthfinish, photodirs, photodirf, clutch_ab[1], amphibreed, amphistage, eta_O, JM_JO, E_0, kap_X_P, PTUREA1, PFEWAT1, wO, w_N, FoodWater1, f, s_G, K, X[1], metab_mode, stages, kap_V, s_j, startday, raindrink, reset, m_a, m_i, m_h, aestivate, depress, minclutch, L_b, E_He, k_Ee, k_EV, mu_N, h_O, h_M[4])
     deblast <- c(iyear, countday, V_init, E_init, ES_init, cumrepro_init, q_init, hs_init, cumbatch_init, V_baby_init, E_baby_init, E_H_init, stage)
 
     # code to determine wet periods for activity in a pond
-
     if(wetmod==1){
       wet_thresh <- 10 * 24 # threshold pond duration
       wet_depth <- 100 # threshold pond depth (mm)
@@ -1293,6 +1420,7 @@ ectotherm <- function(
       write.csv(deblast, file = "ecto csv input/deblast.csv")
       write.csv(rainfall, file = "ecto csv input/rainfall.csv")
       write.csv(rainhr, file = "ecto csv input/rainhr.csv")
+      write.csv(preshr, file = "ecto csv input/preshr.csv")
       write.csv(DEP, file = "ecto csv input/dep.csv")
       write.csv(foodwaters, file = "ecto csv input/foodwaters.csv")
       write.csv(foodlevels, file = "ecto csv input/foodlevels.csv")
@@ -1304,6 +1432,7 @@ ectotherm <- function(
       write.csv(GLMpHs, file = "ecto csv input/GLMpHs.csv", row.names = F)
       write.csv(GLMfoods, file = "ecto csv input/GLMfoods.csv", row.names = F)
       write.csv(arrhenius, file = "ecto csv input/arrhenius.csv")
+      write.csv(arrhenius, file = "ecto csv input/arrhenius2.csv")
       write.csv(thermal_stages, file = "ecto csv input/thermal_stages.csv")
       write.csv(behav_stages, file = "ecto csv input/behav_stages.csv")
       write.csv(water_stages, file = "ecto csv input/water_stages.csv")
@@ -1321,9 +1450,11 @@ ectotherm <- function(
       write.table(shadpot[(seq(1, ndays * 24)), ], file = "ecto csv input/shadpot.csv", sep = ",", row.names = FALSE)
       write.table(humid[(seq(1, ndays * 24)), ], file = "ecto csv input/humid.csv", sep = ",", row.names = FALSE)
       write.table(shadhumid[(seq(1, ndays * 24)), ], file = "ecto csv input/shadhumid.csv", sep = ",", row.names = FALSE)
+      write.table(tcond[(seq(1, ndays * 24)), ], file = "ecto csv input/tcond.csv", sep = ",", row.names = FALSE)
+      write.table(shadtcond[(seq(1, ndays * 24)), ], file = "ecto csv input/shadtcond.csv", sep = ",", row.names = FALSE)
     }
     # final input list
-    ecto <- list(ndays = ndays, nstages = stages, ectoinput = ectoinput, metout = metout[, 1:18], shadmet = shadmet[, 1:18], soil = soil, shadsoil = shadsoil, soilmoist = soilmoist, shadmoist = shadmoist, soilpot = soilpot, shadpot = shadpot, humid = humid, shadhumid = shadhumid, DEP = DEP, rainfall = rainfall, rainhr = rainhr, iyear = iyear, countday = countday, debmod = debmod, deblast = deblast, foodwaters = foodwaters, foodlevels = foodlevels, wetlandTemps = wetlandTemps, wetlandDepths = wetlandDepths, GLMtemps = GLMtemps, GLMO2s = GLMO2s, GLMsalts = GLMsalts, GLMpHs = GLMpHs, GLMfoods = GLMfoods, arrhenius = arrhenius, thermal_stages = thermal_stages, behav_stages = behav_stages, water_stages = water_stages, nutri_stages = nutri_stages, minshades = minshades, maxshades = maxshades, S_instar = S_instar)
+    ecto <- list(ndays = ndays, nstages = stages, ectoinput = ectoinput, metout = metout[, 1:18], shadmet = shadmet[, 1:18], soil = soil, shadsoil = shadsoil, soilmoist = soilmoist, shadmoist = shadmoist, soilpot = soilpot, shadpot = shadpot, humid = humid, shadhumid = shadhumid, tcond = tcond, shadtcond = shadtcond, DEP = DEP, rainfall = rainfall, rainhr = rainhr, preshr = preshr, iyear = iyear, countday = countday, debmod = debmod, deblast = deblast, foodwaters = foodwaters, foodlevels = foodlevels, wetlandTemps = wetlandTemps, wetlandDepths = wetlandDepths, GLMtemps = GLMtemps, GLMO2s = GLMO2s, GLMsalts = GLMsalts, GLMpHs = GLMpHs, GLMfoods = GLMfoods, arrhenius = arrhenius, arrhenius2 = arrhenius2, thermal_stages = thermal_stages, behav_stages = behav_stages, water_stages = water_stages, nutri_stages = nutri_stages, minshades = minshades, maxshades = maxshades, S_instar = S_instar)
 
     message('running ectotherm model ... \n')
 
@@ -1336,12 +1467,12 @@ ectotherm <- function(
     masbal <- ectout$masbal[1:(ndays * 24), ]
     debout <- ectout$debout[1:(ndays * 24), ]
     yearout <- ectout$yearout
-    yearsout <- ectout$yearsout[1:nyears, ]
+    yearsout <- ectout$yearsout
 
     if(DEB==0){
-      return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,soilpot=soilpot,shadpot=shadpot,humid=humid,shadhumid=shadhumid,rainfall=rainfall,rainhr=rainhr,enbal=enbal,environ=environ,masbal=masbal,yearout=yearout,yearsout=yearsout,foodwaters=foodwaters,foodlevels=foodlevels,T_F_min=T_F_min,T_F_max=T_F_max,CT_max=CT_max,CT_min=CT_min,T_B_min=T_B_min,T_RB_min=T_RB_min))
+      return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,soilpot=soilpot,shadpot=shadpot,humid=humid,shadhumid=shadhumid,tcond=tcond,shadtcond=shadtcond,rainfall=rainfall,rainhr=rainhr,enbal=enbal,environ=environ,masbal=masbal,yearout=yearout,yearsout=yearsout,foodwaters=foodwaters,foodlevels=foodlevels,T_F_min=T_F_min,T_F_max=T_F_max,CT_max=CT_max,CT_min=CT_min,T_B_min=T_B_min,T_RB_min=T_RB_min))
     }else{
-      return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,soilpot=soilpot,shadpot=shadpot,humid=humid,shadhumid=shadhumid,rainfall=rainfall,rainhr=rainhr,enbal=enbal,masbal=masbal,environ=environ,debout=debout,yearout=yearout,yearsout=yearsout,foodwaters=foodwaters,foodlevels=foodlevels,T_F_min=T_F_min,T_F_max=T_F_max,CT_max=CT_max,CT_min=CT_min,T_B_min=T_B_min,T_RB_min=T_RB_min))
+      return(list(soil=soil,shadsoil=shadsoil,metout=metout,shadmet=shadmet,soilmoist=soilmoist,shadmoist=shadmoist,soilpot=soilpot,shadpot=shadpot,humid=humid,shadhumid=shadhumid,tcond=tcond,shadtcond=shadtcond,rainfall=rainfall,rainhr=rainhr,enbal=enbal,masbal=masbal,environ=environ,debout=debout,yearout=yearout,yearsout=yearsout,foodwaters=foodwaters,foodlevels=foodlevels,T_F_min=T_F_min,T_F_max=T_F_max,CT_max=CT_max,CT_min=CT_min,T_B_min=T_B_min,T_RB_min=T_RB_min))
     }
   } # end error check
 }

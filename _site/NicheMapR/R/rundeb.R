@@ -3,7 +3,7 @@
 #' Function to simulate the development, growth and reproduction trajectory of
 #' an organism using DEB theory, drawing parameters from the 'AmP' parameter
 #' database at https://github.com/add-my-pet/AmPtool. It requires the
-#' 'allstat.mat' file to have been converted to 'allstat.Rda' via the R.matlab
+#' 'allStat.mat' file to have been converted to 'allStat.Rda' via the R.matlab
 #' package (i.e. allStat <- readMat('allStat.mat' then
 #' save(allStat, file = 'allstat.Rda'))).
 #' @param allstat = allstat, the allstat data set
@@ -27,6 +27,7 @@
 #' @param plot = 1, produce example plots? 0=no, 1=yes
 #' @param mass.unit = 'g', mass unit for the plots, 'mg', 'g' or 'kg'
 #' @param length.unit = 'cm', length unit for the plots, 'mm', 'cm' or 'm'
+#' @param ageing = 1, impose ageing? 0=immortal, 1=aging according to parameter h.a
 #' @examples
 #' #library(R.matlab)
 #' #allStat<-readMat('allStat.mat') # this will take a few minutes
@@ -83,7 +84,8 @@ rundeb <- function(
   E.0.mult = 1,
   plot = 1,
   mass.unit = 'g',
-  length.unit = 'cm'){ # end function parameters
+  length.unit = 'cm',
+  ageing = 1){ # end function parameters
 
   n <- div * ndays # time steps
   step<-1/div # step size (hours)
@@ -112,7 +114,7 @@ rundeb <- function(
   if(exists("T.H")==FALSE){T_H <- 373.15}else{T_H <- T.H}
   if(exists("T.AL")==FALSE){T_AL <- 5E04}else{T_AL <- T.AL}
   if(exists("T.AH")==FALSE){T_AH <- 9E04}else{T_AH <- T.AH}
-  if(exists("T.REF")==FALSE){T_REF <- 20 + 273.15}else{T_REF <- T.REF}
+  if(exists("T.ref")==FALSE){T_REF <- 20 + 273.15}else{T_REF <- T.ref}
 
   # user-specified parameter changes
   kap.orig <- kap # keep original value
@@ -127,7 +129,6 @@ rundeb <- function(
   p.M <- p.M * p.M.mult # multiply by chosen value
   p.Am <- p.M.orig * z / kap.orig # get new p.Am if kap.mult != 1
   z <- p.Am * kap / p.M # get new z if p.M.mult != 1
-
   # covariation rules for scaling
   z <- z * z.mult # multiply by chosen value
   E.0 <- E.0 * z.mult ^ 4 * E.0.mult # multiply by chosen value
@@ -137,19 +138,21 @@ rundeb <- function(
   E.Hb <- E.Hb * z.mult ^ 3 # multiply by chosen value
   E.Hj <- E.Hj * z.mult ^ 3 # multiply by chosen value
   E.Hp <- E.Hp * z.mult ^ 3 # multiply by chosen value
-  F.m <- F.m * z.mult ^ 3 # multiply by chosen value
+  p.Xm <- p.Xm * z.mult ^ 3 # multiply by chosen value
   h.a <- h.a * z.mult # multiply by chosen value
   p.Am <- p.M * z / kap # recompute new p.Am
   E.m <- p.Am / v # recompute new E.m
-  F.m <- p.Am / kap.X * 2 # redefining F.m to a large value - rapid stomach fill
-
+  p.Xm <- p.Am / kap.X * 5 # food intake a large value - rapid stomach fill
+  if(ageing == 0){
+    h.a <- 0
+  }
   # save parameters for output
-  pars <- c(F.m = F.m, kap.X = kap.X, kap.P = kap.P, p.Am = p.Am, p.M = p.M, k.J = k.J, v = v, E.m = E.m, E.G = E.G, kap = kap, kap.R = kap.R, E.Hb = E.Hb, E.Hj = E.Hj, E.Hp = E.Hp, h.a = h.a, s.G = s.G, T.A = T.A)
+  pars <- c(p.Xm = p.Xm, kap.X = kap.X, kap.P = kap.P, p.Am = p.Am, p.M = p.M, k.J = k.J, v = v, E.m = E.m, E.G = E.G, kap = kap, kap.R = kap.R, E.Hb = E.Hb, E.Hj = E.Hj, E.Hp = E.Hp, h.a = h.a, s.G = s.G, T.A = T.A)
 
   # initialise DEB output matrix
-  deb.names <- c("stage", "V", "E", "E_H", "E_s", "E_R", "E_B", "q", "hs", "length", "wetmass", "wetgonad", "wetgut", "wetstorage", "p_surv", "fecundity", "clutches", "JMO2", "JMCO2", "JMH2O", "JMNWASTE", "O2ML", "CO2ML", "GH2OMET", "DEBQMETW", "GDRYFOOD", "GFAECES", "GNWASTE", "p_A", "p_C", "p_M", "p_G", "p_D", "p_J", "p_R", "p_B")
-  debout<-matrix(data = 0, nrow = n, ncol=36)
-  colnames(debout)<-deb.names
+  deb.names <- c("stage", "V", "E", "E_H", "E_s", "E_R", "E_B", "q", "hs", "length", "wetmass", "wetgonad", "wetgut", "wetstorage", "p_surv", "fecundity", "clutches", "JMO2", "JMCO2", "JMH2O", "JMNWASTE", "O2ML", "CO2ML", "GH2OMET", "DEBQMETW", "GDRYFOOD", "GFAECES", "GNWASTE", "p_A", "p_C", "p_M", "p_G", "p_D", "p_J", "p_R", "p_B", "L.b", "L.j")
+  debout <- matrix(data = 0, nrow = n, ncol=38)
+  colnames(debout) <- deb.names
 
   # initial conditions
   i <- 1
@@ -176,7 +179,7 @@ rundeb <- function(
     debout[1,]<-DEB_euler(step=step,
                           z=z,
                           del_M=del.M,
-                          F_m=F.m*step,
+                          p_Xm=p.Xm*step,
                           kap_X=kap.X,
                           v=v*step,
                           kap=kap,
@@ -252,7 +255,7 @@ rundeb <- function(
     debout[1,]<-DEB(step=step,
                     z=z,
                     del_M=del.M,
-                    F_m=F.m*step,
+                    p_Xm=p.Xm*step,
                     kap_X=kap.X,
                     v=v*step,
                     kap=kap,
@@ -342,7 +345,7 @@ rundeb <- function(
         debout[i,]<-DEB_euler(step=step,
                               z=z,
                               del_M=del.M,
-                              F_m=F.m*step,
+                              p_Xm=p.Xm*step,
                               kap_X=kap.X,
                               v=v*step,
                               kap=kap,
@@ -418,7 +421,7 @@ rundeb <- function(
         debout[i,]<-DEB(step=step,
                         z=z,
                         del_M=del.M,
-                        F_m=F.m*step,
+                        p_Xm=p.Xm*step,
                         kap_X=kap.X,
                         v=v*step,
                         kap=kap,
