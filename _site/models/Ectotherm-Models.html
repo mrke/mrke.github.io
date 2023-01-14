@@ -9,8 +9,8 @@
   <head>
     <meta charset="utf-8">
 
-<!-- begin _includes/seo.html --><title>Microclimate Models - NicheMapR</title>
-<meta name="description" content="Computing the climate near the ground">
+<!-- begin _includes/seo.html --><title>Ectotherm Models - NicheMapR</title>
+<meta name="description" content="The NicheMapR informational homepage">
 
 
   <meta name="author" content="NicheMapR">
@@ -22,11 +22,11 @@
 <meta property="og:type" content="article">
 <meta property="og:locale" content="en_US">
 <meta property="og:site_name" content="NicheMapR">
-<meta property="og:title" content="Microclimate Models">
-<meta property="og:url" content="http://localhost:4000/models/Microclimate-Models">
+<meta property="og:title" content="Ectotherm Models">
+<meta property="og:url" content="http://localhost:4000/models/Ectotherm-Models">
 
 
-  <meta property="og:description" content="Computing the climate near the ground">
+  <meta property="og:description" content="The NicheMapR informational homepage">
 
 
 
@@ -35,9 +35,9 @@
 
 
   <meta name="twitter:site" content="@NicheMapR">
-  <meta name="twitter:title" content="Microclimate Models">
-  <meta name="twitter:description" content="Computing the climate near the ground">
-  <meta name="twitter:url" content="http://localhost:4000/models/Microclimate-Models">
+  <meta name="twitter:title" content="Ectotherm Models">
+  <meta name="twitter:description" content="The NicheMapR informational homepage">
+  <meta name="twitter:url" content="http://localhost:4000/models/Ectotherm-Models">
 
   
     <meta name="twitter:card" content="summary_large_image">
@@ -55,7 +55,7 @@
 
 
 
-<link rel="canonical" href="http://localhost:4000/models/Microclimate-Models">
+<link rel="canonical" href="http://localhost:4000/models/Ectotherm-Models">
 
 
 
@@ -175,12 +175,12 @@
     <div class="wrapper">
       <h1 id="page-title" class="page__title" itemprop="headline">
         
-          Microclimate Models
+          Ectotherm Models
 
         
       </h1>
       
-        <p class="page__lead">Computing the climate near the ground
+        <p class="page__lead">
 </p>
       
       
@@ -310,8 +310,8 @@
 
 
   <article class="page" itemscope itemtype="https://schema.org/CreativeWork">
-    <meta itemprop="headline" content="Microclimate Models">
-    <meta itemprop="description" content="Computing the climate near the ground">
+    <meta itemprop="headline" content="Ectotherm Models">
+    <meta itemprop="description" content="">
     <meta itemprop="datePublished" content="2023-01-14T19:40:01+11:00">
     
 
@@ -320,50 +320,36 @@
 
       <section class="page__content" itemprop="text">
         
-        <h1>Microclimate Models</h1>
+        <h1>Ectotherm Models</h1>
 <p>
-Microclimates represent the physical environments experienced by organisms. They are a necessity for mechanistic niche modelling because it is the environment experienced at the scale of the individual that needs to be provided to the equations of energy and mass balance. Microclimate predictions are also useful for a wide range of biological and non-biological applications.
+<h2>The general ectotherm model</h2>
 <p>
-The NicheMapR package has a range of functions useful in the computations of microclimates. These include functions for computing the physical properties of dry and humid air (functions <a href="https://github.com/mrke/NicheMapR/blob/master/R/DRYAIR.R">DRYAIR</a>, <a href="https://github.com/mrke/NicheMapR/blob/master/R/WETAIR.R">WETAIR</a>). Some empirical and theoretical details about the properties of air are also to be found in the  <a href="https://mrke.github.io/NicheMapR/inst/doc/properties-of-air">properties of air vignette</a>.
+The NicheMapR package includes a comprehensive algorithm for the complete heat, water and nutritional budget of an ectotherm to be solved, as described in detail in Kearney and Porter (2019).
 <p>
-The microclimate model of the NicheMapR package (Kearney and Porter 2017) comprises an R wrapper script that communicates with the <a href="https://github.com/mrke/NicheMapR/tree/master/src">FORTRAN code</a> (function <a href="https://github.com/mrke/NicheMapR/blob/master/R/microrun.R">microrun</a>) and a set of environmental database-specific functions that collate and transform the required input data for submission to the microrun function. Specifically, functions are:
+The program comprises a set of <a href="https://github.com/mrke/NicheMapR/tree/master/src">FORTRAN subroutines</a> that encode calculations of the steady-state heat budget for an ectotherm and its thermoregulatory responses, given a set of functional traits that parameterise its morphology, physiology and behaviour. The R wrapper for the FORTRAN code is <a href="https://github.com/mrke/NicheMapR/blob/master/R/ectorun.R">ectorun</a>. The function <a href="https://github.com/mrke/NicheMapR/blob/master/R/ectotherm.R">ectotherm</a> receives the user input data and sets up the call to <a href="https://github.com/mrke/NicheMapR/blob/master/R/ectorun.R">ectorun</a>.
 <p>
-<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_global.R">micro_global</a> which connects to the global monthly database of climate conditions developed by New et al. (2002), on a ~10x10 km grid averaged over 1960 to 1990;
+The ectotherm model is driven by the microclimate model output and has the option of being run with or without the Dynamic Energy Budget (DEB) model. When run without the DEB model, the ectotherm model will provide the body temperature, behavioural state (active/inactive, shade level selected, depth underground, etc.), water loss rate and metabolic rate each hour. When run with the DEB model turned on (and parameters set accordingly), the model will provide the trajectory of growth, development and reproduction of the organism as well as a wider range of mass budget outputs.
 <p>
-<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_ncep.R">micro_ncep</a> which uses the microclima package as well as the RNCEP (Kemp et al. 2012) and elevatr (Hollister et al. 2017) packages to connect to the 6-hourly 2.5x2.5 degree gridded historical NCEP data (global scope, from 1957 onward; Kalnay et al. 1996) and downscale them to hourly and account for local terrain effects (~30x30 m) including elevation-induced lapse rates, coastal influences and cold-air drainage (Kearney et al. 2019).
+The <a href="/NicheMapR/inst/doc/ectotherm-model-tutorial">Ectotherm Model Tutorial</a> provides greater details on the operation of this model.
 <p>
-<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_aust.R">micro_aust</a> connects to the Australian Water Availability Project (AWAP; Jones et al. 2009) 5x5 km gridded daily weather grids.
+<h2>Transient heat budget models for ectotherms</h2>
 <p>
-<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_usa.R">micro_usa</a> connects to the gridMET (Abatzoglou 2013) 5x5 km daily weather grids for the USA.
+In addition, the NicheMapR package has algorithms for computing 'transient heat budgets' of ectotherms. These differ from the steady state calculations made by the <a href="https://github.com/mrke/NicheMapR/blob/master/R/ectotherm.R">ectotherm</a> function in that they account for the lag effects on body temperature of rapidly changing environmental conditions. This can be important for large ectotherms, especially those above about 1kg.
 <p>
-<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_uk.R">micro_uk</a> connects to the CHESS (Robinson et al. 2017) 1x1 km daily weather grids for the UK  (requires log in). 
-<p>
-<a href="https://github.com/mrke/NicheMapR/blob/master/R/micro_nz.R">micro_nz</a> connects to the 5 km daily <a href="https://www.niwa.co.nz/climate/our-services/virtual-climate-stations">Virtual Climate Station Network</a> (VCSN) for New Zealand (requires log in).
-<p>
-All of these functions can connect via the web to the SoilGrids (Hengle 2017) global soil properties database by setting the argument 'soilgrids' to a value of 1.
-<p>
-In addition, there are example vignettes for setting up your own functions for forcing the microclimate model, including a summary of all <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-IO">inputs and outputs</a>, an explanation of all the <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate_inputs">input parameters</a>, and example setups for <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-monthly-input-example">monthly</a> or <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-hourly-input-example">hourly</a> input data. There is also a vignette on the underlying <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-model-theory-equations">theory and equations</a> as well as a general <a href="https://mrke.github.io/NicheMapR/inst/doc/microclimate-model-tutorial">tutorial</a>.
+There are four functions for computing transient heat budgets in NicheMapR:
+
+<ul>
+<li><a href="https://github.com/mrke/NicheMapR/blob/master/R/onelump.R">onelump</a>; which analytically computes the trajectory of temperature change of an organism or object in a constant thermal environment;</li>
+<li><a href="https://github.com/mrke/NicheMapR/blob/master/R/onelump.R">onelump_var</a>; which uses a numerical solver to compute the trajectory of temperature change of an organism or object in a time-varying thermal environment;</li>
+<li><a href="https://github.com/mrke/NicheMapR/blob/master/R/twolump.R">twolump</a>; which uses a numerical solver to compute the trajectory of temperature change of an organism or object in a time-varying thermal environment that is broken into an outer shell and an inner core (may be needed for large organisms);</li>
+<li><a href="https://github.com/mrke/NicheMapR/blob/master/R/trans_behav.R">trans_behav</a>; which applies the latter two functions to compute thermoregulatory behaviour of an organism in a time-varying thermal environment as it shuttles between shade and sun.</li>
+</ul>
+<p> The derivation of these algorithms is described in the <a href="/NicheMapR/inst/doc//transient_equation_derivations">Transient Equation Derivation</a> vignette and the thermoregulatory algorithm will be more fully described in a future publication (currently in prep).
+
 <h1>References</h1>
-Abatzoglou, J. T. (2013). Development of gridded surface meteorological data for ecological applications and modelling. International Journal of Climatology, 33(1), 121–131. doi:10.1002/joc.3413
 <p>
-Hengl, T., de Jesus, J. M., Heuvelink, G. B., Gonzalez, M. R., Kilibarda, M., Blagotić, A., … others. (2017). SoilGrids250m: Global gridded soil information based on machine learning. PloS One, 12(2), e0169748.
-<p>
-Jeffrey W Hollister, Tarak Shah, &amp; Marcus W Beck. (2017). jhollist/elevatr: Latest CRAN release. Zenodo. doi:10.5281/zenodo.400259
-<p>
-Jones, D., Wang, W., &amp; Fawcett, R. (2009). High-quality spatial climate data-sets for Australia. Australian Meteorological and Oceanographic Journal, 58(04), 233–248. doi:10.22499/2.5804.003
-<p>
-Kalnay, E., Kanamitsu, M., Kistler, R., Collins, W., Deaven, D., Gandin, L., … Joseph, D. (1996). The NCEP/NCAR 40-Year Reanalysis Project. Bulletin of the American Meteorological Society, 77(3), 437–472. doi:10.1175/1520-0477(1996)077&lt;0437:TNYRP&gt;2.0.CO;2
-<p>
-Kemp, M. U., Emiel van Loon, E., Shamoun-Baranes, J., &amp; Bouten, W. (2012). RNCEP: global weather and climate data at your fingertips: RNCEP. Methods in Ecology and Evolution, 3(1), 65–70. doi:10.1111/j.2041-210X.2011.00138.x
-<p>
-Kearney, M. R., &amp; Porter, W. P. (2017). NicheMapR - an R package for biophysical modelling: the microclimate model. Ecography, 40(5), 664–674. doi:10.1111/ecog.02360
-<p>
-Kearney, M. R., Gillingham, P. K., Bramer, I., Duffy, J. P., &amp; Maclean, I. M. D. (2019). A method for computing hourly, historical, terrain-corrected microclimate anywhere on Earth. Methods in Ecology and Evolution.
-<p>
-New, M., Lister, D., Hulme, M., &amp; Makin, I. (2002). A high-resolution data set of surface climate over global land areas. Climate Research, 21(1), 1–25. doi:10.3354/cr021001
-<p>
-Robinson, E. L., Blyth, E., Clark, D. B., Comyn-Platt, E., Finch, J., &amp; Rudd, A. C. (2017). Climate hydrology and ecology research support system meteorology dataset for Great Britain (1961-2015) [CHESS-met] v1.2. NERC Environmental Information Data Centre. Retrieved from https://doi.org/10.5285/b745e7b1-626c-4ccc-ac27-56582e77b900
-</p></p></p></p></p></p></p></p></p></p></p></p></p></p></p></p></p></p></p></p>
+Kearney, M. R., &amp; Porter, W. P. (2019). NicheMapR - an R package for biophysical modelling: the ectotherm and Dynamic Energy Budget models. Ecography, 42, 1–12. doi:10.1111/ecog.04680
+</p></p></p></p></p></p></p></p></p></p>
 
         
       </section>
@@ -385,11 +371,11 @@ Robinson, E. L., Blyth, E., Clark, D. B., Comyn-Platt, E., Finch, J., &amp; Rudd
       
   <nav class="pagination">
     
-      <a href="/models/Endotherm-Models" class="pagination--pager" title="Endotherm Models
+      <a href="/models/Dynamic-Energy-Budget-Models" class="pagination--pager" title="Dynamic Energy Budget Models
 ">Previous</a>
     
     
-      <a href="/models/Plant-Models" class="pagination--pager" title="Plant Models
+      <a href="/models/Endotherm-Models" class="pagination--pager" title="Endotherm Models
 ">Next</a>
     
   </nav>
