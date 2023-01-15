@@ -62,7 +62,7 @@ Mitchell, J. W., Beckman, W. A., Bailey, R. T., & Porter, W. P. (1975). Microcli
 <p>
 McCullough, E. C., & Porter, W. P. (1971). Computing clear day solar radiation spectra for the terrestrial ecological environment. Ecology, 52(6), 1008–1015. <a href="https://doi:10.2307/1933806">doi:10.2307/1933806</a>
 <p>
-Porter, W. P., & Gates, D. M. (1969). Thermodynamic equilibria of animals with environment. Ecological Monographs, 39(3), 227–244. href="https://doi:10.2307/1948545">doi:10.2307/1948545</a>
+Porter, W. P., & Gates, D. M. (1969). Thermodynamic equilibria of animals with environment. Ecological Monographs, 39(3), 227–244. <a href="https://doi:10.2307/1948545">doi:10.2307/1948545</a>
 <p>
 Porter, W. P., Mitchell, J. W., Beckman, W. A., & DeWitt, C. B. (1973). Behavioral implications of mechanistic ecology - Thermal and behavioral modeling of desert ectotherms and their microenvironment. Oecologia, 13, 1–54. <a href = "https://doi.org/10.1007/BF00379617">doi.org/10.1007/BF00379617</a>
 <p>
@@ -70,10 +70,10 @@ Porter, W. P., Mitchell, J. W., Beckman, W. A., & Tracy, C. R. (1975). Environme
 <p>
 Porter, W. P., & James, F. C. (1979). Behavioral implications of mechanistic ecology II: the African Rainbow Lizard, Agama agama. Copeia, 1979(4), 594–619. <a href = "https://doi.org/10.2307/1443867">doi.org/10.2307/1443867</a>
 <p>
-Porter, W. P., Munger, J. C., Stewart, W. E., Budaraju, S., & Jaeger, J. (1994). Endotherm energetics: from a scalable individual-based model to ecological applications. Australian Journal of Zoology, 42, 125–162. <href = "https://doi.org/10.1071/ZO9940125">doi.org/10.1071/ZO9940125</a>
+Porter, W. P., Munger, J. C., Stewart, W. E., Budaraju, S., & Jaeger, J. (1994). Endotherm energetics: from a scalable individual-based model to ecological applications. Australian Journal of Zoology, 42, 125–162. <a href = "https://doi.org/10.1071/ZO9940125">doi.org/10.1071/ZO9940125</a>
 <p>
 Porter, W. P., Budaraju, S., Stewart, W. E., & Ramankutty, N. (2000). Calculating climate effects on birds and mammals: impacts on biodiversity, conservation, population parameters, and global community structure. American Zoologist, 40(4), 597–630. <a href = "https://doi.org/10.1093/icb/40.4.597">doi.org/10.1093/icb/40.4.597</a>
 <p>
-Porter, W. P., Sabo, J. L., Tracy, C. R., Reichman, O. J., & Ramankutty, N. (2002). Physiology on a landscape scale: plant-animal interactions. Integrative and Comparative Biology, 42(3), 431–453. <href = "https://doi.org/10.1093/icb/42.3.431">doi.org/10.1093/icb/42.3.431</a>
+Porter, W. P., Sabo, J. L., Tracy, C. R., Reichman, O. J., & Ramankutty, N. (2002). Physiology on a landscape scale: plant-animal interactions. Integrative and Comparative Biology, 42(3), 431–453. <a href = "https://doi.org/10.1093/icb/42.3.431">doi.org/10.1093/icb/42.3.431</a>
 <p>
 Tracy, C. R. (1976). A model of the dynamic exchanges of water and energy between a terrestrial amphibian and its environment. Ecological Monographs, 46(3), 293–326. <a href="https://doi.org/10.2307/1942256">doi.org/10.2307/1942256</a>
