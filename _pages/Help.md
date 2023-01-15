@@ -25,7 +25,7 @@ These can also be found in the NicheMapR/inst/doc folder.
 <a href="/NicheMapR/inst/doc/endotherm-model-tutorial" class="btn btn--danger">Endotherm Model Tutorial</a>
 
 <a href="/NicheMapR/inst/doc/properties-of-air" class="btn btn--success">Properties Of Air</a>
-<a href="/NicheMapR/inst/doc/transient_equation_derivations" class="btn btn--success">Transient Equation Derivations</a>
+<a href="/NicheMapR/inst/doc/transient-equation-derivations" class="btn btn--success">Transient Equation Derivations</a>
 
 
 
