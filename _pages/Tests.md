@@ -6,6 +6,10 @@ permalink: /tests/
 ---
 <h1>NicheMapR Tests</h1>
 <p>
+Kearney, M. R., & Enriquez-Urzelai, U. (2022). A general framework for jointly modelling thermal and hydric constraints on developing eggs. Methods in Ecology and Evolution, n/a(n/a). <a href= "https://doi.org/10.1111/2041-210X.14018">doi.org/10.1111/2041-210X.14018</a>
+<p>
+Briscoe, N. J., McGregor, H., Roshier, D., Carter, A., Wintle, B. A., & Kearney, M. R. (2022). Too hot to hunt: Mechanistic predictions of thermal refuge from cat predation risk. Conservation Letters, n/a(n/a), e12906. <a href= "https://doi.org/10.1111/conl.12906">doi.org/10.1111/conl.12906</a>
+<p>
 Kearney M. R. How will snow alter exposure of organisms to cold stress under climate warming? Global Ecology and Biogeography n/a. [online]. <a href= "http://onlinelibrary.wiley.com/doi/abs/10.1111/geb.13100">10.1111/geb.13100</a>
 <p>
 Kearney, M. R. (2019). microclimUS: hourly estimates of historical microclimates for the United States of America with example applications. Ecology, 0(ja), e02829. <a href="https://10.1002/ecy.2829">10.1002/ecy.2829</a>
