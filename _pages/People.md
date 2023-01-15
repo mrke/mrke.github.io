@@ -22,5 +22,5 @@ Davud Porter
 
 <h1> Illustrations </h1>
 
-<a href="https://eliapirtleresearch.wordpress.com/">Elia Pirtle</a>, artist extraordinaire and researcher
+<a href="https://eliapirtle.com/">Elia Pirtle</a>, artist extraordinaire and researcher
 
