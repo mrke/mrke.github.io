@@ -7,7 +7,7 @@ permalink: /examples/
 <h1>Example Applications</h1>
 
 <p>
-Alessandrini, C., Scridel, D., Boitani, L., Pedrini, P., & Brambilla, M. (n.d.). Remotely sensed variables explain microhabitat selection and reveal buffering behaviours against warming in a climate-sensitive bird species. Remote Sensing in Ecology and Conservation, n/a(n/a). [doi.org/10.1002/rse2.265](https://doi.org/10.1002/rse2.265)
+Alessandrini, C., Scridel, D., Boitani, L., Pedrini, P., & Brambilla, M. (n.d.). Remotely sensed variables explain microhabitat selection and reveal buffering behaviours against warming in a climate-sensitive bird species. Remote Sensing in Ecology and Conservation, n/a(n/a). https://doi.org/10.1002/rse2.265
 <p>
 Anderson, R. O., Alton, L. A., White, C. R., & Chapple, D. G. (2022). Ecophysiology of a small ectotherm tracks environmental variation along an elevational cline. Journal of Biogeography, 49(2), 405–415. https://doi.org/10.1111/jbi.14311
 <p>
