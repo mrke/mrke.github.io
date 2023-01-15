@@ -107,14 +107,14 @@ plot(soilmoist$WC5cm ~ micro$dates, type = 'l')
 plot(metout$SNOWDEP ~ micro$dates, type = 'l')
 ~~~
 
-Compute a heat budget for the default ectotherm (Eastern Water Skink, _Eulamprus quoyii_) in Sydney, Australia for 2015 using the micro_aust function (uses the AWAP daily climate data set for Australia) and plot the consequences for its body temperature and seasonal activity window:
+Compute a heat budget for the default ectotherm (Eastern Water Skink, _Eulamprus quoyii_) in Sydney, Australia for 2017 using the NCEP database and plot the consequences for its body temperature and seasonal activity window:
 
 ~~~ R
 library(NicheMapR)
 loc <- c(150.78, -33.78)
-ystart <- 2015
-yfinish <- 2015
-micro <- micro_aust(loc = loc, ystart = ystart, yfinish = yfinish)
+dstart <- "01/01/2017"
+dfinish <- "31/12/2017"
+micro <- micro_ncep(loc = loc, dstart = dstart, dfinish = dfinish)
 metout <- as.data.frame(micro$metout) # aboveground microclimate
 
 # run ectotherm model
@@ -156,14 +156,14 @@ with(forage, points(TIME ~ DOY, pch = 15, cex = 0.75, col = 'orange')) # foragin
 with(bask, points(TIME ~ DOY, pch = 15, cex = 0.75, col = 'light blue')) # basking Tbs
 ~~~
 
-Compute the full heat, water and Dynamic Energy Budget for the _E. quoyii_ in in Sydney, Australia for 2015, starting as an egg, and plot its growth trajectory as wet mass:
+Compute the full heat, water and Dynamic Energy Budget for the _E. quoyii_ in in Sydney, Australia for 2017, starting as an egg, and plot its growth trajectory as wet mass:
 
 ~~~ R
 library(NicheMapR)
 loc <- c(150.78, -33.78)
-ystart <- 2015
-yfinish <- 2015
-micro <- micro_aust(loc = loc, ystart = ystart, yfinish = yfinish)
+dstart <- "01/01/2017"
+dfinish <- "31/12/2017"
+micro <- micro_ncep(loc = loc, dstart = dstart, dfinish = dfinish)
 metout <- as.data.frame(micro$metout) # aboveground microclimate
 
 # run ectotherm model
