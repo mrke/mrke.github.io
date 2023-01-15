@@ -22,7 +22,7 @@ There are four functions for computing transient heat budgets in NicheMapR:
 
 <ul>
 <li><a href="https://github.com/mrke/NicheMapR/blob/master/R/onelump.R">onelump</a>; which analytically computes the trajectory of temperature change of an organism or object in a constant thermal environment;</li>
-<li><a href="https://github.com/mrke/NicheMapR/blob/master/R/onelump.R">onelump_var</a>; which uses a numerical solver to compute the trajectory of temperature change of an organism or object in a time-varying thermal environment;</li>
+<li><a href="https://github.com/mrke/NicheMapR/blob/master/R/onelump_var.R">onelump_var</a>; which uses a numerical solver to compute the trajectory of temperature change of an organism or object in a time-varying thermal environment;</li>
 <li><a href="https://github.com/mrke/NicheMapR/blob/master/R/twolump.R">twolump</a>; which uses a numerical solver to compute the trajectory of temperature change of an organism or object in a time-varying thermal environment that is broken into an outer shell and an inner core (may be needed for large organisms);</li>
 <li><a href="https://github.com/mrke/NicheMapR/blob/master/R/trans_behav.R">trans_behav</a>; which applies the latter two functions to compute thermoregulatory behaviour of an organism in a time-varying thermal environment as it shuttles between shade and sun.</li>
 </ul>

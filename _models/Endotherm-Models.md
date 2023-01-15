@@ -13,7 +13,7 @@ The simple model is the function <a href="https://github.com/mrke/NicheMapR/blob
 <p>
 The more complex model is a pared down, deconstructed version of the general endotherm model developed by Porter and colleagues over many years (see Mathewson and Porter 2013, including their <a href="https://journals.plos.org/plosone/article/file?id=10.1371/journal.pone.0072863.s007&type=supplementary">supplementary derivation</a>).
 <p>
-The version in NicheMapR includes a set of sub-functions written in FORTRAN and directly callable from R, as described in detail in the <a href="/NicheMapR/inst/doc/endotherm-components-tutorial">Endotherm Components Tutorial</a>. These functions can be used to estimate the heat balance of a single-part animal (e.g. a bird modelled as an ellipsoid) or could be used to build up a multi-part animal (e.g. a bat modelled as an ellipsoid torso plus two plate-shaped wings). It is currently a beta version and is yet to be fully documented and described by a software note. Some of the code for this model is not yet open source.
+The version in NicheMapR includes a set of sub-functions written in FORTRAN and directly callable from R, as described in detail in the <a href="/NicheMapR/inst/doc/endotherm-components-tutorial">Endotherm Components Tutorial</a>. These functions can be used to estimate the heat balance of a single-part animal (e.g. a bird modelled as an ellipsoid) or could be used to build up a multi-part animal (e.g. a bat modelled as an ellipsoid torso plus two plate-shaped wings). It is fully now fully open source and documented and described in Kearney et al. (2021).
 <p>
 In combination, these functions allow the calculation of heat and water budgets by numerically solving for the skin temperature and the outer temperature of the insulation (fur or feathers) in the process of finding the required metabolic heat generation for a particular core temperature. It is explicit about the effects of air temperature, wind speed, solar and infrared radiation and humidity, and thus can be used for complex outdoor environments. It is also explicit about the dorsal and ventral properties of the organism as well as the environment the dorsal and ventral side is exposed to (e.g. solar radiation hitting the top of the animal more intensely than the bottom). The model takes more detailed input on the insulation properties than the ellipsoid function and can be solved for different geometries, specifically a plate, a cylinder, a sphere or an ellipsoid.
 <p>
@@ -27,6 +27,8 @@ The <a href="/NicheMapR/inst/doc/endotherm-model-tutorial">Endotherm Model Tutor
 <p>
 <h1>References</h1>
 <p>
-Mathewson, P. D., & Porter, W. P. (2013). Simulating Polar Bear Energetics during a Seasonal Fast Using a Mechanistic Model. PLoS One, 8(9), e72863. doi:10.1371/journal.pone.0072863
+Kearney, M. R., Briscoe, N. J., Mathewson, P. D., & Porter, W. P. (2021). NicheMapR – an R package for biophysical modelling: The endotherm model. Ecography, 44(11), 1595–1605. <a href ="https://doi.org/10.1111/ecog.05550">doi.org/10.1111/ecog.05550</a>
 <p>
-Porter, W. P., & Kearney, M. (2009). Size, shape, and the thermal niche of endotherms. Proceedings of the National Academy of Sciences, 106(Supplement 2), 19666–19672. doi:10.1073/pnas.0907321106
+Mathewson, P. D., & Porter, W. P. (2013). Simulating Polar Bear Energetics during a Seasonal Fast Using a Mechanistic Model. PLoS One, 8(9), e72863. <a href ="https://doi:10.1371/journal.pone.0072863">doi:10.1371/journal.pone.0072863</a>
+<p>
+Porter, W. P., & Kearney, M. (2009). Size, shape, and the thermal niche of endotherms. Proceedings of the National Academy of Sciences, 106(Supplement 2), 19666–19672. <a href ="https://doi:10.1073/pnas.0907321106">doi:10.1073/pnas.0907321106</a>
