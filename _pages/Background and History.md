@@ -28,13 +28,13 @@ The mass budget aspects of Niche Mapper were initially of a static, empirical na
 <p>
 <h2>Transition to R</h2>
 <p>
-The Niche Mapper programs were developed in the Fortran language, in part because it was the dominant numerical modelling language at the time the programs were first being developed. However, since around the year 2000 the R programming environment began to emerge as the dominant working language in ecology. Kearney created R interfaces to the Niche Mapper Fortran code and developed it into the 'NicheMapR' package. The microclimate model was officially released first (Kearney and Porter 2017), including new capacity to simulate soil moisture (Kearney and Maino 2018) and snow (Kearney 2020) and a beta version of the ectotherm model. The ectotherm model was officially released subsequently in NicheMapR v2.0.0 (Kearney and Porter 2019), along with a beta version of the endotherm model.
+The Niche Mapper programs were developed in the Fortran language, in part because it was the dominant numerical modelling language at the time the programs were first being developed. However, since around the year 2000 the R programming environment began to emerge as the dominant working language in ecology. Kearney created R interfaces to the Niche Mapper Fortran code and developed it into the 'NicheMapR' package. The microclimate model was officially released first (Kearney and Porter 2017), including new capacity to simulate soil moisture (Kearney and Maino 2018) and snow (Kearney 2020) and a beta version of the ectotherm model. The ectotherm model was officially released subsequently in NicheMapR v2.0.0 (Kearney and Porter 2019), along with a beta version of the endotherm model. The endotherm model was officially released in NicheMapR v3.1.0 (Kearney et al. 2021). A modular R-only version of the ectotherm model was released in NicheMapR v3.2.0 as well as new capacity to model liquid uptake from the substrate for eggs and wet-skinned animals (Kearney and Urzelai, 2022).
 <p>
 <h2>References</h2>
 <p>
 Gates, D. M. (1980). Biophysical Ecology. New York: Springer Verlag.
 <p>
-Kearney, M. R. (2020). How will snow alter exposure of organisms to cold stress under climate warming?. Global Ecology and Biogeography. doi:10.1111/geb.13100
+Kearney, M. R. (2020). How will snow alter exposure of organisms to cold stress under climate warming?. Global Ecology and Biogeography. href="https://doi:10.1111/geb.13100">doi:10.1111/geb.13100</a>
 <p>
 Kearney, M., & Porter, W. P. (2004). Mapping the fundamental niche: physiology, climate, and the distribution of a nocturnal lizard. Ecology, 85(11), 3119–3131.
 <p>
@@ -42,23 +42,27 @@ Kearney, M., Phillips, B. L., Tracy, C. R., Christian, K., Betts, G., & Porter, 
 <p>
 Kearney, M., & Porter, W. P. (2009). Mechanistic niche modelling: combining physiological and spatial data to predict species’ ranges. Ecology Letters, 12, 334–350.
 <p>
-Kearney, M. R., Wintle, B. A., & Porter, W. P. (2010). Correlative and mechanistic models of species distribution provide congruent forecasts under climate change. Conservation Letters, 3(3), 203–213. doi:10.1111/j.1755-263X.2010.00097.x
+Kearney, M. R., Wintle, B. A., & Porter, W. P. (2010). Correlative and mechanistic models of species distribution provide congruent forecasts under climate change. Conservation Letters, 3(3), 203–213. href="https://doi:10.1111/j.1755-263X.2010.00097.x">doi:10.1111/j.1755-263X.2010.00097.x</a>
 <p>
-Kearney, M., Simpson, S. J., Raubenheimer, D., & Helmuth, B. (2010). Modelling the ecological niche from functional traits. Philosophical Transactions of the Royal Society B: Biological Sciences, 365(1557), 3469–3483. doi:10.1098/rstb.2010.0034
+Kearney, M., Simpson, S. J., Raubenheimer, D., & Helmuth, B. (2010). Modelling the ecological niche from functional traits. Philosophical Transactions of the Royal Society B: Biological Sciences, 365(1557), 3469–3483. href="https://doi:10.1098/rstb.2010.0034">doi:10.1098/rstb.2010.0034</a>
 <p>
-Kearney, M. (2012). Metabolic theory, life history and the distribution of a terrestrial ectotherm. Functional Ecology, 26(1), 167–179. doi:10.1111/j.1365-2435.2011.01917.x
+Kearney, M. (2012). Metabolic theory, life history and the distribution of a terrestrial ectotherm. Functional Ecology, 26(1), 167–179. href="https://doi:10.1111/j.1365-2435.2011.01917.x">doi:10.1111/j.1365-2435.2011.01917.x</a>
 <p>
-Kearney, M. R., Simpson, S. J., Raubenheimer, D., & Kooijman, S. A. L. M. (2013). Balancing heat, water and nutrients under environmental change: a thermodynamic niche framework. Functional Ecology, 27(4), 950–966. doi:10.1111/1365-2435.12020
+Kearney, M. R., Simpson, S. J., Raubenheimer, D., & Kooijman, S. A. L. M. (2013). Balancing heat, water and nutrients under environmental change: a thermodynamic niche framework. Functional Ecology, 27(4), 950–966. <a href="https://doi:10.1111/1365-2435.12020">doi:10.1111/1365-2435.12020</a>
 <p>
-Kearney, M. R., & Porter, W. P. (2017). NicheMapR - an R package for biophysical modelling: the microclimate model. Ecography, 40(5), 664–674. doi:10.1111/ecog.02360
+Kearney, M. R., & Porter, W. P. (2017). NicheMapR - an R package for biophysical modelling: the microclimate model. Ecography, 40(5), 664–674. <a href="https://doi:10.1111/ecog.02360">doi:10.1111/ecog.02360</a>
 <p>
-Kearney, M. R., & Porter, W. P. (2019). NicheMapR - an R package for biophysical modelling: the ectotherm and Dynamic Energy Budget models. Ecography. doi:10.1111/ecog.04680
+Kearney, M. R., & Porter, W. P. (2019). NicheMapR - an R package for biophysical modelling: the ectotherm and Dynamic Energy Budget models. Ecography. <a href="https://doi:10.1111/ecog.04680">doi:10.1111/ecog.04680</a>
+<p>
+Kearney, M. R., Briscoe, N. J., Mathewson, P. D., & Porter, W. P. (2021). NicheMapR – an R package for biophysical modelling: The endotherm model. Ecography, 44(11), 1595–1605. <a href="https://doi.org/10.1111/ecog.05550">doi.org/10.1111/ecog.05550</a>
+<p>
+Kearney, M. R., & Enriquez-Urzelai, U. (2022). A general framework for jointly modelling thermal and hydric constraints on developing eggs. Methods in Ecology and Evolution, n/a(n/a). <a href="https://doi.org/10.1111/2041-210X.14018">doi.org/10.1111/2041-210X.14018</a>
 <p>
 Mitchell, J. W., Beckman, W. A., Bailey, R. T., & Porter, W. P. (1975). Microclimatic modeling of the desert. In D. A. De Vries & N. H. Afgan (Eds.), Heat and mass transfer in the biosphere, Part 1. Transfer processes in the plant environment (pp. 275–286). Washington D. C.: Scripta Book Co.
 <p>
-McCullough, E. C., & Porter, W. P. (1971). Computing clear day solar radiation spectra for the terrestrial ecological environment. Ecology, 52(6), 1008–1015. doi:10.2307/1933806
+McCullough, E. C., & Porter, W. P. (1971). Computing clear day solar radiation spectra for the terrestrial ecological environment. Ecology, 52(6), 1008–1015. href="https://doi:10.2307/1933806">doi:10.2307/1933806</a>
 <p>
-Porter, W. P., & Gates, D. M. (1969). Thermodynamic equilibria of animals with environment. Ecological Monographs, 39(3), 227–244. doi:10.2307/1948545
+Porter, W. P., & Gates, D. M. (1969). Thermodynamic equilibria of animals with environment. Ecological Monographs, 39(3), 227–244. href="https://doi:10.2307/1948545">doi:10.2307/1948545</a>
 <p>
 Porter, W. P., Mitchell, J. W., Beckman, W. A., & DeWitt, C. B. (1973). Behavioral implications of mechanistic ecology - Thermal and behavioral modeling of desert ectotherms and their microenvironment. Oecologia, 13, 1–54.
 <p>
