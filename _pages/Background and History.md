@@ -34,19 +34,19 @@ The Niche Mapper programs were developed in the Fortran language, in part becaus
 <p>
 Gates, D. M. (1980). Biophysical Ecology. New York: Springer Verlag.
 <p>
-Kearney, M. R. (2020). How will snow alter exposure of organisms to cold stress under climate warming?. Global Ecology and Biogeography. href="https://doi:10.1111/geb.13100">doi:10.1111/geb.13100</a>
+Kearney, M. R. (2020). How will snow alter exposure of organisms to cold stress under climate warming?. Global Ecology and Biogeography. <a href="https://doi:10.1111/geb.13100">doi:10.1111/geb.13100</a>
 <p>
-Kearney, M., & Porter, W. P. (2004). Mapping the fundamental niche: physiology, climate, and the distribution of a nocturnal lizard. Ecology, 85(11), 3119–3131.
+Kearney, M., & Porter, W. P. (2004). Mapping the fundamental niche: physiology, climate, and the distribution of a nocturnal lizard. Ecology, 85(11), 3119–3131. <a href="https://doi.org/10.1890/03-0820">doi.org/10.1890/03-0820</a>
 <p>
-Kearney, M., Phillips, B. L., Tracy, C. R., Christian, K., Betts, G., & Porter, W. P. (2008). Modelling species distributions without using species distributions: the cane toad in Australia under current and future climates. Ecography, 31, 423–434.
+Kearney, M., Phillips, B. L., Tracy, C. R., Christian, K., Betts, G., & Porter, W. P. (2008). Modelling species distributions without using species distributions: the cane toad in Australia under current and future climates. Ecography, 31, 423–434. <a href="https://doi.org/10.1111/j.0906-7590.2008.05457.x">doi.org/10.1111/j.0906-7590.2008.05457.x</a>
 <p>
-Kearney, M., & Porter, W. P. (2009). Mechanistic niche modelling: combining physiological and spatial data to predict species’ ranges. Ecology Letters, 12, 334–350.
+Kearney, M., & Porter, W. P. (2009). Mechanistic niche modelling: combining physiological and spatial data to predict species’ ranges. Ecology Letters, 12, 334–350. <a href="https://doi.org/10.1111/j.1461-0248.2008.01277.x">doi.org/10.1111/j.1461-0248.2008.01277.x</a>
 <p>
-Kearney, M. R., Wintle, B. A., & Porter, W. P. (2010). Correlative and mechanistic models of species distribution provide congruent forecasts under climate change. Conservation Letters, 3(3), 203–213. href="https://doi:10.1111/j.1755-263X.2010.00097.x">doi:10.1111/j.1755-263X.2010.00097.x</a>
+Kearney, M. R., Wintle, B. A., & Porter, W. P. (2010). Correlative and mechanistic models of species distribution provide congruent forecasts under climate change. Conservation Letters, 3(3), 203–213. <a href="https://doi:10.1111/j.1755-263X.2010.00097.x">doi:10.1111/j.1755-263X.2010.00097.x</a>
 <p>
-Kearney, M., Simpson, S. J., Raubenheimer, D., & Helmuth, B. (2010). Modelling the ecological niche from functional traits. Philosophical Transactions of the Royal Society B: Biological Sciences, 365(1557), 3469–3483. href="https://doi:10.1098/rstb.2010.0034">doi:10.1098/rstb.2010.0034</a>
+Kearney, M., Simpson, S. J., Raubenheimer, D., & Helmuth, B. (2010). Modelling the ecological niche from functional traits. Philosophical Transactions of the Royal Society B: Biological Sciences, 365(1557), 3469–3483. <a href="https://doi:10.1098/rstb.2010.0034">doi:10.1098/rstb.2010.0034</a>
 <p>
-Kearney, M. (2012). Metabolic theory, life history and the distribution of a terrestrial ectotherm. Functional Ecology, 26(1), 167–179. href="https://doi:10.1111/j.1365-2435.2011.01917.x">doi:10.1111/j.1365-2435.2011.01917.x</a>
+Kearney, M. (2012). Metabolic theory, life history and the distribution of a terrestrial ectotherm. Functional Ecology, 26(1), 167–179. <a href="https://doi:10.1111/j.1365-2435.2011.01917.x">doi:10.1111/j.1365-2435.2011.01917.x</a>
 <p>
 Kearney, M. R., Simpson, S. J., Raubenheimer, D., & Kooijman, S. A. L. M. (2013). Balancing heat, water and nutrients under environmental change: a thermodynamic niche framework. Functional Ecology, 27(4), 950–966. <a href="https://doi:10.1111/1365-2435.12020">doi:10.1111/1365-2435.12020</a>
 <p>
@@ -60,20 +60,20 @@ Kearney, M. R., & Enriquez-Urzelai, U. (2022). A general framework for jointly m
 <p>
 Mitchell, J. W., Beckman, W. A., Bailey, R. T., & Porter, W. P. (1975). Microclimatic modeling of the desert. In D. A. De Vries & N. H. Afgan (Eds.), Heat and mass transfer in the biosphere, Part 1. Transfer processes in the plant environment (pp. 275–286). Washington D. C.: Scripta Book Co.
 <p>
-McCullough, E. C., & Porter, W. P. (1971). Computing clear day solar radiation spectra for the terrestrial ecological environment. Ecology, 52(6), 1008–1015. href="https://doi:10.2307/1933806">doi:10.2307/1933806</a>
+McCullough, E. C., & Porter, W. P. (1971). Computing clear day solar radiation spectra for the terrestrial ecological environment. Ecology, 52(6), 1008–1015. <a href="https://doi:10.2307/1933806">doi:10.2307/1933806</a>
 <p>
 Porter, W. P., & Gates, D. M. (1969). Thermodynamic equilibria of animals with environment. Ecological Monographs, 39(3), 227–244. href="https://doi:10.2307/1948545">doi:10.2307/1948545</a>
 <p>
-Porter, W. P., Mitchell, J. W., Beckman, W. A., & DeWitt, C. B. (1973). Behavioral implications of mechanistic ecology - Thermal and behavioral modeling of desert ectotherms and their microenvironment. Oecologia, 13, 1–54.
+Porter, W. P., Mitchell, J. W., Beckman, W. A., & DeWitt, C. B. (1973). Behavioral implications of mechanistic ecology - Thermal and behavioral modeling of desert ectotherms and their microenvironment. Oecologia, 13, 1–54. <a href = "https://doi.org/10.1007/BF00379617">doi.org/10.1007/BF00379617</a>
 <p>
 Porter, W. P., Mitchell, J. W., Beckman, W. A., & Tracy, C. R. (1975). Environmental constraints on some predator-prey interactions. In D. M. Gates & R. B. Schmerl (Eds.), Perspectives in Biophysical Ecology (pp. 347–364). New York: Springer-Verlag.
 <p>
-Porter, W. P., & James, F. C. (1979). Behavioral implications of mechanistic ecology II: the African Rainbow Lizard, Agama agama. Copeia, 1979(4), 594–619.
+Porter, W. P., & James, F. C. (1979). Behavioral implications of mechanistic ecology II: the African Rainbow Lizard, Agama agama. Copeia, 1979(4), 594–619. <a href = "https://doi.org/10.2307/1443867">doi.org/10.2307/1443867</a>
 <p>
-Porter, W. P., Munger, J. C., Stewart, W. E., Budaraju, S., & Jaeger, J. (1994). Endotherm energetics: from a scalable individual-based model to ecological applications. Australian Journal of Zoology, 42, 125–162.
+Porter, W. P., Munger, J. C., Stewart, W. E., Budaraju, S., & Jaeger, J. (1994). Endotherm energetics: from a scalable individual-based model to ecological applications. Australian Journal of Zoology, 42, 125–162. <href = "https://doi.org/10.1071/ZO9940125">doi.org/10.1071/ZO9940125</a>
 <p>
-Porter, W. P., Budaraju, S., Stewart, W. E., & Ramankutty, N. (2000). Calculating climate effects on birds and mammals: impacts on biodiversity, conservation, population parameters, and global community structure. American Zoologist, 40(4), 597–630.
+Porter, W. P., Budaraju, S., Stewart, W. E., & Ramankutty, N. (2000). Calculating climate effects on birds and mammals: impacts on biodiversity, conservation, population parameters, and global community structure. American Zoologist, 40(4), 597–630. <a href = "https://doi.org/10.1093/icb/40.4.597">doi.org/10.1093/icb/40.4.597</a>
 <p>
-Porter, W. P., Sabo, J. L., Tracy, C. R., Reichman, O. J., & Ramankutty, N. (2002). Physiology on a landscape scale: plant-animal interactions. Integrative and Comparative Biology, 42(3), 431–453.
+Porter, W. P., Sabo, J. L., Tracy, C. R., Reichman, O. J., & Ramankutty, N. (2002). Physiology on a landscape scale: plant-animal interactions. Integrative and Comparative Biology, 42(3), 431–453. <href = "https://doi.org/10.1093/icb/42.3.431">doi.org/10.1093/icb/42.3.431</a>
 <p>
-Tracy, C. R. (1976). A model of the dynamic exchanges of water and energy between a terrestrial amphibian and its environment. Ecological Monographs, 46(3), 293–326.
+Tracy, C. R. (1976). A model of the dynamic exchanges of water and energy between a terrestrial amphibian and its environment. Ecological Monographs, 46(3), 293–326. <a href="https://doi.org/10.2307/1942256">doi.org/10.2307/1942256</a>
