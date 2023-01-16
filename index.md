@@ -12,13 +12,13 @@ header:
       url: "http://github.com/mrke/NicheMapR"
 ---
 <!-- Global site tag (gtag.js) - Google Analytics -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-GDD3XY1VPM"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=UA-151353837-1"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
 
-  gtag('config', 'G-GDD3XY1VPM');
+  gtag('config', 'UA-151353837-1');
 </script>
 
 <b>NicheMapR:</b> Software suite for microclimate and mechanistic niche modelling in the R programming environment.
