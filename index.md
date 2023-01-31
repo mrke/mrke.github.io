@@ -38,8 +38,7 @@ To achieve this it integrates:
 
 <a href="https://www.youtube.com/watch?v=ud_s7056GXo">Michael Kearney introduces NicheMapR</a>
 
-R Shiny apps for the <a href="http://bioforecasts.science.unimelb.edu.au/soil/">microclimate</a> and <a href="http://bioforecasts.science.unimelb.edu.au/ectotherm/">ectotherm</a> models.
-
+<a href="https://youtube.com/playlist?list=PLnrc5NwgLa223Uads4ZQdKQlk7s3FZm69">Michael Kearney introduces R Shiny apps for NicheMapR</a>
 
 <h2> Background and History </h2>
 
