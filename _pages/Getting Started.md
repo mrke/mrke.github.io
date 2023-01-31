@@ -10,7 +10,7 @@ To discuss ideas and problems with the NicheMapR community, join the NicheMapR <
 
 <h1> Shiny apps </h1>
 
-To get a feeling for what the package can do you can play with a web-based Shiny app of the <a href="http://bioforecasts.science.unimelb.edu.au/soil/">microclimate</a> and <a href="http://bioforecasts.science.unimelb.edu.au/ectotherm/">ectotherm</a> models that run using a monthy long-term average climatology for the globe (function 'micro_global' in the package).
+To get a feeling for what the package can do you can play with <a href="http://bioforecasts.science.unimelb.edu.au/">web-based Shiny apps</a> of different aspects of the package, the most relevant ones to start with being these <a href="http://bioforecasts.science.unimelb.edu.au/soil/">microclimate</a> and <a href="http://bioforecasts.science.unimelb.edu.au/ectotherm/">ectotherm</a> models that run using a monthy long-term average climatology for the globe (function 'micro_global' in the package).
 
 <h1> Installation </h1>
 
