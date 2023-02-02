@@ -21,6 +21,7 @@ These can also be found in the NicheMapR/inst/doc folder.
 
 <a href="/NicheMapR/inst/doc/deb-model-tutorial" class="btn btn--primary">Deb Model Tutorial</a>
 
+<a href="/NicheMapR/inst/doc/endotherm-model-equations" class="btn btn--danger">Endotherm Model Equations</a>
 <a href="/NicheMapR/inst/doc/endotherm-components-tutorial" class="btn btn--danger">Endotherm Components Tutorial</a>
 <a href="/NicheMapR/inst/doc/endotherm-model-tutorial" class="btn btn--danger">Endotherm Model Tutorial</a>
 
