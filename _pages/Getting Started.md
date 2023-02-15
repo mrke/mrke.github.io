@@ -45,7 +45,7 @@ install.packages('devtools')
 
 To install a Fortran compiler: 
 * for Windows, you need to download and install <a href="https://cran.r-project.org/bin/windows/Rtools/">Rtools</a>
-* for Mac, download the relevant <a href="https://github.com/fxcoudert/gfortran-for-macOS/releases">gfortran standalone installer</a>
+* for Mac, download the relevant <a href="https://mac.r-project.org/tools/">gfortran installer</a> for your type of Mac (Intel or arm64-based silicon) and make sure you've installed the right version of R as well (the wrong version may still appear to work but won't compile Fortran)
 * for Linux (Ubuntu) you can follow the instructions <a href="https://www.scivision.dev/install-latest-gfortran-on-ubuntu/">here</a>
 
 Once you have devtools and a Fortran compiler installed, you can install NicheMapR from the R console by typing:
