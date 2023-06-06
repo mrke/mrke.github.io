@@ -21,7 +21,7 @@ Related projects include
 
 <a href="https://en.wikipedia.org/wiki/Dynamic_energy_budget_theory">DEB on wikipedia</a>
 
-<a href="http://www.debtheory.org/wiki/">DEB wiki</a>
+<a href="https://protect-au.mimecast.com/s/WodNCYWLOxh3gJgWOf0CK3g?domain=debportal.debtheory.org">DEBportal</a>
 
 <a href="https://github.com/rafaqz/DynamicEnergyBudgets.jl">Rafael Schouten's DEB models in Julia</a>
 
