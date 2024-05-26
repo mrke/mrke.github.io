@@ -1,1 +1,4 @@
-
+[submodule "NicheMapR"]
+	path = NicheMapR
+	url = https://github.com/mrke/NicheMapR
+	branch = master
