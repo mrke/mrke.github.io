@@ -5,7 +5,9 @@ excerpt: Current plant modelling capacity in NicheMapR
 ---
 <h1>Plant Models</h1>
 <p>
-Presently, there is only limitied plant modelling capacity in NicheMapR. The microclimate model provides many of the environmental inputs required for plant modelling, including soil temperature and moisture, and wavelength-specific irradiance (parameter 'lamb' set to 1 returns the wavelength-specific solar radiation output). 
+NicheMapR can be used to model leaf temperature and water loss explicitly, and root temperature implicitly. The leaf temperature calculations can be linked to photosynthesis with via the plantecophys package.
+
+The microclimate model provides many of the environmental inputs required for plant modelling, including soil temperature and moisture, and wavelength-specific irradiance (parameter 'lamb' set to 1 returns the wavelength-specific solar radiation output). 
 <p>
 Also, the soil moisture algorithm incorporates a soil-plant-atmosphere-continuum (SPAC) model that is defined by the following plant trait parameters (with default values shown):
 <p>
@@ -19,7 +21,7 @@ Also, the soil moisture algorithm incorporates a soil-plant-atmosphere-continuum
 <li>LAI = 0.1, leaf area index, used to partition traspiration/evaporation from potential evapotranspiration (PET)</li>
 </ul>
 <p>
-The microclimate model also produces estimates of plant transpiration rate and the leaf and (depth-specific) root water potential from the from the soil moisture calculations (output tables 'plant' and 'shadplant').
+The microclimate model produces estimates of plant transpiration rate and the leaf and (depth-specific) root water potential from the from the soil moisture calculations (output tables 'plant' and 'shadplant').
 <p>
 The function <a href="https://github.com/mrke/NicheMapR/blob/master/R/plantgro.R">plantgro</a> takes soil water potential and soil temperature input and computes a crude growing degree day model of potential plant growth and an estimate of plant water content, given threshold values of soil water potential at which the wilting point and permanent wilting point occurs, the depth range of the roots and a threshold root temperature for growth.
 <p>

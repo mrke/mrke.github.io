@@ -19,6 +19,8 @@ These can also be found in the NicheMapR/inst/doc folder.
 
 <a href="/NicheMapR/inst/doc/ectotherm-model-tutorial" class="btn btn--warning">Ectotherm Model Tutorial</a>
 
+<a href="/NicheMapR/inst/doc/leaf-temperature-tutorial" class="btn btn--warning">Ectotherm Model Tutorial</a>
+
 <a href="/NicheMapR/inst/doc/deb-model-tutorial" class="btn btn--primary">Deb Model Tutorial</a>
 
 <a href="/NicheMapR/inst/doc/endotherm-model-equations" class="btn btn--danger">Endotherm Model Equations</a>
