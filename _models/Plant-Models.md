@@ -5,11 +5,11 @@ excerpt: Current plant modelling capacity in NicheMapR
 ---
 <h1>Plant Models</h1>
 <p>
-NicheMapR can be used to model leaf temperature and water loss explicitly, and root temperature implicitly. The leaf temperature calculations can be linked to photosynthesis with via the plantecophys package.
+NicheMapR can be used to model <a href="https://mrke.github.io/NicheMapR/inst/doc/leaf-temperature-tutorial">leaf temperature and water loss</a> explicitly, and root temperature implicitly. The leaf temperature calculations can be linked to photosynthesis with via the plantecophys package.
 
 The microclimate model provides many of the environmental inputs required for plant modelling, including soil temperature and moisture, and wavelength-specific irradiance (parameter 'lamb' set to 1 returns the wavelength-specific solar radiation output). 
 <p>
-Also, the soil moisture algorithm incorporates a soil-plant-atmosphere-continuum (SPAC) model that is defined by the following plant trait parameters (with default values shown):
+Also, the soil moisture algorithm incorporates a <a href="https://mrke.github.io/NicheMapR/inst/doc/Campbell_SPAC_infiltration">soil-plant-atmosphere-continuum (SPAC)</a> model that is defined by the following plant trait parameters (with default values shown):
 <p>
 <ul>
 <li>L = c(0, 0, 8.2, 8.0, 7.8, 7.4, 7.1, 6.4, 5.8, 4.8, 4.0, 1.8, 0.9, 0.6, 0.8, 0.4, 0.4, 0, 0) * 10000, root density (m/m3), (19 values descending through soil for specified soil nodes in parameter</li>
