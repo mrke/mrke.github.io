@@ -12,7 +12,6 @@ These can also be found in the NicheMapR/inst/doc folder.
 
 <a href="/NicheMapR/inst/doc/microclimate-model-tutorial" class="btn btn--info">Microclimate Model Tutorial</a>
 <a href="/NicheMapR/inst/doc/microclimate-model-theory-equations" class="btn btn--info">Microclimate Model Theory Equations</a>
-<a href="/NicheMapR/inst/doc/Campbell_SPAC_infiltration" class="btn btn--info">SPAC infiltration theory</a>
 <a href="/NicheMapR/inst/doc/microclimate_inputs" class="btn btn--info">Microclimate Inputs</a>
 <a href="/NicheMapR/inst/doc/microclimate-IO" class="btn btn--info">Microclimate IO</a>
 <a href="/NicheMapR/inst/doc/microclimate-monthly-input-example" class="btn btn--info">Microclimate Monthly Input Example</a>
@@ -29,7 +28,7 @@ These can also be found in the NicheMapR/inst/doc folder.
 
 <a href="/NicheMapR/inst/doc/properties-of-air" class="btn btn--success">Properties Of Air</a>
 <a href="/NicheMapR/inst/doc/transient-equation-derivations" class="btn btn--success">Transient Equation Derivations</a>
-
+<a href="/NicheMapR/inst/doc/Campbell_SPAC_infiltration" class="btn btn--success">SPAC infiltration theory</a>
 
 
 
