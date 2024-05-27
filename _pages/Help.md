@@ -18,6 +18,7 @@ These can also be found in the NicheMapR/inst/doc folder.
 <a href="/NicheMapR/inst/doc/microclimate-hourly-input-example" class="btn btn--info">Microclimate Hourly Input Example</a>
 
 <a href="/NicheMapR/inst/doc/ectotherm-model-tutorial" class="btn btn--warning">Ectotherm Model Tutorial</a>
+<a href="/NicheMapR/inst/doc/leaf-temperature-tutorial" class="btn btn--warning">Leaf Temperature Tutorial</a>
 
 <a href="/NicheMapR/inst/doc/deb-model-tutorial" class="btn btn--primary">Deb Model Tutorial</a>
 
