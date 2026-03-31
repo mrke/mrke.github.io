@@ -18,10 +18,11 @@ GEM
       faraday-net_http (>= 2.0, < 3.1)
       ruby2_keywords (>= 0.0.4)
     faraday-net_http (3.0.2)
+    ffi (1.15.5)
     ffi (1.15.5-x64-mingw-ucrt)
     forwardable-extended (2.6.0)
     gemoji (4.0.1)
-    google-protobuf (3.21.12-x64-mingw-ucrt)
+    google-protobuf (3.21.12)
     html-pipeline (2.14.3)
       activesupport (>= 2)
       nokogiri (>= 1.4)
@@ -78,7 +79,9 @@ GEM
       jekyll-paginate (~> 1.1)
       jekyll-sitemap (~> 1.3)
     minitest (5.17.0)
-    nokogiri (1.14.0-x64-mingw-ucrt)
+    nokogiri (1.14.3-x64-mingw-ucrt)
+      racc (~> 1.4)
+    nokogiri (1.14.3-x86_64-linux)
       racc (~> 1.4)
     octokit (4.25.1)
       faraday (>= 1, < 3)
@@ -96,6 +99,8 @@ GEM
     safe_yaml (1.0.5)
     sass-embedded (1.57.1-x64-mingw-ucrt)
       google-protobuf (~> 3.21)
+    sass-embedded (1.57.1-x86_64-linux-gnu)
+      google-protobuf (~> 3.21)
     sawyer (0.9.2)
       addressable (>= 2.3.5)
       faraday (>= 0.17.3, < 3)
@@ -106,11 +111,11 @@ GEM
     tzinfo-data (1.2022.7)
       tzinfo (>= 1.0.0)
     unicode-display_width (2.4.2)
-    wdm (0.1.1)
     webrick (1.7.0)
 
 PLATFORMS
   x64-mingw-ucrt
+  x86_64-linux
 
 DEPENDENCIES
   jekyll (~> 4.3.1)
@@ -118,9 +123,8 @@ DEPENDENCIES
   jemoji
   liquid
   minimal-mistakes-jekyll
-  nokogiri (~> 1.14.0)
+  nokogiri (~> 1.14.3)
   tzinfo-data
-  wdm (~> 0.1.0)
   webrick
 
 BUNDLED WITH
